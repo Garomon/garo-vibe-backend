@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GΛRO VIBE CENTER</title>
+    <style>
+        :root {
+            --neon-purple: #bc13fe;
+            --neon-green: #17e890;
+            --bg-dark: #0a0a0f;
+            --panel-bg: #13131f;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            background: var(--panel-bg);
+            padding: 2rem;
+            border: 2px solid var(--neon-purple);
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.4);
+            border-radius: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, var(--neon-purple), transparent, var(--neon-green));
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0.5;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px var(--neon-purple);
+            letter-spacing: 3px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: #000;
+            border: 1px solid #333;
+            color: var(--neon-green);
+            font-family: inherit;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        input[type="text"]:focus {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 10px rgba(23, 232, 144, 0.2);
+        }
+        button {
+            background: var(--neon-purple);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            width: 100%;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        button:hover {
+            background: #d54aff;
+            box-shadow: 0 0 20px var(--neon-purple);
+            transform: scale(1.02);
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        #status {
+            margin-top: 20px;
+            min-height: 20px;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+        .success { color: var(--neon-green); }
+        .error { color: #ff3333; }
+        .loading { color: #aaaaaa; }
+
+        /* Glitch effect placeholder */
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+        .glitch-hover:hover {
+            animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="glitch-hover">GΛRO VIBE<br>CENTER</h1>
+        
+        <input type="text" id="walletInput" placeholder="Pega tu Solana Address aquí...">
+        
+        <button id="mintButton" onclick="mintNFT()">AIRDROP NFT</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        async function mintNFT() {
+            const input = document.getElementById('walletInput');
+            const statusDiv = document.getElementById('status');
+            const btn = document.getElementById('mintButton');
+            const address = input.value.trim();
+
+            if (!address) {
+                statusDiv.innerHTML = '<span class="error">⚠️ Por favor ingresa una dirección</span>';
+                return;
+            }
+
+            // UI Loading State
+            btn.disabled = true;
+            btn.innerText = "MINTEANDO...";
+            statusDiv.className = "loading";
+            statusDiv.innerText = "Conectando con la Matrix (Solana Devnet)... Espere...";
+
+            try {
+                const response = await fetch('/mint', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ receiverAddress: address })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusDiv.className = "success";
+                    statusDiv.innerHTML = `
+                        ✅ <strong>MINTEO EXITOSO</strong><br><br>
+                        <a href="${data.explorer}" target="_blank" style="color:var(--neon-green)">VER EN EXPLORER ↗</a>
+                    `;
+                    input.value = ""; // Clear input
+                } else {
+                    throw new Error(data.error || "Error desconocido");
+                }
+
+            } catch (error) {
+                statusDiv.className = "error";
+                statusDiv.innerText = "❌ ERROR: " + error.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "AIRDROP NFT";
+            }
+        }
+    </script>
+</body>
+</html>
