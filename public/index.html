@@ -3,260 +3,282 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GΛRO VIBE CENTER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GΛRO VIBE | Genesis Access</title>
 
-    <!-- POLYFILLS (Critical for Web3/Solana in Browser) -->
-    <script>
-        window.global = window;
-        window.process = { env: { DEBUG: undefined }, version: '' };
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js"></script>
-    <script>
-        if (window.buffer) window.Buffer = window.buffer.Buffer;
-    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
 
-    <!-- Web3Auth SDKs - Stable Version 8.12.4 (All packages matching) -->
+    <!-- Web3Auth SDKs (Stable Versions) -->
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/no-modal@8.12.4/dist/noModal.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@8.12.4/dist/solanaProvider.umd.min.js"></script>
     <script
         src="https://cdn.jsdelivr.net/npm/@web3auth/openlogin-adapter@8.12.4/dist/openloginAdapter.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/base@8.12.4/dist/base.umd.min.js"></script>
-
-    <!-- Solana Web3 used for some utils -->
-    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.78.0/lib/index.iife.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js"></script>
 
     <style>
         :root {
             --neon-purple: #bc13fe;
-            --neon-green: #17e890;
-            --bg-dark: #0a0a0f;
-            --panel-bg: #13131f;
-            --google-red: #ea4335;
-            --twitter-blue: #1DA1F2;
+            --neon-blue: #0ff0fc;
+            --deep-bg: #050510;
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #8a8a9a;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--deep-bg);
+            color: var(--text-main);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000000 100%);
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        .container {
-            background: var(--panel-bg);
-            padding: 2.5rem;
-            border: 2px solid var(--neon-purple);
-            box-shadow: 0 0 30px rgba(188, 19, 254, 0.3);
-            border-radius: 16px;
-            text-align: center;
+        /* Ambient Glow */
+        .ambient-glow {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(188, 19, 254, 0.2) 0%, rgba(5, 5, 16, 0) 60%);
+            top: -150px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+            pointer-events: none;
+            animation: pulse-glow 8s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                opacity: 0.5;
+                transform: translateX(-50%) scale(1);
+            }
+
+            100% {
+                opacity: 0.9;
+                transform: translateX(-50%) scale(1.15);
+            }
+        }
+
+        /* Main Container */
+        .app-container {
+            position: relative;
+            z-index: 10;
             width: 90%;
             max-width: 380px;
-            position: relative;
-            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
         }
 
-        h1 {
-            font-size: 2.2rem;
-            margin-bottom: 2rem;
-            text-shadow: 0 0 15px var(--neon-purple);
-            letter-spacing: 4px;
-            font-weight: 800;
+        /* Logo */
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #fff 20%, var(--neon-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(188, 19, 254, 0.3);
+            margin-bottom: 5px;
         }
 
-        .subtitle {
-            margin-bottom: 2rem;
+        .sub-logo {
             font-size: 0.9rem;
-            color: #aaa;
-            line-height: 1.4;
+            font-weight: 300;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
         }
 
-        /* Social Buttons */
-        .btn-social {
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px 25px;
+        }
+
+        /* Buttons */
+        .btn {
             width: 100%;
-            padding: 16px;
+            padding: 15px 20px;
             margin-bottom: 12px;
-            border: none;
-            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
             font-size: 1rem;
-            font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            font-family: 'Verdana', sans-serif;
-            /* Cleaner font for buttons */
-        }
-
-        .btn-google {
-            background: white;
-            color: #444;
-        }
-
-        .btn-google:hover {
-            background: #f1f1f1;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-twitter {
-            background: black;
-            /* X branding */
+            background: rgba(255, 255, 255, 0.03);
             color: white;
-            border: 1px solid #333;
+            transition: all 0.2s ease;
         }
 
-        .btn-twitter:hover {
-            background: #111;
-            border-color: #555;
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.08);
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Status & Loading */
-        #status {
-            margin-top: 25px;
-            min-height: 20px;
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--neon-purple), #9600e0);
+            border: none;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(188, 19, 254, 0.4);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 25px rgba(188, 19, 254, 0.6);
+        }
+
+        .btn-disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn img,
+        .btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Status / Loader */
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--glass-border);
+            border-radius: 50%;
+            border-top-color: var(--neon-purple);
+            animation: spin 0.8s linear infinite;
+            margin: 15px auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status-text {
+            color: var(--text-muted);
             font-size: 0.9rem;
-            word-break: break-all;
         }
 
-        .loading-spinner {
-            color: var(--neon-purple);
-            animation: blink 1s infinite;
+        /* Success State */
+        .nft-img {
+            width: 160px;
+            height: 160px;
+            border-radius: 16px;
+            object-fit: cover;
+            border: 2px solid var(--glass-border);
+            box-shadow: 0 0 40px rgba(188, 19, 254, 0.25);
+            margin-bottom: 20px;
+            animation: float 5s ease-in-out infinite;
         }
 
-        @keyframes blink {
-            50% {
-                opacity: 0.5;
-            }
-        }
+        @keyframes float {
 
-        .success-box {
-            border: 1px solid var(--neon-green);
-            padding: 15px;
-            border-radius: 8px;
-            background: rgba(23, 232, 144, 0.05);
-            margin-top: 20px;
-        }
-
-        a {
-            color: var(--neon-green);
-            text-decoration: none;
-            border-bottom: 1px dotted var(--neon-green);
-        }
-
-        /* Glitch Animation */
-        .glitch-text {
-            position: relative;
-        }
-
-        .glitch-text::before,
-        .glitch-text::after {
-            content: "GΛRO VIBE";
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-dark);
-        }
-
-        .glitch-text:hover::before {
-            animation: glitch-anim-1 0.4s infinite linear alternate-reverse;
-            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-            transform: translate(-2px);
-            opacity: 0.7;
-        }
-
-        .glitch-text:hover::after {
-            animation: glitch-anim-2 0.4s infinite linear alternate-reverse;
-            clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
-            transform: translate(2px);
-            opacity: 0.7;
-        }
-
-        @keyframes glitch-anim-1 {
-            0% {
-                clip-path: inset(20% 0 80% 0);
-            }
-
+            0%,
             100% {
-                clip-path: inset(80% 0 20% 0);
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
             }
         }
 
-        .link-sub {
+        .success-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--neon-blue);
+            margin-bottom: 5px;
+        }
+
+        .success-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* Links */
+        .link-muted {
             display: block;
             margin-top: 15px;
             color: var(--text-muted);
+            font-size: 0.75rem;
             text-decoration: none;
-            font-size: 0.8rem;
-            opacity: 0.7;
-            transition: opacity 0.2s;
+            opacity: 0.6;
         }
 
-        .link-sub:hover {
+        .link-muted:hover {
             opacity: 1;
             text-decoration: underline;
         }
 
-        /* --- Scanlines Effect --- */
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1));
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 5;
-            opacity: 0.3;
+        /* Divider */
+        .divider {
+            border-top: 1px solid var(--glass-border);
+            margin: 20px 0;
         }
 
-        /* --- Mobile Adjustments --- */
-        @media (max-width: 480px) {
-            .glitch-text {
-                font-size: 2.5rem;
-            }
+        /* Footer Text */
+        .footer-text {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 20px;
+            opacity: 0.5;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="scanlines"></div>
     <div class="ambient-glow"></div>
 
     <div class="app-container">
-
-        <!-- HEADER -->
-        <div class="logo-area">
-            <div class="glitch-text">GΛRO</div>
-            <div class="subtitle">GENESIS ACCESS</div>
-        </div>
+        <div class="logo">GΛRO</div>
+        <div class="sub-logo">Genesis Access</div>
 
         <!-- LOGIN CARD -->
         <div id="loginArea" class="glass-card">
-            <p style="margin-bottom: 25px; font-weight: 500;">Conecta para reclamar tu VIBE</p>
+            <p style="margin-bottom: 25px; font-weight: 400; color: var(--text-muted);">Conecta para reclamar tu VIBE
+            </p>
 
-            <button class="btn-social btn-google" onclick="login('google')">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" class="icon"
-                    alt="G">
+            <button class="btn" onclick="login('google')">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
                 Continuar con Google
             </button>
 
-            <button class="btn-social btn-x" onclick="login('twitter')">
-                <svg class="icon" viewBox="0 0 24 24" fill="white">
+            <button class="btn" onclick="login('twitter')">
+                <svg viewBox="0 0 24 24" fill="white">
                     <path
                         d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z">
                     </path>
@@ -264,121 +286,68 @@
                 Continuar con X
             </button>
 
-            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--text-muted); opacity: 0.6;">
-                Powered by Solana • Gas-Free
-            </div>
+            <p class="footer-text">Powered by Solana • Gas-Free</p>
         </div>
 
-        <!-- STATUS / SUCCESS AREA -->
-        <div id="statusArea" style="display:none; transition: opacity 0.5s;">
-            <div id="statusContent"></div>
-        </div>
+        <!-- STATUS AREA (Hidden by default) -->
+        <div id="statusArea" class="glass-card" style="display:none;"></div>
 
     </div>
 
-    <!-- LOGIC -->
     <script>
-        // Polyfills required by Web3Auth/Solana
+        // Polyfills
         window.global = window;
         window.process = { env: { DEBUG: undefined }, version: '' };
 
-        // Configuration
-        const CLIENT_ID = "BM-MYF10MnxIke1bEqjAr39dibU5kHDMVNLepOM0prcajw67H-fhIeXa953MbVZdHeTwyZr3SMEyLjOG3-Q1mMc"; // Production ID
+        // Config
+        const CLIENT_ID = "BM-MYF10MnxIke1bEqjAr39dibU5kHDMVNLepOM0prcajw67H-fhIeXa953MbVZdHeTwyZr3SMEyLjOG3-Q1mMc";
         const NETWORK = "sapphire_devnet";
 
         let web3auth = null;
         let privateKeyProvider = null;
 
-        // UI Helpers
-        const log = (msg) => console.log(`[VIBE_LOG]: ${msg}`);
+        const log = (msg) => console.log(`[VIBE]: ${msg}`);
 
         function showLoading(msg) {
+            document.getElementById('loginArea').style.display = 'none';
             const el = document.getElementById('statusArea');
             el.style.display = 'block';
-            document.getElementById('loginArea').style.display = 'none';
-            document.getElementById('statusContent').innerHTML = `
-                <div class="glass-card">
-                    <div class="spinner"></div><br><br>
-                    ${msg}
-                </div>
-            `;
+            el.innerHTML = `<div class="spinner"></div><p class="status-text">${msg}</p>`;
         }
 
         function showCards() {
             document.getElementById('statusArea').style.display = 'none';
             document.getElementById('loginArea').style.display = 'block';
-            // Animation reset if needed
         }
 
         async function init() {
             try {
-                // Determine Classes handles for UMD 
                 const NoModal = window.NoModal?.Web3AuthNoModal || window.Web3AuthNoModal;
                 const SolanaProvider = window.SolanaProvider?.SolanaPrivateKeyProvider || window.SolanaPrivateKeyProvider;
                 const OpenloginAdapter = window.OpenloginAdapter?.OpenloginAdapter || window.OpenloginAdapter;
                 const CHAIN_NAMESPACES = window.NoModal?.CHAIN_NAMESPACES || { SOLANA: "solana" };
 
-                if (!NoModal || !SolanaProvider || !OpenloginAdapter) {
-                    throw new Error("Librerías Web3Auth no cargaron correctamente.");
-                }
+                if (!NoModal || !SolanaProvider || !OpenloginAdapter) throw new Error("SDK Load Error");
 
-                // 1. Setup Chain Config
-                const chainConfig = {
-                    chainNamespace: CHAIN_NAMESPACES.SOLANA,
-                    chainId: "0x3", // Use 0x1 for Mainnet, 0x3 for Devnet
-                    rpcTarget: "https://api.devnet.solana.com",
-                    displayName: "Solana Devnet",
-                    blockExplorer: "https://explorer.solana.com",
-                    ticker: "SOL",
-                    tickerName: "Solana",
-                };
-
-                // 2. Init Provider
+                const chainConfig = { chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: "0x3", rpcTarget: "https://api.devnet.solana.com", displayName: "Solana Devnet", blockExplorer: "https://explorer.solana.com", ticker: "SOL", tickerName: "Solana" };
                 privateKeyProvider = new SolanaProvider({ config: { chainConfig } });
-
-                // 3. Init Web3Auth
-                web3auth = new NoModal({
-                    clientId: CLIENT_ID,
-                    web3AuthNetwork: NETWORK,
-                    chainConfig,
-                });
-
-                // 4. Configure Adapter (Redirect Mode for Mobile)
-                const adapter = new OpenloginAdapter({
-                    privateKeyProvider,
-                    adapterSettings: {
-                        uxMode: "redirect",
-                        redirectUrl: window.location.href,
-                    }
-                });
+                web3auth = new NoModal({ clientId: CLIENT_ID, web3AuthNetwork: NETWORK, chainConfig });
+                const adapter = new OpenloginAdapter({ privateKeyProvider, adapterSettings: { uxMode: "redirect", redirectUrl: window.location.href } });
                 web3auth.configureAdapter(adapter);
-
-                // 5. Initialize
                 await web3auth.init();
 
-                // 6. Check Login Status
-                if (web3auth.connected) {
-                    handleSuccess();
-                } else {
-                    showCards();
-                }
+                if (web3auth.connected) { handleSuccess(); } else { showCards(); }
 
             } catch (error) {
                 console.error(error);
-                document.getElementById('statusContent').innerHTML = `<p style="color:red">Error Init: ${error.message}</p>`;
+                document.getElementById('statusArea').innerHTML = `<p style="color:#ff5555;">Error: ${error.message}</p>`;
                 document.getElementById('statusArea').style.display = 'block';
             }
         }
 
         async function login(provider) {
             if (!web3auth) return;
-            try {
-                await web3auth.connectTo(window.OpenloginAdapter.WALLET_ADAPTERS.OPENLOGIN, {
-                    loginProvider: provider,
-                });
-            } catch (error) {
-                console.error("Login Error:", error);
-            }
+            try { await web3auth.connectTo(window.OpenloginAdapter.WALLET_ADAPTERS.OPENLOGIN, { loginProvider: provider }); } catch (e) { console.error("Login Error:", e); }
         }
 
         async function logout() {
@@ -387,101 +356,55 @@
             window.location.reload();
         }
 
-        // --- CORE LOGIC ---
-
         async function handleSuccess() {
             showLoading("Verificando identidad...");
-
             try {
-                // Get User Wallet
                 const accounts = await web3auth.provider.request({ method: "getAccounts" });
                 const userAddress = accounts[0];
-                log("User Address: " + userAddress);
+                log("User: " + userAddress);
 
-                // --- DOUBLE MINT PROTECTION (LocalStorage + Event) ---
                 const urlParams = new URLSearchParams(window.location.search);
                 const eventId = urlParams.get('event') || 'GENESIS_2025';
+                const localKey = 'vibe_minted_' + userAddress + '_' + eventId;
+                const cached = localStorage.getItem(localKey);
 
-                const localData = localStorage.getItem('vibe_minted_' + userAddress + '_' + eventId);
+                if (cached) { showSuccessState(cached, true); }
+                else { await mintNFT(userAddress, eventId, localKey); }
 
-                if (localData) {
-                    showSuccessState(localData, true); // True = Already Minted
-                } else {
-                    await mintNFT(userAddress, eventId);
-                }
-
-            } catch (e) {
-                log("Wallet Error: " + e.message);
-                document.getElementById('statusContent').innerText = "Error obteniendo wallet: " + e.message;
-            }
+            } catch (e) { log("Wallet Error: " + e.message); document.getElementById('statusArea').innerHTML = `<p style="color:#ff5555;">Error: ${e.message}</p>`; }
         }
 
-        async function mintNFT(address, eventId) {
-            showLoading(`Minteando VIBE para:<br><small style="font-family:monospace">${address.slice(0, 4)}...${address.slice(-4)}</small>`);
-
+        async function mintNFT(address, eventId, localKey) {
+            showLoading(`Generando VIBE para ${address.slice(0, 4)}...${address.slice(-4)}`);
             try {
-                const response = await fetch('/mint', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ receiverAddress: address, eventId: eventId })
-                });
-
+                const response = await fetch('/mint', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ receiverAddress: address, eventId: eventId }) });
                 const data = await response.json();
-
-                if (data.success) {
-                    // Save to LocalStorage with Event ID
-                    localStorage.setItem('vibe_minted_' + address + '_' + eventId, data.explorer);
-                    showSuccessState(data.explorer, false); // False = Just Minted
-                } else {
-                    throw new Error(data.error || "Error desconocido");
-                }
-
+                if (data.success) { localStorage.setItem(localKey, data.explorer); showSuccessState(data.explorer, false); }
+                else { throw new Error(data.error || "Mint Error"); }
             } catch (error) {
                 log("API Error: " + error.message);
-                document.getElementById('statusContent').innerHTML = `
-                    <div class="glass-card" style="border-color: #ff3333;">
-                        ❌ <strong>ERROR</strong><br>
-                        ${error.message}<br><br>
-                        <button class="btn-social" onclick="window.location.reload()">Reintentar</button>
-                    </div>
-                `;
+                document.getElementById('statusArea').innerHTML = `<div style="color:#ff5555;">❌ ${error.message}</div><button class="btn" style="margin-top:15px" onclick="window.location.reload()">Reintentar</button>`;
             }
         }
 
         function showSuccessState(explorerLink, isCached) {
             const title = isCached ? "YA ERES MIEMBRO" : "¡ACCESO CONCEDIDO!";
             const desc = isCached ? "Tu pase Genesis ya está activo." : "Bienvenido al ecosistema GΛRO.";
-
-            // Image from IPFS (Hardcoded for now based on current metadata)
             const imgUrl = "https://ipfs.io/ipfs/bafkreicf2uskmsrm7sgqvy7hmign255iedvab4x5s5q4vxe2mcluc7yvhm";
 
-            document.getElementById('statusContent').innerHTML = `
-                <div class="glass-card nft-reveal">
-                    <img src="${imgUrl}" class="nft-image" alt="NFT">
-                    <div class="success-title">${title}</div>
-                    <div class="success-desc">${desc}</div>
-                    
-                    <a href="${explorerLink}" target="_blank" style="text-decoration:none;">
-                        <button class="btn-social btn-primary">VER EN BLOCKCHAIN ↗</button>
-                    </a>
-
-                    <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
-                        <p style="margin:0; font-size:0.8rem; color:var(--text-muted)">Próximamente:</p>
-                        <button class="btn-social" style="margin-top:10px; opacity:0.5; cursor:not-allowed;">
-                            🔐 ACCEDER A MI GALERÍA
-                        </button>
-                    </div>
-
-                    <a href="#" onclick="logout()" class="link-sub">Cerrar Sesión</a>
-                </div>
+            document.getElementById('statusArea').innerHTML = `
+                <img src="${imgUrl}" class="nft-img" alt="NFT">
+                <div class="success-title">${title}</div>
+                <div class="success-desc">${desc}</div>
+                <a href="${explorerLink}" target="_blank" style="text-decoration:none;"><button class="btn btn-primary">VER EN BLOCKCHAIN ↗</button></a>
+                <div class="divider"></div>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Próximamente:</p>
+                <button class="btn btn-disabled">🔐 MI GALERÍA</button>
+                <a href="#" onclick="logout()" class="link-muted">Cerrar Sesión</a>
             `;
-
-            // Optional: Play Sound here
         }
 
-        // Start
         window.addEventListener('load', init);
-
     </script>
 </body>
 
