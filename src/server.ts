@@ -123,6 +123,98 @@ app.post('/mint', async (req, res) => {
     }
 });
 
+// --- SOLANA ACTIONS (BLINKS) CONFIG ---
+
+// Middleware to set specific CORS for Actions (Must allow all origins)
+app.use('/api/actions/*', (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Encoding, Accept-Encoding');
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+    } else {
+        next();
+    }
+});
+
+// 1. Actions Manifest (GET /api/actions.json)
+app.get('/api/actions.json', (req, res) => {
+    res.json({
+        "rules": [
+            { "pathPattern": "/*", "apiPath": "/api/actions/*" }
+        ]
+    });
+});
+
+// 2. Action Card (GET /api/actions/mint)
+app.get('/api/actions/mint', (req, res) => {
+    res.json({
+        "icon": "https://ipfs.io/ipfs/bafkreicf2uskmsrm7sgqvy7hmign255iedvab4x5s5q4vxe2mcluc7yvhm", // Using NFT image
+        "title": "GΛRO GENESIS DROP",
+        "description": "Claim your exclusive Genesis NFT directly from this Blink.",
+        "label": "GET GENESIS DROP",
+        "links": {
+            "actions": [
+                {
+                    "label": "Claim Now 🎉",
+                    "href": `/api/actions/mint` // POST endpoint
+                }
+            ]
+        }
+    });
+});
+
+// 3. Action Transaction Execution (POST /api/actions/mint)
+app.post('/api/actions/mint', async (req, res) => {
+    // Note: To fully implement this, we'd need to construct an unsigned transaction 
+    // and return it base64 encoded. For now, since we use a backend minting flow 
+    // where the server pays and mints (custodial-ish for the mint), 
+    // a standard Blink flow would require the User to sign. 
+    // 
+    // For this 'Super App', we might still want the 'Click to Claim' experience.
+    // However, the standard Blink expects a transaction to sign.
+    // 
+    // If we want the server to do it all, the user still needs to "sign" a dummy message 
+    // or we just return a message saying "Check your wallet".
+    //
+    // BUT, for a true Blink, we should return a transaction. 
+    // Let's return a simple message for now as a placeholder or error if account not provided.
+
+    const { account } = req.body;
+    if (!account) {
+        return res.status(400).json({ error: "Account required" });
+    }
+
+    // In a real Blink, we would build a transaction here for the user to sign.
+    // Since our current logic is "Server pays for mint", we can't easily make the user sign 
+    // a transaction that does nothing but verify them without changing the flow.
+    // For now, let's just trigger the mint server-side and return a success message 
+    // disguised as a completed message.
+
+    // NOTE: This deviates from standard Blink which expects a transaction. 
+    // To make it work 'by the book', we'd need to rework minting so user pays or we partially sign.
+    // For the demo "Viral" check, let's keep it simple: 
+    // We will trigger the mint logic here but we SHOULD return a transaction.
+    // Since we can't easily mix server-side-mint-fee with client-side-sign without partial sign,
+    // We will just mint directly and return a message. 
+    // WARNING: Blinks might error if no transaction is returned. 
+
+    try {
+        // Reuse mint logic or call it? 
+        // Let's just create a dummy transaction (memo) for them to sign so the Blink succeeds visually,
+        // and WE trigger the mint in background.
+
+        // Actually, to be safe for the demo, let's just use the existing API 
+        // and tell the user "Blink support coming soon" via the UI if accessed directly,
+        // OR better: Trigger the mint here (Server Side) then return a message.
+        // Blinks allow returning `message` instead of `transaction`? No, usually expect tx.
+
+        res.status(501).json({ error: "Blink Minting Implementation Pending (Requires Transaction Construction)" });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`🚀 Servidor listo en http://localhost:${PORT}`);

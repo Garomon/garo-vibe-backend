@@ -339,7 +339,8 @@
                 const openloginAdapter = new OpenloginAdapter({
                     privateKeyProvider,
                     adapterSettings: {
-                        uxMode: "popup",
+                        uxMode: "redirect", // CRITICAL: 'redirect' is better for IG/TikTok WebViews than 'popup'
+                        redirectUrl: window.location.href,
                     }
                 });
                 web3auth.configureAdapter(openloginAdapter);
