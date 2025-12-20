@@ -38,12 +38,15 @@ if (!newName && !newUri) {
     process.exit(1);
 }
 
+// TypeScript: eventId is guaranteed to be defined after the check above
+const EVENT_ID: string = eventId!;
+
 // --- CONFIG ---
 const WALLET_FILE = 'wallet-keypair.json';
 const RPC_URL = process.env.RPC_URL || 'https://api.devnet.solana.com';
 
 async function main() {
-    console.log(`\n🧬 BATCH EVOLVE: Event "${eventId}"`);
+    console.log(`\n🧬 BATCH EVOLVE: Event "${EVENT_ID}"`);
     console.log(`   RPC: ${RPC_URL}`);
     if (newName) console.log(`   New Name: ${newName}`);
     if (newUri) console.log(`   New URI: ${newUri}`);
@@ -101,11 +104,11 @@ async function main() {
         const name = nft.content?.metadata?.name || '';
         const symbol = nft.content?.metadata?.symbol || '';
         // Simple matching: if name contains event ID or symbol matches
-        return name.toUpperCase().includes(eventId.toUpperCase()) ||
-            symbol.toUpperCase() === eventId.toUpperCase();
+        return name.toUpperCase().includes(EVENT_ID.toUpperCase()) ||
+            symbol.toUpperCase() === EVENT_ID.toUpperCase();
     });
 
-    console.log(`🎫 Matched ${eventNfts.length} NFTs for event "${eventId}"\n`);
+    console.log(`🎫 Matched ${eventNfts.length} NFTs for event "${EVENT_ID}"\n`);
 
     if (eventNfts.length === 0) {
         console.log("   No matching NFTs found. Exiting.");
