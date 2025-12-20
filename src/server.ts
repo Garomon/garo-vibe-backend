@@ -20,6 +20,10 @@ app.use(express.json()); // Enable JSON body parsing
 // --- Serve Static Files ---
 app.use(express.static(path.join(__dirname, '../public')));
 
+// --- In-Memory Referral Tracking ---
+const referrals: Record<string, Array<{ user: string; event: string; timestamp: number }>> = {};
+
+
 // --- Global Umi Setup ---
 function getUmi() {
     const umi = createUmi('https://api.devnet.solana.com').use(mplBubblegum());
@@ -66,18 +70,20 @@ app.get('/status', (req, res) => {
 app.post('/mint', async (req, res) => {
     console.log("📩 Petición de minteo recibida...");
 
-    // Load Events Config
-    // Load Events Config
-
-
-    // ... (inside /mint endpoint)
-    const { receiverAddress, eventId } = req.body;
+    const { receiverAddress, eventId, referrer } = req.body;
 
     // Default to Genesis if no eventId or invalid
     const evtId = (eventId && EVENTS[eventId as keyof typeof EVENTS]) ? eventId : 'GENESIS_2025';
     const metadataConfig = EVENTS[evtId as keyof typeof EVENTS];
 
     console.log(`🎫 Minting Event: ${evtId} (${metadataConfig.name})`);
+
+    // Track referral (in-memory for now, upgrade to DB later)
+    if (referrer && receiverAddress && referrer !== receiverAddress) {
+        console.log(`🔗 Referral: ${referrer.slice(0, 8)}... → ${receiverAddress.slice(0, 8)}...`);
+        if (!referrals[referrer]) referrals[referrer] = [];
+        referrals[referrer].push({ user: receiverAddress, event: evtId, timestamp: Date.now() });
+    }
 
     try {
         const { umi, mySigner, merkleTreePK } = getUmi();
@@ -131,6 +137,25 @@ app.post('/mint', async (req, res) => {
             error: error.message || "Error desconocido al mintear"
         });
     }
+});
+
+// 2b. Referrals Endpoint - Get referral stats
+app.get('/referrals', (req, res) => {
+    const { address } = req.query;
+
+    if (address && typeof address === 'string') {
+        // Get specific user's referrals
+        const userRefs = referrals[address] || [];
+        return res.json({ address, count: userRefs.length, referrals: userRefs });
+    }
+
+    // Return leaderboard (top 10)
+    const leaderboard = Object.entries(referrals)
+        .map(([addr, refs]) => ({ address: addr, count: refs.length }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+    res.json({ leaderboard });
 });
 
 // 3. Verify Endpoint - Check NFT Holdings for Levels

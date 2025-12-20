@@ -366,21 +366,24 @@
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const eventId = urlParams.get('event') || 'GENESIS_2025';
+                const referrer = urlParams.get('ref') || null;
                 const localKey = 'vibe_minted_' + userAddress + '_' + eventId;
                 const cached = localStorage.getItem(localKey);
 
-                if (cached) { showSuccessState(cached, true); }
-                else { await mintNFT(userAddress, eventId, localKey); }
+                if (cached) { showSuccessState(cached, true, userAddress); }
+                else { await mintNFT(userAddress, eventId, localKey, referrer); }
 
             } catch (e) { log("Wallet Error: " + e.message); document.getElementById('statusArea').innerHTML = `<p style="color:#ff5555;">Error: ${e.message}</p>`; }
         }
 
-        async function mintNFT(address, eventId, localKey) {
+        async function mintNFT(address, eventId, localKey, referrer) {
             showLoading(`Generando VIBE para ${address.slice(0, 4)}...${address.slice(-4)}`);
             try {
-                const response = await fetch('/mint', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ receiverAddress: address, eventId: eventId }) });
+                const body = { receiverAddress: address, eventId: eventId };
+                if (referrer) body.referrer = referrer;
+                const response = await fetch('/mint', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 const data = await response.json();
-                if (data.success) { localStorage.setItem(localKey, data.explorer); showSuccessState(data.explorer, false); }
+                if (data.success) { localStorage.setItem(localKey, data.explorer); showSuccessState(data.explorer, false, address); }
                 else { throw new Error(data.error || "Mint Error"); }
             } catch (error) {
                 log("API Error: " + error.message);
@@ -388,10 +391,11 @@
             }
         }
 
-        function showSuccessState(explorerLink, isCached) {
+        function showSuccessState(explorerLink, isCached, userAddress) {
             const title = isCached ? "YA ERES MIEMBRO" : "¡ACCESO CONCEDIDO!";
             const desc = isCached ? "Tu pase Genesis ya está activo." : "Bienvenido al ecosistema GΛRO.";
             const imgUrl = "https://ipfs.io/ipfs/bafkreicf2uskmsrm7sgqvy7hmign255iedvab4x5s5q4vxe2mcluc7yvhm";
+            const referralLink = `${window.location.origin}/?ref=${userAddress}`;
 
             document.getElementById('statusArea').innerHTML = `
                 <img src="${imgUrl}" class="nft-img" alt="NFT">
@@ -399,10 +403,21 @@
                 <div class="success-desc">${desc}</div>
                 <a href="${explorerLink}" target="_blank" style="text-decoration:none;"><button class="btn btn-primary">VER EN BLOCKCHAIN ↗</button></a>
                 <div class="divider"></div>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Próximamente:</p>
+                <p style="font-size:0.85rem; color:var(--neon-blue); margin-bottom:8px;">🔗 Comparte y gana:</p>
+                <div style="display:flex; gap:8px; margin-bottom:15px;">
+                    <input type="text" id="refLink" value="${referralLink}" readonly style="flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; padding:10px; color:white; font-size:0.75rem;">
+                    <button class="btn" style="width:auto; padding:10px 15px; margin-bottom:0;" onclick="copyRefLink()">📋</button>
+                </div>
                 <a href="/dashboard.html" style="text-decoration:none;"><button class="btn">🔐 MI DASHBOARD</button></a>
                 <a href="#" onclick="logout()" class="link-muted">Cerrar Sesión</a>
             `;
+        }
+
+        function copyRefLink() {
+            const input = document.getElementById('refLink');
+            input.select();
+            document.execCommand('copy');
+            alert('¡Link copiado!');
         }
 
         window.addEventListener('load', init);
