@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GΛRO VIBE | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+
+    <!-- Web3Auth SDKs -->
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/no-modal@8.12.4/dist/noModal.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@8.12.4/dist/solanaProvider.umd.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@web3auth/openlogin-adapter@8.12.4/dist/openloginAdapter.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js"></script>
+
+    <style>
+        :root {
+            --neon-purple: #bc13fe;
+            --neon-blue: #0ff0fc;
+            --neon-gold: #ffd700;
+            --deep-bg: #050510;
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #fff;
+            --text-muted: #8a8a9a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--deep-bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 900;
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .btn-back:hover {
+            border-color: var(--text-main);
+            color: var(--text-main);
+        }
+
+        /* Level Card */
+        .level-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .level-badge {
+            font-size: 4rem;
+            margin-bottom: 10px;
+        }
+
+        .level-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .level-genesis {
+            color: var(--neon-purple);
+            text-shadow: 0 0 10px var(--neon-purple);
+        }
+
+        .level-silver {
+            color: #c0c0c0;
+            text-shadow: 0 0 10px #c0c0c0;
+        }
+
+        .level-gold {
+            color: var(--neon-gold);
+            text-shadow: 0 0 10px var(--neon-gold);
+        }
+
+        .level-diamond {
+            color: var(--neon-blue);
+            text-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        .nft-count {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Progress */
+        .progress-section {
+            margin-top: 25px;
+        }
+
+        .progress-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
+            transition: width 0.5s;
+        }
+
+        /* Benefits */
+        .benefits {
+            margin-top: 30px;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .benefit-icon {
+            font-size: 1.5rem;
+        }
+
+        .benefit-text {
+            font-size: 0.9rem;
+        }
+
+        .benefit-locked {
+            opacity: 0.4;
+        }
+
+        .benefit-unlocked {
+            border-color: var(--neon-purple);
+        }
+
+        /* Loader */
+        .loader {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--glass-border);
+            border-radius: 50%;
+            border-top-color: var(--neon-purple);
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>MI DASHBOARD</h1>
+            <a href="/" class="btn-back">← Volver</a>
+        </div>
+
+        <div id="content">
+            <div class="loader">
+                <div class="spinner"></div>
+                <p>Conectando...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.global = window;
+        window.process = { env: { DEBUG: undefined }, version: '' };
+
+        const CLIENT_ID = "BM-MYF10MnxIke1bEqjAr39dibU5kHDMVNLepOM0prcajw67H-fhIeXa953MbVZdHeTwyZr3SMEyLjOG3-Q1mMc";
+        const NETWORK = "sapphire_devnet";
+        let web3auth = null;
+
+        // Level Definitions
+        const LEVELS = [
+            { min: 0, name: "Newcomer", emoji: "🌱", class: "" },
+            { min: 1, name: "Genesis Holder", emoji: "🥉", class: "level-genesis" },
+            { min: 3, name: "Silver Fan", emoji: "🥈", class: "level-silver" },
+            { min: 5, name: "Gold VIP", emoji: "🥇", class: "level-gold" },
+            { min: 10, name: "Diamond Elite", emoji: "💎", class: "level-diamond" }
+        ];
+
+        // Benefits
+        const BENEFITS = [
+            { required: 1, icon: "🎵", text: "Acceso a contenido exclusivo" },
+            { required: 3, icon: "🎟️", text: "Early access a tickets" },
+            { required: 5, icon: "🎧", text: "Stems descargables" },
+            { required: 10, icon: "📞", text: "Llamada 1:1 con GΛRO" }
+        ];
+
+        function getLevel(count) {
+            let level = LEVELS[0];
+            for (const l of LEVELS) { if (count >= l.min) level = l; }
+            return level;
+        }
+
+        function getNextLevel(count) {
+            for (const l of LEVELS) { if (count < l.min) return l; }
+            return null;
+        }
+
+        async function init() {
+            try {
+                const NoModal = window.NoModal?.Web3AuthNoModal || window.Web3AuthNoModal;
+                const SolanaProvider = window.SolanaProvider?.SolanaPrivateKeyProvider || window.SolanaPrivateKeyProvider;
+                const OpenloginAdapter = window.OpenloginAdapter?.OpenloginAdapter || window.OpenloginAdapter;
+                const CHAIN_NAMESPACES = window.NoModal?.CHAIN_NAMESPACES || { SOLANA: "solana" };
+
+                const chainConfig = { chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: "0x3", rpcTarget: "https://api.devnet.solana.com", displayName: "Solana Devnet", blockExplorer: "https://explorer.solana.com", ticker: "SOL", tickerName: "Solana" };
+                const privateKeyProvider = new SolanaProvider({ config: { chainConfig } });
+                web3auth = new NoModal({ clientId: CLIENT_ID, web3AuthNetwork: NETWORK, chainConfig });
+                const adapter = new OpenloginAdapter({ privateKeyProvider, adapterSettings: { uxMode: "redirect", redirectUrl: window.location.href } });
+                web3auth.configureAdapter(adapter);
+                await web3auth.init();
+
+                if (web3auth.connected) {
+                    const accounts = await web3auth.provider.request({ method: "getAccounts" });
+                    const userAddress = accounts[0];
+                    await loadDashboard(userAddress);
+                } else {
+                    document.getElementById('content').innerHTML = `<div class="level-card"><p>No has iniciado sesión.</p><a href="/" class="btn-back" style="margin-top:15px; display:inline-block;">Iniciar Sesión</a></div>`;
+                }
+            } catch (e) {
+                document.getElementById('content').innerHTML = `<div class="level-card"><p style="color:#ff5555;">Error: ${e.message}</p></div>`;
+            }
+        }
+
+        async function loadDashboard(address) {
+            document.getElementById('content').innerHTML = `<div class="loader"><div class="spinner"></div><p>Cargando tu perfil...</p></div>`;
+
+            try {
+                // Call backend to get NFT count
+                const res = await fetch(`/verify?address=${address}`);
+                const data = await res.json();
+                const nftCount = data.count || 0;
+
+                renderDashboard(nftCount, address);
+            } catch (e) {
+                // If API fails, fallback to 0
+                renderDashboard(0, address);
+            }
+        }
+
+        function renderDashboard(nftCount, address) {
+            const level = getLevel(nftCount);
+            const nextLevel = getNextLevel(nftCount);
+            const progressPercent = nextLevel ? Math.min(100, (nftCount / nextLevel.min) * 100) : 100;
+
+            let benefitsHtml = BENEFITS.map(b => {
+                const unlocked = nftCount >= b.required;
+                return `<div class="benefit-item ${unlocked ? 'benefit-unlocked' : 'benefit-locked'}">
+                    <span class="benefit-icon">${b.icon}</span>
+                    <span class="benefit-text">${b.text} ${unlocked ? '✓' : `(${b.required} NFTs)`}</span>
+                </div>`;
+            }).join('');
+
+            document.getElementById('content').innerHTML = `
+                <div class="level-card">
+                    <div class="level-badge">${level.emoji}</div>
+                    <div class="level-name ${level.class}">${level.name}</div>
+                    <div class="nft-count">${nftCount} NFT${nftCount !== 1 ? 's' : ''} coleccionados</div>
+                    
+                    ${nextLevel ? `
+                    <div class="progress-section">
+                        <div class="progress-label">Siguiente: ${nextLevel.name} (${nextLevel.min} NFTs)</div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: ${progressPercent}%"></div></div>
+                    </div>
+                    ` : '<p style="margin-top:15px; color:var(--neon-gold);">¡Nivel Máximo Alcanzado!</p>'}
+                </div>
+
+                <div class="benefits">
+                    <h3 style="font-size:1rem; margin-bottom:15px; color:var(--text-muted);">BENEFICIOS</h3>
+                    ${benefitsHtml}
+                </div>
+            `;
+        }
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+
+</html>

@@ -133,6 +133,66 @@ app.post('/mint', async (req, res) => {
     }
 });
 
+// 3. Verify Endpoint - Check NFT Holdings for Levels
+app.get('/verify', async (req, res) => {
+    const { address } = req.query;
+
+    if (!address || typeof address !== 'string') {
+        return res.status(400).json({ success: false, error: "Address required" });
+    }
+
+    console.log(`🔍 Verificando holdings para: ${address}`);
+
+    try {
+        // Use DAS API to get user's assets
+        // NOTE: Default Devnet RPC may not support DAS. Use Helius if available.
+        const RPC_URL = process.env.RPC_URL || 'https://api.devnet.solana.com';
+
+        const response = await fetch(RPC_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                id: 'verify-nfts',
+                method: 'getAssetsByOwner',
+                params: {
+                    ownerAddress: address,
+                    page: 1,
+                    limit: 100
+                }
+            })
+        });
+
+        const data = await response.json() as any;
+
+        if (data.error) {
+            // DAS not supported, return mock count
+            console.log("⚠️ DAS API not available, returning mock data");
+            return res.json({ success: true, count: 1, note: "DAS unavailable, mock data" });
+        }
+
+        // Filter for our collection (by name prefix or other criteria)
+        const allAssets = data.result?.items || [];
+        const garoNfts = allAssets.filter((nft: any) =>
+            nft.content?.metadata?.name?.includes('GΛRO') ||
+            nft.content?.metadata?.symbol === 'VIBE'
+        );
+
+        console.log(`✅ Found ${garoNfts.length} GΛRO NFTs for ${address}`);
+
+        res.json({
+            success: true,
+            count: garoNfts.length,
+            address: address
+        });
+
+    } catch (error: any) {
+        console.error("❌ Verify Error:", error.message);
+        // Fallback to 0 on error
+        res.json({ success: true, count: 0, error: error.message });
+    }
+});
+
 // --- SOLANA ACTIONS (BLINKS) CONFIG ---
 
 // Middleware to set specific CORS for Actions (Must allow all origins)
