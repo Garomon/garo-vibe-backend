@@ -210,7 +210,7 @@ app.post('/api/actions/mint', async (req, res) => {
         // Blinks allow returning `message` instead of `transaction`? No, usually expect tx.
 
         res.status(501).json({ error: "Blink Minting Implementation Pending (Requires Transaction Construction)" });
-    } catch (e) {
+    } catch (e: any) {
         res.status(500).json({ error: e.message });
     }
 });

@@ -1,5 +1,5 @@
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
-import { mplBubblegum, updateMetadata } from '@metaplex-foundation/mpl-bubblegum';
+import { mplBubblegum, updateMetadata, MetadataArgsArgs } from '@metaplex-foundation/mpl-bubblegum';
 import { keypairIdentity, createSignerFromKeypair, publicKey, none, some, PublicKey } from '@metaplex-foundation/umi';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -123,11 +123,11 @@ async function main() {
             share: c.share
         }));
 
-        const currentMetadata = {
-            name: rpcAsset.content.metadata.name,
-            symbol: rpcAsset.content.metadata.symbol,
-            uri: rpcAsset.content.json_uri,
-            sellerFeeBasisPoints: rpcAsset.royalty.basis_points,
+        const currentMetadata: MetadataArgsArgs = {
+            name: rpcAsset.content.metadata.name as string,
+            symbol: rpcAsset.content.metadata.symbol as string,
+            uri: rpcAsset.content.json_uri as string,
+            sellerFeeBasisPoints: rpcAsset.royalty.basis_points as number,
             collection: rpcAsset.grouping && rpcAsset.grouping.length > 0
                 ? some({ key: publicKey(rpcAsset.grouping[0].group_value), verified: false })
                 : none(),
