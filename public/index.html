@@ -398,13 +398,16 @@
                 const userAddress = accounts[0];
                 log("User Address: " + userAddress);
 
-                // --- DOUBLE MINT PROTECTION (LocalStorage) ---
-                const localData = localStorage.getItem('vibe_minted_' + userAddress);
+                // --- DOUBLE MINT PROTECTION (LocalStorage + Event) ---
+                const urlParams = new URLSearchParams(window.location.search);
+                const eventId = urlParams.get('event') || 'GENESIS_2025';
+
+                const localData = localStorage.getItem('vibe_minted_' + userAddress + '_' + eventId);
 
                 if (localData) {
                     showSuccessState(localData, true); // True = Already Minted
                 } else {
-                    await mintNFT(userAddress);
+                    await mintNFT(userAddress, eventId);
                 }
 
             } catch (e) {
@@ -413,21 +416,21 @@
             }
         }
 
-        async function mintNFT(address) {
+        async function mintNFT(address, eventId) {
             showLoading(`Minteando VIBE para:<br><small style="font-family:monospace">${address.slice(0, 4)}...${address.slice(-4)}</small>`);
 
             try {
                 const response = await fetch('/mint', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ receiverAddress: address })
+                    body: JSON.stringify({ receiverAddress: address, eventId: eventId })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    // Save to LocalStorage
-                    localStorage.setItem('vibe_minted_' + address, data.explorer);
+                    // Save to LocalStorage with Event ID
+                    localStorage.setItem('vibe_minted_' + address + '_' + eventId, data.explorer);
                     showSuccessState(data.explorer, false); // False = Just Minted
                 } else {
                     throw new Error(data.error || "Error desconocido");

@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // Configuration
-// Configuration
+import EVENTS from './events.json';
 const PORT = process.env.PORT || 3000;
 const WALLET_FILE = 'wallet-keypair.json';
 const TREE_FILE = 'tree-address.txt';
@@ -66,8 +66,18 @@ app.get('/status', (req, res) => {
 app.post('/mint', async (req, res) => {
     console.log("📩 Petición de minteo recibida...");
 
-    // Check if a specific receiver was requested
-    const { receiverAddress } = req.body;
+    // Load Events Config
+    // Load Events Config
+
+
+    // ... (inside /mint endpoint)
+    const { receiverAddress, eventId } = req.body;
+
+    // Default to Genesis if no eventId or invalid
+    const evtId = (eventId && EVENTS[eventId as keyof typeof EVENTS]) ? eventId : 'GENESIS_2025';
+    const metadataConfig = EVENTS[evtId as keyof typeof EVENTS];
+
+    console.log(`🎫 Minting Event: ${evtId} (${metadataConfig.name})`);
 
     try {
         const { umi, mySigner, merkleTreePK } = getUmi();
@@ -91,9 +101,9 @@ app.post('/mint', async (req, res) => {
             leafOwner: targetOwner,
             merkleTree: merkleTreePK,
             metadata: {
-                name: "GΛRO Genesis Rave",
-                symbol: "VIBE",
-                uri: "https://ipfs.io/ipfs/bafkreicf2uskmsrm7sgqvy7hmign255iedvab4x5s5q4vxe2mcluc7yvhm",
+                name: metadataConfig.name,
+                symbol: metadataConfig.symbol,
+                uri: metadataConfig.uri,
                 sellerFeeBasisPoints: 500, // 5%
                 collection: none(),
                 creators: [

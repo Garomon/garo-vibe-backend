@@ -92,11 +92,21 @@
 
     <script>
         // URL de Producción detectada
-        const APP_URL = "https://garo-vibe-backend.onrender.com";
+        const BASE_URL = "https://garo-vibe-backend.onrender.com";
+
+        // Obtener Event ID de la URL propia (ej: /qr-code.html?event=RAVE_CDMX)
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('event') || 'GENESIS_2025';
+
+        // Construir la URL final que escaneará el usuario
+        const FINAL_URL = `${BASE_URL}/?event=${eventId}`;
+
+        document.querySelector('.url-text').innerText = FINAL_URL.replace('https://', '');
+        document.querySelector('h1').innerText = `Scan: ${eventId}`;
 
         // Generar QR
         new QRCode(document.getElementById("qrcode"), {
-            text: APP_URL,
+            text: FINAL_URL,
             width: 200,
             height: 200,
             colorDark: "#000000",
