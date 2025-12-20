@@ -354,11 +354,30 @@
                     clientId: CLIENT_ID,
                     web3AuthNetwork: NETWORK,
                     chainConfig,
-                    privateKeyProvider
+                    privateKeyProvider,
+                    uiConfig: {
+                        mode: "dark",
+                        uxMode: "redirect",
+                        loginMethodsOrder: ["google", "twitter"]
+                    }
                 });
 
-                log("Ejecutando web3auth.initModal()...");
-                await web3auth.initModal();
+                log("Ejecutando web3auth.initModal() con uxMode redirect...");
+
+                // Configure to use redirect mode instead of popup
+                await web3auth.initModal({
+                    modalConfig: {
+                        openlogin: {
+                            label: "openlogin",
+                            loginMethods: {
+                                google: { name: "google", mainOption: true },
+                                twitter: { name: "twitter", mainOption: true }
+                            },
+                            showOnModal: true
+                        }
+                    }
+                });
+
                 log("Web3Auth inicializado correctamente");
 
                 if (web3auth.connected) {
