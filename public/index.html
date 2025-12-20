@@ -292,17 +292,27 @@
             try {
                 log("Iniciando Web3Auth...");
 
-                // 1. Acceder a los globales expuestos por los UMD bundles
-                // @web3auth/no-modal expone 'window.NoModal' o 'window.Web3AuthNoModal'
-                // Revisa network tab si falla, pero el estándar suele ser window.NoModal
+                // 1. Detección Inteligente de UMD Globals
+                // Algunos CDNs exponen 'Namespace.Class', otros solo 'Class'. probamos ambos.
 
-                const { Web3AuthNoModal } = window.NoModal;
-                const { SolanaPrivateKeyProvider } = window.SolanaProvider;
-                const { OpenloginAdapter } = window.OpenloginAdapter;
-                const { CHAIN_NAMESPACES } = window.Base;
+                // NoModal
+                const Web3AuthNoModal = window.NoModal?.Web3AuthNoModal || window.Web3AuthNoModal;
+
+                // Solana Provider
+                const SolanaPrivateKeyProvider = window.SolanaProvider?.SolanaPrivateKeyProvider || window.SolanaProvider;
+
+                // OpenLogin Adapter
+                const OpenloginAdapter = window.OpenloginAdapter?.OpenloginAdapter || window.OpenloginAdapter;
+
+                // Base / ChainNamespaces
+                const Base = window.Base || {};
+                const CHAIN_NAMESPACES = Base.CHAIN_NAMESPACES || { SOLANA: "solana" };
+
+                // Debug Info
+                log(`Check: NoModal=${!!Web3AuthNoModal}, SolProv=${!!SolanaPrivateKeyProvider}, Adapter=${!!OpenloginAdapter}`);
 
                 if (!Web3AuthNoModal || !SolanaPrivateKeyProvider || !OpenloginAdapter) {
-                    throw new Error("SDKs no cargados correctamente. Revisa tu conexión.");
+                    throw new Error("Clases de Web3Auth no encontradas. Verifica console.");
                 }
 
                 const chainConfig = {
