@@ -348,7 +348,7 @@
 
         async function login(provider) {
             if (!web3auth) return;
-            try { await web3auth.connectTo(window.OpenloginAdapter.WALLET_ADAPTERS.OPENLOGIN, { loginProvider: provider }); } catch (e) { console.error("Login Error:", e); }
+            try { await web3auth.connectTo("openlogin", { loginProvider: provider }); } catch (e) { console.error("Login Error:", e); }
         }
 
         async function logout() {
