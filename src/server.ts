@@ -285,7 +285,7 @@ app.get('/api/actions.json', (req, res) => {
 
 // 2. Action Card (GET /api/actions/mint)
 app.get('/api/actions/mint', (req, res) => {
-    const iconUrl = "https://dweb.link/ipfs/bafkreicf2uskmsrm7sgqvy7hmign255iedvab4x5s5q4vxe2mcluc7yvhm";
+    const iconUrl = "https://ipfs.io/ipfs/bafybeicilwj77izwenlikir6uomtgjkuslhpiubgggho7c374677yymqwi";
     res.json({
         "icon": iconUrl,
         "title": "GΛRO GENESIS DROP",
@@ -392,7 +392,7 @@ app.post('/api/actions/mint', async (req, res) => {
 // 4. Frame Metadata (GET /frames/mint)
 app.get('/frames/mint', (req, res) => {
     console.log("Serving Frame Metadata...");
-    const imageUrl = "https://dweb.link/ipfs/bafkreicf2uskmsrm7sgqvy7hmign255iedvab4x5s5q4vxe2mcluc7yvhm"; // Genesis Image
+    const imageUrl = "https://ipfs.io/ipfs/bafybeicilwj77izwenlikir6uomtgjkuslhpiubgggho7c374677yymqwi"; // Genesis Image
     // Ensure process.env.App_URL is defined or fallback
     const baseUrl = process.env.App_URL || "https://garo-vibe-backend.onrender.com";
     const postUrl = `${baseUrl}/api/frames/mint`;
@@ -447,7 +447,7 @@ app.post('/api/frames/mint', async (req, res) => {
             <html>
               <head>
                 <meta property="fc:frame" content="vNext" />
-                <meta property="fc:frame:image" content="https://dweb.link/ipfs/bafkreicf2uskmsrm7sgqvy7hmign255iedvab4x5s5q4vxe2mcluc7yvhm" />
+                <meta property="fc:frame:image" content="https://ipfs.io/ipfs/bafybeicilwj77izwenlikir6uomtgjkuslhpiubgggho7c374677yymqwi" />
                 <meta property="fc:frame:button:1" content="View Your Vibe (Gallery) 🖼️" />
                 <meta property="fc:frame:button:1:action" content="link" />
                 <meta property="fc:frame:button:1:target" content="https://garo-vibe-backend.onrender.com/gallery.html" />
