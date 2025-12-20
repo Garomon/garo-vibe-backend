@@ -460,8 +460,14 @@
                     }
                 });
 
-                // Convert signature (Uint8Array) to Base64 for the server
-                const signatureBase64 = Buffer.from(signedMessage).toString('base64');
+                // Convert signature (Uint8Array) to Base64 for the server (Browser native)
+                let binary = '';
+                const bytes = new Uint8Array(signedMessage);
+                const len = bytes.byteLength;
+                for (let i = 0; i < len; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                const signatureBase64 = window.btoa(binary);
                 // ----------------------------------------------
 
                 const body = {
