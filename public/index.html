@@ -11,11 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
 
-    <!-- Web3Auth SDKs (Stable Versions) -->
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/no-modal@8.12.4/dist/noModal.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@8.12.4/dist/solanaProvider.umd.min.js"></script>
-    <script
-        src="https://cdn.jsdelivr.net/npm/@web3auth/openlogin-adapter@8.12.4/dist/openloginAdapter.umd.min.js"></script>
+    <!-- Web3Auth Modal SDK (Bundled - CDN Friendly) -->
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@9.6.0/dist/modal.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@9.6.0/dist/solanaProvider.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.78.0/lib/index.iife.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js"></script>
 
@@ -323,41 +321,82 @@
 
         async function init() {
             try {
-                const NoModal = window.NoModal?.Web3AuthNoModal || window.Web3AuthNoModal;
+                log("Inicializando Web3Auth Modal SDK...");
+                log("Globals disponibles: " + Object.keys(window).filter(k => k.toLowerCase().includes('web3') || k.toLowerCase().includes('modal')).join(', '));
+
+                // Modal SDK globals
+                const Web3AuthModal = window.Modal?.Web3Auth || window.Web3Auth;
                 const SolanaProvider = window.SolanaProvider?.SolanaPrivateKeyProvider || window.SolanaPrivateKeyProvider;
-                const OpenloginAdapter = window.OpenloginAdapter?.OpenloginAdapter || window.OpenloginAdapter;
-                const CHAIN_NAMESPACES = window.NoModal?.CHAIN_NAMESPACES || { SOLANA: "solana" };
+                const CHAIN_NAMESPACES = window.Modal?.CHAIN_NAMESPACES || { SOLANA: "solana" };
 
-                if (!NoModal || !SolanaProvider || !OpenloginAdapter) throw new Error("SDK Load Error");
+                if (!Web3AuthModal) {
+                    throw new Error("Web3Auth Modal SDK no cargó. Globals: " + Object.keys(window).filter(k => k.toLowerCase().includes('web3') || k.toLowerCase().includes('modal')).join(', '));
+                }
+                if (!SolanaProvider) {
+                    throw new Error("Solana Provider SDK no cargó.");
+                }
 
-                const chainConfig = { chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: "0x3", rpcTarget: "https://api.devnet.solana.com", displayName: "Solana Devnet", blockExplorer: "https://explorer.solana.com", ticker: "SOL", tickerName: "Solana" };
+                log("SDKs cargados correctamente");
+
+                const chainConfig = {
+                    chainNamespace: CHAIN_NAMESPACES.SOLANA || "solana",
+                    chainId: "0x3",
+                    rpcTarget: "https://api.devnet.solana.com",
+                    displayName: "Solana Devnet",
+                    blockExplorerUrl: "https://explorer.solana.com",
+                    ticker: "SOL",
+                    tickerName: "Solana"
+                };
+
                 privateKeyProvider = new SolanaProvider({ config: { chainConfig } });
-                web3auth = new NoModal({ clientId: CLIENT_ID, web3AuthNetwork: NETWORK, chainConfig });
 
-                const redirectUrl = window.location.origin;
-                log("Configurando Web3Auth con Redirect URL: " + redirectUrl);
+                web3auth = new Web3AuthModal({
+                    clientId: CLIENT_ID,
+                    web3AuthNetwork: NETWORK,
+                    chainConfig,
+                    privateKeyProvider
+                });
 
-                const adapter = new OpenloginAdapter({ privateKeyProvider, adapterSettings: { uxMode: "redirect", redirectUrl: redirectUrl } });
-                web3auth.configureAdapter(adapter);
-                await web3auth.init();
+                log("Ejecutando web3auth.initModal()...");
+                await web3auth.initModal();
+                log("Web3Auth inicializado correctamente");
 
-                if (web3auth.connected) { handleSuccess(); } else { showCards(); }
+                if (web3auth.connected) {
+                    log("Usuario ya conectado, procesando...");
+                    handleSuccess();
+                } else {
+                    log("Mostrando opciones de login");
+                    showCards();
+                }
 
             } catch (error) {
-                console.error(error);
+                console.error("[VIBE] Init Error:", error);
                 log("Critical Init Error: " + error.message);
                 let msg = error.message;
-                if (msg.includes("validate redirect")) {
+                if (msg.includes("validate redirect") || msg.includes("whitelist")) {
                     msg = `Dominio no autorizado.<br><br>Verifica que <b>${window.location.origin}</b> esté en la Whitelist del Dashboard de Web3Auth.`;
                 }
-                document.getElementById('statusArea').innerHTML = `<p style="color:#ff5555;">Error: ${msg}</p>`;
+                document.getElementById('statusArea').innerHTML = `<p style="color:#ff5555;">Error: ${msg}</p><button class="btn" style="margin-top:15px" onclick="window.location.reload()">Reintentar</button>`;
                 document.getElementById('statusArea').style.display = 'block';
+                document.getElementById('loginArea').style.display = 'none';
             }
         }
 
         async function login(provider) {
-            if (!web3auth) return;
-            try { await web3auth.connectTo("openlogin", { loginProvider: provider }); } catch (e) { console.error("Login Error:", e); }
+            if (!web3auth) {
+                log("web3auth no inicializado");
+                return;
+            }
+            try {
+                log("Conectando con " + provider + "...");
+                // Modal SDK uses connect() which opens the modal
+                // For direct provider, we use connectTo with social login params
+                await web3auth.connect();
+                handleSuccess();
+            } catch (e) {
+                console.error("Login Error:", e);
+                log("Login Error: " + e.message);
+            }
         }
 
         async function logout() {
