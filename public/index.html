@@ -5,6 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GΛRO VIBE CENTER</title>
+
+    <!-- POLYFILLS (Critical for Web3/Solana in Browser) -->
+    <script>
+        window.global = window;
+        window.process = { env: { DEBUG: undefined }, version: '' };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js"></script>
+    <script>
+        if (window.buffer) window.Buffer = window.buffer.Buffer;
+    </script>
+
     <!-- Web3Auth SDKs - Correct Bundle for NoModal -->
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/no-modal@9.4.2/dist/noModal.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@9.4.2/dist/solanaProvider.umd.min.js"></script>
@@ -195,7 +206,8 @@
 
         /* DEBUG CONSOLE */
         #debug-console {
-            display: none;
+            display: block;
+            /* Enabled for debugging */
             position: fixed;
             bottom: 0;
             left: 0;
