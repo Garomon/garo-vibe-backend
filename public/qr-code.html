@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GΛRO VIBE | Scan Access</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-purple: #bd00ff;
+            --neon-cyan: #00f3ff;
+            --bg-dark: #0a0a0a;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000000 100%);
+        }
+
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(189, 0, 255, 0.2);
+            text-align: center;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        h1 {
+            font-weight: 600;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--neon-purple);
+        }
+
+        #qrcode {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+
+        .url-text {
+            color: var(--neon-cyan);
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 1rem;
+            text-decoration: none;
+            display: block;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Scan Network</h1>
+        <div id="qrcode"></div>
+        <p>Acceso Móvil al Protocolo VIBE</p>
+        <a href="/" class="url-text">garo-vibe-backend.onrender.com</a>
+    </div>
+
+    <script>
+        // URL de Producción detectada
+        const APP_URL = "https://garo-vibe-backend.onrender.com";
+
+        // Generar QR
+        new QRCode(document.getElementById("qrcode"), {
+            text: APP_URL,
+            width: 200,
+            height: 200,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    </script>
+</body>
+
+</html>
