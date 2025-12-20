@@ -39,5 +39,8 @@
     "moduleDetection": "force",
     "esModuleInterop": true,
     "skipLibCheck": true,
-  }
+  },
+  "exclude": [
+    "scripts"
+  ]
 }

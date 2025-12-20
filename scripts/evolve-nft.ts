@@ -1,6 +1,6 @@
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
-import { mplBubblegum, updateMetadata, fetchMerkleTree } from '@metaplex-foundation/mpl-bubblegum';
-import { keypairIdentity, createSignerFromKeypair, publicKey, none } from '@metaplex-foundation/umi';
+import { mplBubblegum, updateMetadata } from '@metaplex-foundation/mpl-bubblegum';
+import { keypairIdentity, createSignerFromKeypair, publicKey, none, some, PublicKey } from '@metaplex-foundation/umi';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -11,7 +11,12 @@ if (args.length < 1) {
     process.exit(1);
 }
 
-const assetId = publicKey(args[0]);
+const assetIdString = args[0];
+if (!assetIdString) {
+    console.error("Asset ID required");
+    process.exit(1);
+}
+const assetId = publicKey(assetIdString);
 const nameArgIndex = args.indexOf('--name');
 const uriArgIndex = args.indexOf('--uri');
 
@@ -40,7 +45,21 @@ async function main() {
     // Load Wallet
     let secretKey: Uint8Array;
     if (process.env.WALLET_SECRET_KEY) {
-        secretKey = Uint8Array.from(JSON.parse(process.env.WALLET_SECRET_KEY));
+        try {
+            // Try parsing as JSON array string first
+            const secretString = process.env.WALLET_SECRET_KEY;
+            let parsed: number[];
+            if (secretString.startsWith('[') && secretString.endsWith(']')) {
+                parsed = JSON.parse(secretString);
+            } else {
+                // assume format is just raw bytes or try parsing anyway
+                parsed = JSON.parse(secretString);
+            }
+            secretKey = Uint8Array.from(parsed);
+        } catch (e) {
+            console.error("Failed to parse WALLET_SECRET_KEY");
+            throw e;
+        }
     } else {
         if (!fs.existsSync(WALLET_FILE)) throw new Error("Wallet file not found");
         secretKey = Uint8Array.from(JSON.parse(fs.readFileSync(WALLET_FILE, 'utf-8')));
@@ -71,7 +90,7 @@ async function main() {
                 params: { id: assetId.toString() },
             }),
         });
-        const { result: proofResult, error: proofError } = await response.json();
+        const { result: proofResult, error: proofError } = await response.json() as any;
 
         if (proofError) throw new Error(`DAS API Error (Proof): ${JSON.stringify(proofError)}`);
 
@@ -86,7 +105,7 @@ async function main() {
                 params: { id: assetId.toString() },
             }),
         });
-        const { result: assetResult, error: assetError } = await responseData.json();
+        const { result: assetResult, error: assetError } = await responseData.json() as any;
 
         if (assetError) throw new Error(`DAS API Error (Asset): ${JSON.stringify(assetError)}`);
 
@@ -97,17 +116,22 @@ async function main() {
 
         // 2. Prepare Update Args
         // We need: root, dataHash, creatorHash, nonce, index
+
+        const currentCreators = rpcAsset.creators.map((c: any) => ({
+            address: publicKey(c.address),
+            verified: c.verified,
+            share: c.share
+        }));
+
         const currentMetadata = {
             name: rpcAsset.content.metadata.name,
             symbol: rpcAsset.content.metadata.symbol,
             uri: rpcAsset.content.json_uri,
             sellerFeeBasisPoints: rpcAsset.royalty.basis_points,
-            collection: rpcAsset.grouping.length > 0 ? { key: publicKey(rpcAsset.grouping[0].group_value), verified: false } : none(), // Simplification
-            creators: rpcAsset.creators.map((c: any) => ({
-                address: publicKey(c.address),
-                verified: c.verified,
-                share: c.share
-            })),
+            collection: rpcAsset.grouping && rpcAsset.grouping.length > 0
+                ? some({ key: publicKey(rpcAsset.grouping[0].group_value), verified: false })
+                : none(),
+            creators: currentCreators,
         };
 
         const newMetadata = {
@@ -134,9 +158,9 @@ async function main() {
         console.log("✨ MUTATION COMPLETE!");
         console.log(`🔗 Tx: https://explorer.solana.com/tx/${sigString}?cluster=devnet`);
 
-    } catch (e) {
+    } catch (e: any) {
         console.error("❌ Evolve Failed:", e);
-        if (e.message.includes("Method not found")) {
+        if (e.message && e.message.includes("Method not found")) {
             console.error("\n⚠️  HINT: The current RPC URL does not support DAS API (getAsset/getAssetProof).");
             console.error("   Please set RPC_URL to a Helius/Triton Devnet endpoint.");
         }
