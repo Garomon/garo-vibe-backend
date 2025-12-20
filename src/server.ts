@@ -464,6 +464,58 @@ app.post('/api/frames/mint', async (req, res) => {
     }
 });
 
+// --- Admin Section ---
+app.get('/api/admin/stats', async (req, res) => {
+    const adminKey = req.headers['x-admin-key'];
+    const validKey = process.env.ADMIN_PASSWORD || 'admin123'; // Default fallback (change in prod)
+
+    if (adminKey !== validKey) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    try {
+        // 1. Total Mints
+        const { count: totalMints, error: countError } = await supabase
+            .from('referrals')
+            .select('*', { count: 'exact', head: true });
+
+        // 2. Leaderboard (Top Referrers)
+        // Note: Supabase JS doesn't do "GROUP BY" easily without stored procedures or raw SQL.
+        // For MVP, we'll fetch all and aggregate in JS (Not scalable for millions, fine for 200).
+        const { data: allRefs } = await supabase
+            .from('referrals')
+            .select('referrer_wallet');
+
+        const counts: Record<string, number> = {};
+        allRefs?.forEach(r => {
+            const w = r.referrer_wallet || 'unknown';
+            counts[w] = (counts[w] || 0) + 1;
+        });
+
+        const leaderboard = Object.entries(counts)
+            .map(([w, c]) => ({ referrer_wallet: w, count: c }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 10); // Top 10
+
+        // 3. Recent Activity
+        const { data: recent } = await supabase
+            .from('referrals')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(20);
+
+        res.json({
+            total_mints: totalMints || 0,
+            leaderboard,
+            recent: recent || []
+        });
+
+    } catch (e: any) {
+        console.error("Admin Stats Error:", e);
+        res.status(500).json({ error: "Server Error" });
+    }
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`🚀 Servidor listo en http://localhost:${PORT}`);
