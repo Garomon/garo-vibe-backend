@@ -446,7 +446,32 @@
         async function mintNFT(address, eventId, localKey, referrer) {
             showLoading(`Generando VIBE para ${address.slice(0, 4)}...${address.slice(-4)}`);
             try {
-                const body = { receiverAddress: address, eventId: eventId };
+                // --- SECURITY: Sign Message (Doctrina Garo) ---
+                log("Solicitando firma de seguridad...");
+                const message = `Minting GARO VIBE for ${address}`;
+                const msgEncoded = new TextEncoder().encode(message);
+
+                // Request signature from wallet
+                const signedMessage = await web3auth.provider.request({
+                    method: "signMessage",
+                    params: {
+                        message: msgEncoded,
+                        display: "utf8" // Standard for Solana
+                    }
+                });
+
+                // Convert signature (Uint8Array) to Base64 for the server
+                const signatureBase64 = Buffer.from(signedMessage).toString('base64');
+                // ----------------------------------------------
+
+                const body = {
+                    receiverAddress: address,
+                    eventId: eventId,
+                    signature: signatureBase64,
+                    publicKey: address,
+                    message: message
+                };
+
                 if (referrer) body.referrer = referrer;
                 const response = await fetch('/mint', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 const data = await response.json();

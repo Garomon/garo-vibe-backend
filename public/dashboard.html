@@ -8,10 +8,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
 
     <!-- Web3Auth SDKs -->
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/no-modal@8.12.4/dist/noModal.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@8.12.4/dist/solanaProvider.umd.min.js"></script>
-    <script
-        src="https://cdn.jsdelivr.net/npm/@web3auth/openlogin-adapter@8.12.4/dist/openloginAdapter.umd.min.js"></script>
+    <!-- Web3Auth SDKs (Updated to v9 for Consistency) -->
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@9.6.0/dist/modal.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@9.6.0/dist/solanaProvider.umd.min.js"></script>
+    <!-- Removed Openlogin Adapter (included/not needed for basic redirect in v9 modal often, or we use defaults) -->
+    <!-- Buffer (required for polyfills) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js"></script>
 
     <style>
@@ -255,26 +256,47 @@
 
         async function init() {
             try {
-                const NoModal = window.NoModal?.Web3AuthNoModal || window.Web3AuthNoModal;
+                // v9 Logic (Consistent with index.html)
+                const Web3AuthModal = window.Modal?.Web3Auth || window.Web3Auth;
                 const SolanaProvider = window.SolanaProvider?.SolanaPrivateKeyProvider || window.SolanaPrivateKeyProvider;
-                const OpenloginAdapter = window.OpenloginAdapter?.OpenloginAdapter || window.OpenloginAdapter;
-                const CHAIN_NAMESPACES = window.NoModal?.CHAIN_NAMESPACES || { SOLANA: "solana" };
 
-                const chainConfig = { chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: "0x3", rpcTarget: "https://api.devnet.solana.com", displayName: "Solana Devnet", blockExplorer: "https://explorer.solana.com", ticker: "SOL", tickerName: "Solana" };
+                const chainConfig = {
+                    chainNamespace: "solana",
+                    chainId: "0x3", // Devnet
+                    rpcTarget: "https://api.devnet.solana.com",
+                    displayName: "Solana Devnet",
+                    blockExplorer: "https://explorer.solana.com",
+                    ticker: "SOL",
+                    tickerName: "Solana",
+                };
+
                 const privateKeyProvider = new SolanaProvider({ config: { chainConfig } });
-                web3auth = new NoModal({ clientId: CLIENT_ID, web3AuthNetwork: NETWORK, chainConfig });
-                const adapter = new OpenloginAdapter({ privateKeyProvider, adapterSettings: { uxMode: "redirect", redirectUrl: window.location.href } });
-                web3auth.configureAdapter(adapter);
-                await web3auth.init();
+
+                web3auth = new Web3AuthModal({
+                    clientId: CLIENT_ID,
+                    web3AuthNetwork: NETWORK,
+                    chainConfig,
+                    privateKeyProvider,
+                    uiConfig: {
+                        mode: "dark",
+                        uxMode: "redirect", // Key for session persistence across pages
+                        loginMethodsOrder: ["google", "twitter"]
+                    }
+                });
+
+                // Init with redirect settings to pick up session from index.html
+                await web3auth.initModal();
 
                 if (web3auth.connected) {
                     const accounts = await web3auth.provider.request({ method: "getAccounts" });
                     const userAddress = accounts[0];
                     await loadDashboard(userAddress);
                 } else {
+                    // Not logged in
                     document.getElementById('content').innerHTML = `<div class="level-card"><p>No has iniciado sesión.</p><a href="/" class="btn-back" style="margin-top:15px; display:inline-block;">Iniciar Sesión</a></div>`;
                 }
             } catch (e) {
+                console.error("Dashboard Init Error:", e);
                 document.getElementById('content').innerHTML = `<div class="level-card"><p style="color:#ff5555;">Error: ${e.message}</p></div>`;
             }
         }

@@ -85,7 +85,47 @@ app.get('/status', (req, res) => {
 app.post('/mint', async (req, res) => {
     console.log("📩 Petición de minteo recibida...");
 
-    const { receiverAddress, eventId, referrer } = req.body;
+    const { receiverAddress, eventId, referrer, signature, publicKey: signerPublicKey, message } = req.body;
+
+    // --- SECURITY CHECK (DOCTRINA GARO: PREMIUM & SECURE) ---
+    if (!signature || !signerPublicKey || !message) {
+        console.error("❌ Rechazado: Falta firma criptográfica.");
+        return res.status(401).json({ success: false, error: "Firma requerida. Autenticación fallida." });
+    }
+
+    try {
+        const { umi } = getUmi();
+        const signerPubkey = publicKey(signerPublicKey);
+
+        // Simple message verification
+        // Message should be: "Minting GARO VIBE for <receiverAddress>" to prevent replay attacks for other addresses
+        const expectedMessage = `Minting GARO VIBE for ${receiverAddress}`;
+        if (message !== expectedMessage) {
+            throw new Error("Mensaje de firma inválido.");
+        }
+
+        const signatureBytes = new Uint8Array(Buffer.from(signature, 'base64'));
+        const messageBytes = new TextEncoder().encode(message);
+
+        const isValid = umi.eddsa.verify(messageBytes, signatureBytes, signerPubkey);
+
+        if (!isValid) {
+            console.error("❌ Rechazado: Firma inválida.");
+            return res.status(403).json({ success: false, error: "Firma inválida." });
+        }
+
+        if (signerPublicKey !== receiverAddress) {
+            console.log(`⚠️ Nota: ${signerPublicKey} está minteando para ${receiverAddress} (Gift/Airdrop flow compatible)`);
+        }
+
+        console.log("✅ Firma verificada correctamente.");
+
+    } catch (e: any) {
+        console.error("❌ Error de seguridad:", e.message);
+        return res.status(403).json({ success: false, error: "Falló la verificación de seguridad." });
+    }
+    // ---------------------------------------------------------
+
 
     // Default to Genesis if no eventId or invalid
     const evtId = (eventId && EVENTS[eventId as keyof typeof EVENTS]) ? eventId : 'GENESIS_2025';
