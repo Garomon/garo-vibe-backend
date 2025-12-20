@@ -190,36 +190,45 @@
             }
 
             100% {
-                font-size: 0.8rem;
-                opacity: 0.7;
-                transition: opacity 0.2s;
+                clip-path: inset(80% 0 20% 0);
             }
+        }
 
-            .link-sub:hover {
-                opacity: 1;
-                text-decoration: underline;
-            }
+        .link-sub {
+            display: block;
+            margin-top: 15px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
 
-            /* --- Scanlines Effect --- */
-            .scanlines {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1));
-                background-size: 100% 4px;
-                pointer-events: none;
-                z-index: 5;
-                opacity: 0.3;
-            }
+        .link-sub:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
 
-            /* --- Mobile Adjustments --- */
-            @media (max-width: 480px) {
-                .glitch-text {
-                    font-size: 2.5rem;
-                }
+        /* --- Scanlines Effect --- */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0.3;
+        }
+
+        /* --- Mobile Adjustments --- */
+        @media (max-width: 480px) {
+            .glitch-text {
+                font-size: 2.5rem;
             }
+        }
     </style>
 </head>
 
