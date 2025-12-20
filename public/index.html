@@ -386,12 +386,28 @@
 
             try {
                 // Obtener llaves usando el provider de Solana
-                // El provider de web3auth cumple la interfaz, pero para request simple:
                 const accounts = await web3auth.provider.request({ method: "getAccounts" });
                 const userAddress = accounts[0];
 
                 log("Wallet: " + userAddress);
-                await mintNFT(userAddress);
+
+                // --- PREVENCIÓN DE DOBLE MINT ---
+                const hasMinted = localStorage.getItem('vibe_minted_' + userAddress);
+
+                if (hasMinted) {
+                    log("Usuario ya minteó (Cache local).");
+                    document.getElementById('status').innerHTML = `
+                        <div class="success-box">
+                            ✅ <strong>NFT YA RECLAMADO</strong><br>
+                            <span style="font-size:0.8rem">Ya tienes tu acceso VIBE.</span><br><br>
+                            <a href="${hasMinted}" target="_blank">VER EN BLOCKCHAIN ↗</a>
+                        </div>
+                        <br>
+                        <button onclick="logout()" style="background:transparent; border:1px solid #333; color:#555; padding:5px 10px; cursor:pointer; font-size:0.7rem; border-radius:4px;">Salir</button>
+                    `;
+                } else {
+                    await mintNFT(userAddress);
+                }
 
             } catch (e) {
                 log("WALLET ERROR: " + e.message);
@@ -413,6 +429,9 @@
                 const data = await response.json();
 
                 if (data.success) {
+                    // GUARDAR EN LOCALSTORAGE
+                    localStorage.setItem('vibe_minted_' + address, data.explorer);
+
                     statusDiv.innerHTML = `
                         <div class="success-box">
                             ✅ <strong>NFT ENVIADO</strong><br>
