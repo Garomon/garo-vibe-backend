@@ -190,134 +190,133 @@
             }
 
             100% {
-                clip-path: inset(60% 0 10% 0);
-            }
-        }
-
-        @keyframes glitch-anim-2 {
-            0% {
-                clip-path: inset(10% 0 60% 0);
+                font-size: 0.8rem;
+                opacity: 0.7;
+                transition: opacity 0.2s;
             }
 
-            100% {
-                clip-path: inset(80% 0 5% 0);
+            .link-sub:hover {
+                opacity: 1;
+                text-decoration: underline;
             }
-        }
 
-        /* DEBUG CONSOLE */
-        #debug-console {
-            display: none;
-            /* Hidden for production */
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 150px;
-            background: rgba(0, 0, 0, 0.9);
-            color: #0f0;
-            font-family: monospace;
-            font-size: 10px;
-            overflow-y: scroll;
-            padding: 10px;
-            z-index: 9999;
-            text-align: left;
-            border-top: 1px solid #333;
-        }
+            /* --- Scanlines Effect --- */
+            .scanlines {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.1));
+                background-size: 100% 4px;
+                pointer-events: none;
+                z-index: 5;
+                opacity: 0.3;
+            }
+
+            /* --- Mobile Adjustments --- */
+            @media (max-width: 480px) {
+                .glitch-text {
+                    font-size: 2.5rem;
+                }
+            }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <h1 class="glitch-text">GΛRO VIBE</h1>
-        <div class="subtitle">Identifícate para acceder al<br>Genesis Drop 2025</div>
+    <div class="scanlines"></div>
+    <div class="ambient-glow"></div>
 
-        <div id="loginArea">
+    <div class="app-container">
+
+        <!-- HEADER -->
+        <div class="logo-area">
+            <div class="glitch-text">GΛRO</div>
+            <div class="subtitle">GENESIS ACCESS</div>
+        </div>
+
+        <!-- LOGIN CARD -->
+        <div id="loginArea" class="glass-card">
+            <p style="margin-bottom: 25px; font-weight: 500;">Conecta para reclamar tu VIBE</p>
+
             <button class="btn-social btn-google" onclick="login('google')">
-                <!-- SVG Icon Google -->
-                <svg width="18" height="18" viewBox="0 0 18 18" style="margin-right:8px">
-                    <path
-                        d="M17.64 9.2c0-.637-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
-                        fill="#4285F4" />
-                    <path
-                        d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.715H.957v2.332A8.997 8.997 0 0 0 9 18z"
-                        fill="#34A853" />
-                    <path
-                        d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"
-                        fill="#FBBC05" />
-                    <path
-                        d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.272C4.672 5.141 6.656 3.58 9 3.58z"
-                        fill="#EA4335" />
-                </svg>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" class="icon"
+                    alt="G">
                 Continuar con Google
             </button>
-            <button class="btn-social btn-twitter" onclick="login('twitter')">
-                <!-- SVG Icon X -->
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="white" style="margin-right:8px">
+
+            <button class="btn-social btn-x" onclick="login('twitter')">
+                <svg class="icon" viewBox="0 0 24 24" fill="white">
                     <path
-                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z">
+                    </path>
                 </svg>
                 Continuar con X
             </button>
+
+            <div style="margin-top: 20px; font-size: 0.75rem; color: var(--text-muted); opacity: 0.6;">
+                Powered by Solana • Gas-Free
+            </div>
         </div>
 
-        <div id="status"></div>
+        <!-- STATUS / SUCCESS AREA -->
+        <div id="statusArea" style="display:none; transition: opacity 0.5s;">
+            <div id="statusContent"></div>
+        </div>
+
     </div>
 
-    <div id="debug-console"></div>
-
+    <!-- LOGIC -->
     <script>
-        // --- LOGGER HELPER ---
-        // To help debug on mobile devices where console isn't visible
-        function log(msg) {
-            console.log(msg);
-            const debugEl = document.getElementById('debug-console');
-            // Uncomment next line to show debug console on screen
-            // debugEl.style.display = 'block'; 
-            debugEl.innerHTML += `> ${msg}<br>`;
-        }
+        // Polyfills required by Web3Auth/Solana
+        window.global = window;
+        window.process = { env: { DEBUG: undefined }, version: '' };
 
-        window.onerror = function (msg, url, line) {
-            log(`ERROR: ${msg} (${line})`);
-            document.getElementById('status').innerText = `Error interno: ${msg}`;
-            return false;
-        };
-
-        // --- CONFIG ---
-        const CLIENT_ID = "BM-MYF10MnxIke1bEqjAr39dibU5kHDMVNLepOM0prcajw67H-fhIeXa953MbvZdHeTwyZr3SMEyLjOG3-Q1mMc";
+        // Configuration
+        const CLIENT_ID = "BM-MYF10MnxIke1bEqjAr39dibU5kHDMVNLepOM0prcajw67H-fhIeXa953MbVZdHeTwyZr3SMEyLjOG3-Q1mMc"; // Production ID
+        const NETWORK = "sapphire_devnet";
 
         let web3auth = null;
+        let privateKeyProvider = null;
+
+        // UI Helpers
+        const log = (msg) => console.log(`[VIBE_LOG]: ${msg}`);
+
+        function showLoading(msg) {
+            const el = document.getElementById('statusArea');
+            el.style.display = 'block';
+            document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('statusContent').innerHTML = `
+                <div class="glass-card">
+                    <div class="spinner"></div><br><br>
+                    ${msg}
+                </div>
+            `;
+        }
+
+        function showCards() {
+            document.getElementById('statusArea').style.display = 'none';
+            document.getElementById('loginArea').style.display = 'block';
+            // Animation reset if needed
+        }
 
         async function init() {
             try {
-                log("Iniciando Web3Auth...");
-
-                // 1. Detección Inteligente de UMD Globals
-                // Algunos CDNs exponen 'Namespace.Class', otros solo 'Class'. probamos ambos.
-
-                // NoModal
-                const Web3AuthNoModal = window.NoModal?.Web3AuthNoModal || window.Web3AuthNoModal;
-
-                // Solana Provider
-                const SolanaPrivateKeyProvider = window.SolanaProvider?.SolanaPrivateKeyProvider || window.SolanaProvider;
-
-                // OpenLogin Adapter
+                // Determine Classes handles for UMD 
+                const NoModal = window.NoModal?.Web3AuthNoModal || window.Web3AuthNoModal;
+                const SolanaProvider = window.SolanaProvider?.SolanaPrivateKeyProvider || window.SolanaPrivateKeyProvider;
                 const OpenloginAdapter = window.OpenloginAdapter?.OpenloginAdapter || window.OpenloginAdapter;
+                const CHAIN_NAMESPACES = window.NoModal?.CHAIN_NAMESPACES || { SOLANA: "solana" };
 
-                // Base / ChainNamespaces
-                const Base = window.Base || {};
-                const CHAIN_NAMESPACES = Base.CHAIN_NAMESPACES || { SOLANA: "solana" };
-
-                // Debug Info
-                log(`Check: NoModal=${!!Web3AuthNoModal}, SolProv=${!!SolanaPrivateKeyProvider}, Adapter=${!!OpenloginAdapter}`);
-
-                if (!Web3AuthNoModal || !SolanaPrivateKeyProvider || !OpenloginAdapter) {
-                    throw new Error("Clases de Web3Auth no encontradas. Verifica console.");
+                if (!NoModal || !SolanaProvider || !OpenloginAdapter) {
+                    throw new Error("Librerías Web3Auth no cargaron correctamente.");
                 }
 
+                // 1. Setup Chain Config
                 const chainConfig = {
                     chainNamespace: CHAIN_NAMESPACES.SOLANA,
-                    chainId: "0x3", // Devnet
+                    chainId: "0x3", // Use 0x1 for Mainnet, 0x3 for Devnet
                     rpcTarget: "https://api.devnet.solana.com",
                     displayName: "Solana Devnet",
                     blockExplorer: "https://explorer.solana.com",
@@ -325,100 +324,88 @@
                     tickerName: "Solana",
                 };
 
-                // 2. Instancia Principal
-                web3auth = new Web3AuthNoModal({
+                // 2. Init Provider
+                privateKeyProvider = new SolanaProvider({ config: { chainConfig } });
+
+                // 3. Init Web3Auth
+                web3auth = new NoModal({
                     clientId: CLIENT_ID,
+                    web3AuthNetwork: NETWORK,
                     chainConfig,
-                    web3AuthNetwork: "sapphire_devnet",
                 });
 
-                // 3. Configurar Provider
-                const privateKeyProvider = new SolanaPrivateKeyProvider({ config: { chainConfig } });
-
-                // 4. Configurar Adapter
-                const openloginAdapter = new OpenloginAdapter({
+                // 4. Configure Adapter (Redirect Mode for Mobile)
+                const adapter = new OpenloginAdapter({
                     privateKeyProvider,
                     adapterSettings: {
-                        uxMode: "redirect", // CRITICAL: 'redirect' is better for IG/TikTok WebViews than 'popup'
+                        uxMode: "redirect",
                         redirectUrl: window.location.href,
                     }
                 });
-                web3auth.configureAdapter(openloginAdapter);
+                web3auth.configureAdapter(adapter);
 
-                // 5. Init
+                // 5. Initialize
                 await web3auth.init();
-                log("Web3Auth Inicializado.");
 
+                // 6. Check Login Status
                 if (web3auth.connected) {
                     handleSuccess();
+                } else {
+                    showCards();
                 }
 
             } catch (error) {
-                log("INIT ERROR: " + error.message);
-                document.getElementById('status').innerText = "System Init Fail: " + error.message;
+                console.error(error);
+                document.getElementById('statusContent').innerHTML = `<p style="color:red">Error Init: ${error.message}</p>`;
+                document.getElementById('statusArea').style.display = 'block';
             }
         }
 
         async function login(provider) {
-            if (!web3auth) {
-                log("Web3Auth no listo aún.");
-                return;
-            }
-
-            document.getElementById('status').innerHTML = '<span class="loading-spinner">Conectando...</span>';
-
+            if (!web3auth) return;
             try {
-                await web3auth.connectTo("openlogin", {
+                await web3auth.connectTo(window.OpenloginAdapter.WALLET_ADAPTERS.OPENLOGIN, {
                     loginProvider: provider,
                 });
-
-                if (web3auth.connected) {
-                    handleSuccess();
-                }
             } catch (error) {
-                log("LOGIN ERROR: " + error.message);
-                document.getElementById('status').innerText = "Login Cancelado.";
+                console.error("Login Error:", error);
             }
         }
 
+        async function logout() {
+            if (!web3auth) return;
+            await web3auth.logout();
+            window.location.reload();
+        }
+
+        // --- CORE LOGIC ---
+
         async function handleSuccess() {
-            document.getElementById('loginArea').style.display = 'none';
-            document.getElementById('status').innerHTML = '<span class="loading-spinner">Autenticado. Verificando identidad...</span>';
+            showLoading("Verificando identidad...");
 
             try {
-                // Obtener llaves usando el provider de Solana
+                // Get User Wallet
                 const accounts = await web3auth.provider.request({ method: "getAccounts" });
                 const userAddress = accounts[0];
+                log("User Address: " + userAddress);
 
-                log("Wallet: " + userAddress);
+                // --- DOUBLE MINT PROTECTION (LocalStorage) ---
+                const localData = localStorage.getItem('vibe_minted_' + userAddress);
 
-                // --- PREVENCIÓN DE DOBLE MINT ---
-                const hasMinted = localStorage.getItem('vibe_minted_' + userAddress);
-
-                if (hasMinted) {
-                    log("Usuario ya minteó (Cache local).");
-                    document.getElementById('status').innerHTML = `
-                        <div class="success-box">
-                            ✅ <strong>NFT YA RECLAMADO</strong><br>
-                            <span style="font-size:0.8rem">Ya tienes tu acceso VIBE.</span><br><br>
-                            <a href="${hasMinted}" target="_blank">VER EN BLOCKCHAIN ↗</a>
-                        </div>
-                        <br>
-                        <button onclick="logout()" style="background:transparent; border:1px solid #333; color:#555; padding:5px 10px; cursor:pointer; font-size:0.7rem; border-radius:4px;">Salir</button>
-                    `;
+                if (localData) {
+                    showSuccessState(localData, true); // True = Already Minted
                 } else {
                     await mintNFT(userAddress);
                 }
 
             } catch (e) {
-                log("WALLET ERROR: " + e.message);
-                document.getElementById('status').innerText = "Error obteniendo wallet.";
+                log("Wallet Error: " + e.message);
+                document.getElementById('statusContent').innerText = "Error obteniendo wallet: " + e.message;
             }
         }
 
         async function mintNFT(address) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerHTML = `<span class="loading-spinner">Minteando para:<br><small>${address.slice(0, 6)}...${address.slice(-4)}</small></span>`;
+            showLoading(`Minteando VIBE para:<br><small style="font-family:monospace">${address.slice(0, 4)}...${address.slice(-4)}</small>`);
 
             try {
                 const response = await fetch('/mint', {
@@ -430,35 +417,59 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // GUARDAR EN LOCALSTORAGE
+                    // Save to LocalStorage
                     localStorage.setItem('vibe_minted_' + address, data.explorer);
-
-                    statusDiv.innerHTML = `
-                        <div class="success-box">
-                            ✅ <strong>NFT ENVIADO</strong><br>
-                            <span style="font-size:0.8rem">Bienvenido al ecosistema VIBE.</span><br><br>
-                            <a href="${data.explorer}" target="_blank">VER EN BLOCKCHAIN ↗</a>
-                        </div>
-                        <br>
-                        <button onclick="logout()" style="background:transparent; border:1px solid #333; color:#555; padding:5px 10px; cursor:pointer; font-size:0.7rem; border-radius:4px;">Salir</button>
-                    `;
+                    showSuccessState(data.explorer, false); // False = Just Minted
                 } else {
                     throw new Error(data.error || "Error desconocido");
                 }
 
             } catch (error) {
-                log("API ERROR: " + error.message);
-                statusDiv.innerHTML = `<span style="color:var(--google-red)">❌ ERROR: ${error.message}</span>`;
+                log("API Error: " + error.message);
+                document.getElementById('statusContent').innerHTML = `
+                    <div class="glass-card" style="border-color: #ff3333;">
+                        ❌ <strong>ERROR</strong><br>
+                        ${error.message}<br><br>
+                        <button class="btn-social" onclick="window.location.reload()">Reintentar</button>
+                    </div>
+                `;
             }
         }
 
-        async function logout() {
-            await web3auth.logout();
-            window.location.reload();
+        function showSuccessState(explorerLink, isCached) {
+            const title = isCached ? "YA ERES MIEMBRO" : "¡ACCESO CONCEDIDO!";
+            const desc = isCached ? "Tu pase Genesis ya está activo." : "Bienvenido al ecosistema GΛRO.";
+
+            // Image from IPFS (Hardcoded for now based on current metadata)
+            const imgUrl = "https://ipfs.io/ipfs/bafkreicf2uskmsrm7sgqvy7hmign255iedvab4x5s5q4vxe2mcluc7yvhm";
+
+            document.getElementById('statusContent').innerHTML = `
+                <div class="glass-card nft-reveal">
+                    <img src="${imgUrl}" class="nft-image" alt="NFT">
+                    <div class="success-title">${title}</div>
+                    <div class="success-desc">${desc}</div>
+                    
+                    <a href="${explorerLink}" target="_blank" style="text-decoration:none;">
+                        <button class="btn-social btn-primary">VER EN BLOCKCHAIN ↗</button>
+                    </a>
+
+                    <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+                        <p style="margin:0; font-size:0.8rem; color:var(--text-muted)">Próximamente:</p>
+                        <button class="btn-social" style="margin-top:10px; opacity:0.5; cursor:not-allowed;">
+                            🔐 ACCEDER A MI GALERÍA
+                        </button>
+                    </div>
+
+                    <a href="#" onclick="logout()" class="link-sub">Cerrar Sesión</a>
+                </div>
+            `;
+
+            // Optional: Play Sound here
         }
 
-        // Delay init slightly to ensure scripts load
-        window.onload = init;
+        // Start
+        window.addEventListener('load', init);
+
     </script>
 </body>
 
