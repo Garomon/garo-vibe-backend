@@ -333,7 +333,11 @@
                 const chainConfig = { chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: "0x3", rpcTarget: "https://api.devnet.solana.com", displayName: "Solana Devnet", blockExplorer: "https://explorer.solana.com", ticker: "SOL", tickerName: "Solana" };
                 privateKeyProvider = new SolanaProvider({ config: { chainConfig } });
                 web3auth = new NoModal({ clientId: CLIENT_ID, web3AuthNetwork: NETWORK, chainConfig });
-                const adapter = new OpenloginAdapter({ privateKeyProvider, adapterSettings: { uxMode: "redirect", redirectUrl: window.location.href } });
+
+                const redirectUrl = window.location.origin;
+                log("Configurando Web3Auth con Redirect URL: " + redirectUrl);
+
+                const adapter = new OpenloginAdapter({ privateKeyProvider, adapterSettings: { uxMode: "redirect", redirectUrl: redirectUrl } });
                 web3auth.configureAdapter(adapter);
                 await web3auth.init();
 
@@ -341,7 +345,12 @@
 
             } catch (error) {
                 console.error(error);
-                document.getElementById('statusArea').innerHTML = `<p style="color:#ff5555;">Error: ${error.message}</p>`;
+                log("Critical Init Error: " + error.message);
+                let msg = error.message;
+                if (msg.includes("validate redirect")) {
+                    msg = `Dominio no autorizado.<br><br>Verifica que <b>${window.location.origin}</b> esté en la Whitelist del Dashboard de Web3Auth.`;
+                }
+                document.getElementById('statusArea').innerHTML = `<p style="color:#ff5555;">Error: ${msg}</p>`;
                 document.getElementById('statusArea').style.display = 'block';
             }
         }
