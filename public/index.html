@@ -1,16 +1,26 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GΛRO VIBE CENTER</title>
+    <!-- Web3Auth SDKs -->
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/browser@9.4.0/dist/browser.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@9.4.0/dist/solanaProvider.umd.min.js"></script>
+    <!-- Solana Web3 for key handling -->
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+
     <style>
         :root {
             --neon-purple: #bc13fe;
             --neon-green: #17e890;
             --bg-dark: #0a0a0f;
             --panel-bg: #13131f;
+            --google-red: #ea4335;
+            --twitter-blue: #1DA1F2;
         }
+
         body {
             background-color: var(--bg-dark);
             color: white;
@@ -21,127 +31,303 @@
             height: 100vh;
             margin: 0;
             overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000000 100%);
         }
+
         .container {
             background: var(--panel-bg);
-            padding: 2rem;
+            padding: 2.5rem;
             border: 2px solid var(--neon-purple);
-            box-shadow: 0 0 20px rgba(188, 19, 254, 0.4);
-            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(188, 19, 254, 0.3);
+            border-radius: 16px;
             text-align: center;
             width: 90%;
-            max-width: 400px;
+            max-width: 380px;
             position: relative;
+            backdrop-filter: blur(10px);
         }
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -2px; left: -2px; right: -2px; bottom: -2px;
-            background: linear-gradient(45deg, var(--neon-purple), transparent, var(--neon-green));
-            z-index: -1;
-            filter: blur(10px);
-            opacity: 0.5;
-        }
+
         h1 {
-            font-size: 2rem;
+            font-size: 2.2rem;
             margin-bottom: 2rem;
-            text-shadow: 0 0 10px var(--neon-purple);
-            letter-spacing: 3px;
+            text-shadow: 0 0 15px var(--neon-purple);
+            letter-spacing: 4px;
+            font-weight: 800;
         }
-        input[type="text"] {
+
+        .subtitle {
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            color: #aaa;
+            line-height: 1.4;
+        }
+
+        /* Social Buttons */
+        .btn-social {
             width: 100%;
-            padding: 15px;
-            margin-bottom: 20px;
-            background: #000;
-            border: 1px solid #333;
-            color: var(--neon-green);
-            font-family: inherit;
-            font-size: 1rem;
-            box-sizing: border-box;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-        input[type="text"]:focus {
-            border-color: var(--neon-green);
-            box-shadow: 0 0 10px rgba(23, 232, 144, 0.2);
-        }
-        button {
-            background: var(--neon-purple);
-            color: white;
+            padding: 16px;
+            margin-bottom: 12px;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            font-family: inherit;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            width: 100%;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-family: 'Verdana', sans-serif;
+            /* Cleaner font for buttons */
         }
-        button:hover {
-            background: #d54aff;
-            box-shadow: 0 0 20px var(--neon-purple);
-            transform: scale(1.02);
+
+        .btn-google {
+            background: white;
+            color: #444;
         }
-        button:active {
-            transform: scale(0.98);
+
+        .btn-google:hover {
+            background: #f1f1f1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
         }
+
+        .btn-twitter {
+            background: black;
+            /* X branding */
+            color: white;
+            border: 1px solid #333;
+        }
+
+        .btn-twitter:hover {
+            background: #111;
+            border-color: #555;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Status & Loading */
         #status {
-            margin-top: 20px;
+            margin-top: 25px;
             min-height: 20px;
             font-size: 0.9rem;
-            word-break: break-all;
         }
-        .success { color: var(--neon-green); }
-        .error { color: #ff3333; }
-        .loading { color: #aaaaaa; }
 
-        /* Glitch effect placeholder */
-        @keyframes glitch {
-            0% { transform: translate(0) }
-            20% { transform: translate(-2px, 2px) }
-            40% { transform: translate(-2px, -2px) }
-            60% { transform: translate(2px, 2px) }
-            80% { transform: translate(2px, -2px) }
-            100% { transform: translate(0) }
+        .loading-spinner {
+            color: var(--neon-purple);
+            animation: blink 1s infinite;
         }
-        .glitch-hover:hover {
-            animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+
+        @keyframes blink {
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .success-box {
+            border: 1px solid var(--neon-green);
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(23, 232, 144, 0.05);
+            margin-top: 20px;
+        }
+
+        a {
+            color: var(--neon-green);
+            text-decoration: none;
+            border-bottom: 1px dotted var(--neon-green);
+        }
+
+        /* Glitch Animation */
+        .glitch-text {
+            position: relative;
+        }
+
+        .glitch-text::before,
+        .glitch-text::after {
+            content: "GΛRO VIBE";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+        }
+
+        .glitch-text:hover::before {
+            animation: glitch-anim-1 0.4s infinite linear alternate-reverse;
+            clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+            transform: translate(-2px);
+            opacity: 0.7;
+        }
+
+        .glitch-text:hover::after {
+            animation: glitch-anim-2 0.4s infinite linear alternate-reverse;
+            clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
+            transform: translate(2px);
+            opacity: 0.7;
+        }
+
+        @keyframes glitch-anim-1 {
+            0% {
+                clip-path: inset(20% 0 80% 0);
+            }
+
+            100% {
+                clip-path: inset(60% 0 10% 0);
+            }
+        }
+
+        @keyframes glitch-anim-2 {
+            0% {
+                clip-path: inset(10% 0 60% 0);
+            }
+
+            100% {
+                clip-path: inset(80% 0 5% 0);
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
-        <h1 class="glitch-hover">GΛRO VIBE<br>CENTER</h1>
-        
-        <input type="text" id="walletInput" placeholder="Pega tu Solana Address aquí...">
-        
-        <button id="mintButton" onclick="mintNFT()">AIRDROP NFT</button>
-        
+        <h1 class="glitch-text">GΛRO VIBE</h1>
+        <div class="subtitle">Identifícate para acceder al<br>Genesis Drop 2025</div>
+
+        <div id="loginArea">
+            <button class="btn-social btn-google" onclick="login('google')">
+                <svg width="18" height="18" viewBox="0 0 18 18">
+                    <path
+                        d="M17.64 9.2c0-.637-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+                        fill="#4285F4" />
+                    <path
+                        d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.715H.957v2.332A8.997 8.997 0 0 0 9 18z"
+                        fill="#34A853" />
+                    <path
+                        d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"
+                        fill="#FBBC05" />
+                    <path
+                        d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.272C4.672 5.141 6.656 3.58 9 3.58z"
+                        fill="#EA4335" />
+                </svg>
+                Continuar con Google
+            </button>
+            <button class="btn-social btn-twitter" onclick="login('twitter')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                    <path
+                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                Continuar con X
+            </button>
+        </div>
+
         <div id="status"></div>
     </div>
 
     <script>
-        async function mintNFT() {
-            const input = document.getElementById('walletInput');
-            const statusDiv = document.getElementById('status');
-            const btn = document.getElementById('mintButton');
-            const address = input.value.trim();
+        // --- CONFIGURACIÓN ---
+        // IMPORTANTE: REEMPLAZA ESTO CON TU CLIENT ID DEL DASHBOARD DE WEB3AUTH
+        const CLIENT_ID = "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXQhiMab8v-xPkkEjz8BBmJlyVRn8GRTCqBpU7xp0q5z9jlbesgqO2";
+        // ---------------------
 
-            if (!address) {
-                statusDiv.innerHTML = '<span class="error">⚠️ Por favor ingresa una dirección</span>';
-                return;
+        let web3auth = null;
+        let provider = null;
+
+        async function init() {
+            try {
+                // 1. Configurar Web3Auth (Versión No-Modal)
+                const { NoModal } = window.NoModal || {}; // Fallback safe
+
+                web3auth = new window.NoModal.Web3AuthNoModal({
+                    clientId: CLIENT_ID,
+                    chainConfig: {
+                        chainNamespace: "solana",
+                        chainId: "0x3", // Devnet
+                        rpcTarget: "https://api.devnet.solana.com",
+                        displayName: "Garo Vibe Devnet",
+                        blockExplorer: "https://explorer.solana.com",
+                        ticker: "SOL",
+                        tickerName: "Solana",
+                    },
+                    web3AuthNetwork: "sapphire_devnet", // Usar Devnet para pruebas
+                });
+
+                // 2. Configurar Provider de Solana
+                const privateKeyProvider = new window.SolanaProvider.SolanaPrivateKeyProvider({
+                    config: { chainConfig: web3auth.chainConfig }
+                });
+
+                // 3. Inicializar
+                await web3auth.init({
+                    adapters: [
+                        new window.NoModal.OpenloginAdapter({
+                            adapterSettings: {
+                                uxMode: "popup", // Popup para que sea fluido
+                            },
+                            privateKeyProvider,
+                        })
+                    ]
+                });
+
+                // Verificar si ya está logueado
+                if (web3auth.connected) {
+                    handleSuccess();
+                }
+
+            } catch (error) {
+                console.error("Error init Web3Auth:", error);
+                document.getElementById('status').innerText = "System Init Error";
             }
+        }
 
-            // UI Loading State
-            btn.disabled = true;
-            btn.innerText = "MINTEANDO...";
-            statusDiv.className = "loading";
-            statusDiv.innerText = "Conectando con la Matrix (Solana Devnet)... Espere...";
+        async function login(providerByType) {
+            if (!web3auth) return;
+
+            document.getElementById('status').innerHTML = '<span class="loading-spinner">Autenticando acceso biométrico...</span>';
+
+            try {
+                // Iniciar login
+                await web3auth.connectTo("openlogin", {
+                    loginProvider: providerByType,
+                });
+
+                if (web3auth.connected) {
+                    handleSuccess();
+                }
+            } catch (error) {
+                console.error("Login fallido:", error);
+                document.getElementById('status').innerText = "Acceso Denegado.";
+            }
+        }
+
+        async function handleSuccess() {
+            document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('status').innerHTML = '<span class="loading-spinner">Identidad verificada. Generando VIBE ID...</span>';
+
+            try {
+                // Obtener llaves
+                const solanaProvider = web3auth.provider;
+
+                // Obtener cuentas (forma estándar de Web3Auth Solana Provider)
+                const accounts = await solanaProvider.request({ method: "getAccounts" });
+                const userAddress = accounts[0];
+
+                console.log("Wallet Generada:", userAddress);
+
+                // LLAMAR AL BACKEND
+                await mintNFT(userAddress);
+
+            } catch (e) {
+                console.error("Error obteniendo wallet:", e);
+                document.getElementById('status').innerText = "Error generando identidad.";
+            }
+        }
+
+        async function mintNFT(address) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<span class="loading-spinner">Minteando Artefacto para:<br><small>${address.slice(0, 6)}...${address.slice(-4)}</small></span>`;
 
             try {
                 const response = await fetch('/mint', {
@@ -153,24 +339,32 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    statusDiv.className = "success";
                     statusDiv.innerHTML = `
-                        ✅ <strong>MINTEO EXITOSO</strong><br><br>
-                        <a href="${data.explorer}" target="_blank" style="color:var(--neon-green)">VER EN EXPLORER ↗</a>
+                        <div class="success-box">
+                            ✅ <strong>ACCESO CONCEDIDO</strong><br>
+                            <span style="font-size:0.8rem">Tu NFT ha sido minteado.</span><br><br>
+                            <a href="${data.explorer}" target="_blank">VER EN BLOCKCHAIN ↗</a>
+                        </div>
+                        <br>
+                        <button onclick="logout()" style="background:transparent; border:1px solid #333; color:#555; padding:5px 10px; cursor:pointer; font-size:0.7rem; border-radius:4px;">Cerrar Sesión</button>
                     `;
-                    input.value = ""; // Clear input
                 } else {
                     throw new Error(data.error || "Error desconocido");
                 }
 
             } catch (error) {
-                statusDiv.className = "error";
-                statusDiv.innerText = "❌ ERROR: " + error.message;
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "AIRDROP NFT";
+                statusDiv.innerHTML = `<span style="color:var(--google-red)">❌ ERROR: ${error.message}</span>`;
             }
         }
+
+        async function logout() {
+            await web3auth.logout();
+            window.location.reload();
+        }
+
+        // Run
+        init();
     </script>
 </body>
+
 </html>
