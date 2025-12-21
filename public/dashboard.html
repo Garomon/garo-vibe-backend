@@ -527,7 +527,7 @@
                 const unlocked = nftCount >= b.required;
                 return `<div class="benefit-item ${unlocked ? 'benefit-unlocked' : 'benefit-locked'}">
                     <span class="benefit-icon">${b.icon}</span>
-                    <span class="benefit-text">${b.text} ${unlocked ? '✓' : `(${b.required} NFTs)`}</span>
+                    <span class="benefit-text">${b.text} ${unlocked ? '✓' : `(${b.required} Memories)`}</span>
                 </div>`;
             }).join('');
 
@@ -564,7 +564,7 @@
                     <h3 style="font-size:0.8rem; color:#666; letter-spacing:2px; margin-bottom:15px;">SYSTEM NAVIGATION</h3>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         <button onclick="window.location.href='/scanner.html'" class="btn" style="font-size:0.8rem;">👮 SCANNER</button>
-                        <button onclick="window.location.href='/inject.html'" class="btn" style="font-size:0.8rem;">💉 INJECT (TEST)</button>
+                        <button onclick="window.location.href='/inject.html'" class="btn" style="font-size:0.8rem;">📸 CAPTURE (TEST)</button>
                         <button onclick="window.location.href='/godmode.html'" class="btn" style="font-size:0.8rem; grid-column: span 2; border-color:var(--neon-purple); color:var(--neon-purple);">👁️ GOD MODE</button>
                     </div>
                 </div>
