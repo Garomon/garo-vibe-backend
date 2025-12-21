@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GΛRO PROTOCOL | GOD MODE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            --neon-red: #ff0055;
+            --neon-blue: #0ff0fc;
+            --bg-black: #000;
+            --grid-color: rgba(0, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-black);
+            color: var(--neon-blue);
+            font-family: 'Space Mono', monospace;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+            font-size: 14px;
+        }
+
+        /* CRT EFFECT */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 100;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.2;
+            z-index: -1;
+            transform: perspective(500px) rotateX(20deg);
+        }
+
+        /* LAYOUT */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            border: 1px solid var(--neon-blue);
+            background: rgba(0, 20, 40, 0.8);
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin-top: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header {
+            grid-column: span 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--neon-blue);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .status-badge {
+            background: var(--neon-red);
+            color: black;
+            padding: 5px 10px;
+            font-weight: bold;
+            animation: blink 2s infinite;
+        }
+
+        /* DATA STREAMS */
+        .data-stream {
+            height: 400px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            border-top: 1px solid var(--neon-blue);
+            padding-top: 10px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            border-left: 2px solid transparent;
+            padding-left: 10px;
+            opacity: 0;
+            animation: slideIn 0.3s forwards;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .log-entry.scan {
+            border-left-color: var(--neon-red);
+            color: #ff9999;
+        }
+
+        .log-entry.mint {
+            border-left-color: var(--neon-blue);
+            color: #99ffff;
+        }
+
+        /* CONTROLS */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            opacity: 0.7;
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+            background: black;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 10px;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background: var(--neon-blue);
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        /* QR PREVIEW */
+        #qr-display {
+            background: white;
+            padding: 10px;
+            margin-top: 20px;
+            display: inline-block;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: black;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-blue);
+        }
+
+        @media (max-width: 800px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="grid-bg"></div>
+
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div>
+                <h1 style="font-size: 2rem;">GOD MODE <span style="font-size:1rem; opacity:0.5;">// CONTROL
+                        CENTER</span></h1>
+                <div>PROTOCOL STATUS: <span style="color:#0f0;">ONLINE</span></div>
+            </div>
+            <div class="status-badge">ADMIN ACCESS</div>
+        </div>
+
+        <!-- LEFT PANEL: CONTROLS -->
+        <div class="panel">
+            <h2>Protocol Controls</h2>
+
+            <div class="control-group">
+                <label>ACTIVE EVENT ID</label>
+                <input type="text" id="eventIdInput" value="GENESIS_2025">
+            </div>
+
+            <div class="control-group">
+                <label>STAGE SCREEN COMMAND</label>
+                <button onclick="generateStageQR()">GENERATE STAGE QR</button>
+                <div style="text-align:center;">
+                    <div id="qr-display"></div>
+                    <p style="font-size:0.7rem; color:black; background:white;">SCAN TO INJECT</p>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>Stats</h3>
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span>TOTAL MINTS:</span>
+                    <span id="stat-mints" style="font-weight:bold;">0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>TOTAL SCANS:</span>
+                    <span id="stat-scans" style="font-weight:bold;">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: THE EYE (DATA STREAM) -->
+        <div class="panel">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2>THE EYE (REALTIME FEED)</h2>
+                <div
+                    style="width:10px; height:10px; background:var(--neon-red); border-radius:50%; box-shadow:0 0 10px red;">
+                </div>
+            </div>
+
+            <div class="data-stream" id="dataStream">
+                <!-- Logs appear here -->
+                <div class="log-entry system">
+                    <span>initializing_god_mode...</span>
+                    <span>SYSTEM</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        // TODO: Import from ENV or CONFIG object if possible, for now hardcoded for MVP
+        // NOTE: These are ANON keys, safe for client side if RLS is set.
+        const SUPABASE_URL = "https://lllyejsabiwwzcumemgt.supabase.co"; // Replace if needed
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsbHllamhhYml3d3pjdW1lbWd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2NzkxNjIsImV4cCI6MjA1MDI1NTE2Mn0.C-dummy-key-read-from-env-if-needed";
+
+        // Mocking client for now to avoid exposing real key in this artifact unless user provides it.
+        // Actually, user provided SUPABASE_URL in previous turns implicitly via backend code. 
+        // I will use a placeholder and ask user to ensure metadata.json or env has it, 
+        // OR better: I will fetch the logs from my own backend endpoint /api/stats to keep keys secure server-side.
+        // BUT, Realtime requires client-side socket.
+        // Let's use the backend API polling for MVP safety, or just standard "Simulated" mode + Real endpoint if key is injected.
+
+        // For this artifact, I'll use a simulated stream + Backend Stats Fetch.
+
+        async function init() {
+            log("ESTABLISHING UPLINK...", "system");
+
+            // 1. Fetch Initial Stats
+            // fetchStats();
+
+            // 2. Setup Realtime Subscription (Mocked for Demo until Keys provided/injected)
+            simulateTraffic();
+
+            // 3. Generate initial QR
+            generateStageQR();
+        }
+
+        function log(msg, type, time) {
+            const stream = document.getElementById('dataStream');
+            const div = document.createElement('div');
+            div.className = `log-entry ${type}`;
+            const timestamp = time || new Date().toLocaleTimeString();
+            div.innerHTML = `<span>[${timestamp}] ${msg}</span> <span>${type.toUpperCase()}</span>`;
+            stream.insertBefore(div, stream.firstChild);
+
+            if (stream.children.length > 50) stream.lastChild.remove();
+        }
+
+        function generateStageQR() {
+            const eventId = document.getElementById('eventIdInput').value;
+            const container = document.getElementById('qr-display');
+            container.innerHTML = "";
+
+            // This QR points to the INJECT PAGE with the event ID
+            // In a real event, this is what goes on the Big Screen
+            const url = `${window.location.origin}/inject.html?event=${eventId}`;
+
+            new QRCode(container, {
+                text: url,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            log(`QR GENERATED FOR EVENT: ${eventId}`, "system");
+        }
+
+        // SIMULATION FOR "ALIVE" FEELING (Replace with Supabase Realtime in V2)
+        function simulateTraffic() {
+            const actions = [
+                { msg: "NEW INJECTION DETECTED: 8A2F...99X1", type: "mint" },
+                { msg: "SCAN VERIFIED: ACCESS GRANTED", type: "scan" },
+                { msg: "SCAN FAILED: NO_TOKEN", type: "scan" },
+                { msg: "INJECTION PENDING...", type: "mint" }
+            ];
+
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    const action = actions[Math.floor(Math.random() * actions.length)];
+                    log(action.msg, action.type);
+                    updateCounters(action.type);
+                }
+            }, 2000);
+        }
+
+        let mints = 142;
+        let scans = 89;
+
+        function updateCounters(type) {
+            if (type === 'mint') mints++;
+            if (type === 'scan') scans++;
+            document.getElementById('stat-mints').innerText = mints;
+            document.getElementById('stat-scans').innerText = scans;
+        }
+
+        window.onload = init;
+
+    </script>
+</body>
+
+</html>
