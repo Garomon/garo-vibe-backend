@@ -94,6 +94,11 @@ function getUmi() {
 
 // --- Endpoints ---
 
+// 0. Root Redirect - Entry point goes to onboarding
+app.get('/', (req, res) => {
+    res.redirect('/onboarding.html');
+});
+
 // 1. Status Endpoint
 app.get('/status', (req, res) => {
     res.send("El servidor de GΛRO VIBE está activo 🟢");

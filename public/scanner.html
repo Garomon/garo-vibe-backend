@@ -1,325 +1,287 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GΛRO SCANNER | Doorman</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GΛRO | Scanner</title>
+    <link rel="stylesheet" href="/styles.css">
+    <meta name="theme-color" content="#08080f">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
     <style>
-        :root {
-            --neon-green: #00ff9d;
-            --neon-red: #ff0055;
-            --deep-bg: #050510;
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--deep-bg);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .page {
+            padding: var(--space-lg);
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
         }
 
-        h1 {
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px white;
+        .header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
         }
 
-        /* HUD STYLES */
+        .back-btn {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: var(--space-sm) var(--space-md);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        /* Scanner */
+        .scanner-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            margin-bottom: var(--space-xl);
+        }
+
         #reader {
             width: 100%;
-            max-width: 400px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(0, 255, 157, 0.1);
         }
 
-        #reader::after {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            bottom: 20px;
-            border: 2px solid rgba(0, 255, 157, 0.5);
-            box-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
-            pointer-events: none;
-            clip-path: polygon(0 0, 20px 0, 20px 2px, 2px 2px, 2px 20px, 0 20px,
-                    0 calc(100% - 20px), 2px calc(100% - 20px), 2px calc(100% - 2px), 20px calc(100% - 2px), 20px 100%, 0 100%,
-                    100% 100%, calc(100% - 20px) 100%, calc(100% - 20px) calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) calc(100% - 20px), 100% calc(100% - 20px),
-                    100% 0, calc(100% - 20px) 0, calc(100% - 20px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 20px, 100% 20px);
+        #reader video {
+            border-radius: var(--radius-lg);
         }
 
-        .scan-line-anim {
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background: rgba(0, 255, 157, 0.8);
-            animation: scan-vertical 2s infinite ease-in-out;
-            pointer-events: none;
-        }
-
-        @keyframes scan-vertical {
-            0% {
-                top: 0
-            }
-
-            100% {
-                top: 100%
-            }
-        }
-
+        /* Result Card */
         .result-card {
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid #333;
-            padding: 30px;
-            border-radius: 4px;
-            /* Tech look */
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
             text-align: center;
-            width: 100%;
-            max-width: 400px;
-            display: none;
-            position: relative;
+            margin-bottom: var(--space-xl);
         }
 
-        .status-big {
-            font-size: 3rem;
-            font-weight: 900;
-            margin-bottom: 10px;
+        .result-icon {
+            font-size: 4rem;
+            margin-bottom: var(--space-md);
         }
 
-        .status-granted {
-            color: var(--neon-green);
-            text-shadow: 0 0 20px var(--neon-green);
-            border: 2px solid var(--neon-green);
-            padding: 10px;
-            display: inline-block;
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
         }
 
-        .status-denied {
-            color: var(--neon-red);
-            text-shadow: 0 0 20px var(--neon-red);
-            border: 2px solid var(--neon-red);
-            padding: 10px;
-            display: inline-block;
+        .result-card.success {
+            border-color: var(--success);
         }
 
-        .user-details {
-            font-family: monospace;
-            font-size: 1rem;
-            color: #00ff9d;
-            margin: 20px 0;
-            border-top: 1px solid #333;
-            padding-top: 10px;
+        .result-card.success .result-title {
+            color: var(--success);
         }
 
-        .btn-scan {
-            background: transparent;
-            color: white;
-            border: 1px solid white;
-            padding: 15px 30px;
-            font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: all 0.2s;
+        .result-card.error {
+            border-color: var(--error);
         }
 
-        .btn-scan:hover {
-            background: white;
-            color: black;
-            box-shadow: 0 0 15px white;
+        .result-card.error .result-title {
+            color: var(--error);
         }
 
-        /* HISTORY LOG */
-        .history-log {
-            width: 100%;
-            max-width: 400px;
-            margin-top: 30px;
+        .result-wallet {
             font-family: monospace;
             font-size: 0.8rem;
-            color: #666;
-            text-align: left;
+            color: var(--text-muted);
+            background: var(--bg-glass);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            display: inline-block;
+            margin-top: var(--space-md);
         }
 
-        .log-item {
-            border-bottom: 1px solid #222;
-            padding: 5px 0;
+        .scan-btn {
+            width: 100%;
+            padding: var(--space-lg);
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: var(--radius-lg);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* History */
+        .history-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: var(--space-md);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .history-item {
             display: flex;
             justify-content: space-between;
+            padding: var(--space-md);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
         }
 
-        .log-success {
-            color: var(--neon-green);
+        .history-item.valid {
+            border-left: 3px solid var(--success);
         }
 
-        .log-fail {
-            color: var(--neon-red);
+        .history-item.invalid {
+            border-left: 3px solid var(--error);
         }
     </style>
 </head>
 
-<body>
+<body class="safe-area-top safe-area-bottom">
+    <div class="container page">
+        <div class="header">
+            <button class="back-btn" onclick="location.href='/dashboard.html'">←</button>
+            <h1 class="page-title">👮 Scanner</h1>
+        </div>
 
-    <h1>🏰 The Doorman</h1>
-    <div id="reader">
-        <div class="scan-line-anim"></div>
-    </div>
+        <div class="scanner-container">
+            <div id="reader"></div>
+        </div>
 
-    <div id="result" class="result-card">
-        <div id="statusIcon" class="status-big"></div>
-        <div id="statusText"
-            style="font-size: 1.5rem; font-weight: bold; margin-bottom:10px; text-transform:uppercase;"></div>
-        <div id="userDetails" class="user-details"></div>
-        <button class="btn-scan" onclick="startScanner()">SCAN NEXT TARGET</button>
-    </div>
+        <div id="result"></div>
 
-    <!-- History Log -->
-    <div class="history-log">
-        <div style="border-bottom:1px solid #444; margin-bottom:5px; padding-bottom:5px;">ACCESS LOG (LAST 5)</div>
-        <div id="logList"></div>
+        <button class="scan-btn" onclick="startScan()">Start Scanning</button>
+
+        <div style="margin-top: var(--space-xl);">
+            <h3 class="history-title">Scan History</h3>
+            <div class="history-list" id="history"></div>
+        </div>
     </div>
 
     <script>
-        let html5QrcodeScanner;
+        let html5QrcodeScanner = null;
 
-        function onScanSuccess(decodedText, decodedResult) {
-            // Handle valid QR (Wallet Address)
-            console.log(`Scan result: ${decodedText}`);
-            stopScanner();
-            verifyUser(decodedText);
-        }
-
-        function stopScanner() {
+        function startScan() {
             if (html5QrcodeScanner) {
                 html5QrcodeScanner.clear();
-                document.getElementById('reader').style.display = 'none';
             }
+
+            html5QrcodeScanner = new Html5Qrcode("reader");
+
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                onScanSuccess,
+                () => { }
+            ).catch(err => {
+                document.getElementById('result').innerHTML = `
+                    <div class="result-card error">
+                        <div class="result-icon">📷</div>
+                        <div class="result-title">Camera Error</div>
+                        <p style="color: var(--text-muted);">Please allow camera access</p>
+                    </div>
+                `;
+            });
         }
 
-        function startScanner() {
-            document.getElementById('result').style.display = 'none';
-            document.getElementById('reader').style.display = 'block';
+        async function onScanSuccess(decodedText) {
+            html5QrcodeScanner.stop();
+            playSound('scan');
 
-            html5QrcodeScanner = new Html5QrcodeScanner(
-                "reader", { fps: 10, qrbox: 250 }
-            );
-            html5QrcodeScanner.render(onScanSuccess);
-        }
+            // The QR contains wallet address
+            const address = decodedText;
 
-        // Sound Synth (No external files needed)
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function beep(type) {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            if (type === 'success') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-            } else {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-                osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
-                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-            }
-        }
-
-        function addToHistory(address, status) {
-            const list = document.getElementById('logList');
-            const item = document.createElement('div');
-            item.className = 'log-item';
-            const time = new Date().toLocaleTimeString();
-            const colorClass = status === 'GRANTED' ? 'log-success' : 'log-fail';
-            item.innerHTML = `<span>${time}</span> <span class="${colorClass}">${address.slice(0, 4)}... ${status}</span>`;
-            list.prepend(item);
-            if (list.children.length > 5) list.lastChild.remove();
-        }
-
-        async function verifyUser(address) {
-            const resDiv = document.getElementById('result');
-            const icon = document.getElementById('statusIcon');
-            const text = document.getElementById('statusText');
-            const details = document.getElementById('userDetails');
-
-            resDiv.style.display = 'block';
-            resDiv.innerHTML = '<div class="status-big">⏳</div><p style="font-family:monospace; color:#00ff9d;">DECRYPTION_IN_PROGRESS...</p>';
+            document.getElementById('result').innerHTML = `
+                <div class="result-card">
+                    <div class="result-icon">⏳</div>
+                    <div class="result-title">Verifying...</div>
+                </div>
+            `;
 
             try {
-                const response = await fetch(`/verify?address=${address}`);
-                const data = await response.json();
+                const res = await fetch(`/verify?address=${address}`);
+                const data = await res.json();
 
-                resDiv.innerHTML = `
-                    <div id="statusIcon" class="status-big"></div>
-                    <div id="statusText" style="font-size: 1.5rem; font-weight: bold; margin-bottom:10px; text-transform:uppercase;"></div>
-                    <div id="userDetails" class="user-details"></div>
-                    <button class="btn-scan" onclick="startScanner()">SCAN NEXT TARGET</button>
-                `;
-
-                if (data.count > 0) {
-                    // ACCESS GRANTED
-                    beep('success');
-                    document.getElementById('statusIcon').innerText = "ACCESS GRANTED"; // Just text or icon? CSS handles look
-                    document.getElementById('statusIcon').innerText = "🔓";
-                    document.getElementById('statusIcon').className = "status-big status-granted";
-                    document.getElementById('statusText').innerText = "WELCOME VIP";
-                    document.getElementById('statusText').style.color = "#00ff9d";
-                    document.getElementById('userDetails').innerHTML = `
-                        ID: <span style="color:white">${address.slice(0, 6)}...</span><br>
-                        LEVEL: <span style="color:yellow">🏆 ${data.count} MEMORIES</span>
-                    `;
-
-                    addToHistory(address, 'GRANTED');
-                    logScan(address, 'GRANTED');
-
+                if (data.valid && data.count > 0) {
+                    playSound('success');
+                    showResult('success', 'ACCESS GRANTED', address, data.count);
+                    logScan(address, true);
                 } else {
-                    // ACCESS DENIED
-                    beep('fail');
-                    document.getElementById('statusIcon').innerText = "🚫";
-                    document.getElementById('statusIcon').className = "status-big status-denied";
-                    document.getElementById('statusText').innerText = "ACCESS DENIED";
-                    document.getElementById('statusText').style.color = "#ff0055";
-                    document.getElementById('userDetails').innerHTML = `NO_ASSETS_FOUND<br><span style="font-size:0.8rem; color:#666">${address}</span>`;
-
-                    addToHistory(address, 'DENIED');
-                    logScan(address, 'DENIED');
+                    playSound('error');
+                    showResult('error', 'NO MEMORIES', address, 0);
+                    logScan(address, false);
                 }
 
+                // Log to backend
+                fetch('/api/scan-log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ wallet_address: address, status: data.valid ? 'GRANTED' : 'DENIED' })
+                }).catch(() => { });
+
             } catch (e) {
-                resDiv.innerHTML = `<p style="color:red">NET_ERROR: ${e.message}</p><button class="btn-scan" onclick="startScanner()">RETRY</button>`;
+                showResult('error', 'SCAN ERROR', address, 0);
             }
         }
 
-        function logScan(address, status) {
-            // Send to backend (Fire and forget)
-            fetch('/api/scan-log', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ scanned_address: address, status: status })
-            }).catch(e => console.error(e));
+        function showResult(type, title, address, count) {
+            const icons = { success: '✅', error: '❌' };
+            document.getElementById('result').innerHTML = `
+                <div class="result-card ${type}">
+                    <div class="result-icon">${icons[type]}</div>
+                    <div class="result-title">${title}</div>
+                    ${count > 0 ? `<p style="color: var(--accent-secondary);">${count} memories found</p>` : ''}
+                    <div class="result-wallet">${address.slice(0, 8)}...${address.slice(-4)}</div>
+                </div>
+            `;
         }
 
-        // Auto-start
-        window.addEventListener('load', startScanner);
+        function logScan(address, valid) {
+            const history = document.getElementById('history');
+            const item = document.createElement('div');
+            item.className = `history-item ${valid ? 'valid' : 'invalid'}`;
+            item.innerHTML = `
+                <span>${address.slice(0, 8)}...</span>
+                <span>${valid ? '✓ GRANTED' : '✗ DENIED'}</span>
+            `;
+            history.insertBefore(item, history.firstChild);
+        }
+
+        function playSound(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'success') {
+                    osc.frequency.value = 880;
+                } else if (type === 'error') {
+                    osc.frequency.value = 220;
+                } else {
+                    osc.frequency.value = 440;
+                }
+
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
+            } catch (e) { }
+        }
     </script>
 </body>
 
