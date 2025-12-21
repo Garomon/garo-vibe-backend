@@ -302,13 +302,16 @@
         async function init() {
             log("ESTABLISHING UPLINK...", "system");
 
-            // 1. Fetch Initial Stats
-            // fetchStats();
+            // 1. Check if real keys are available
+            if (SUPABASE_KEY.includes('dummy')) {
+                log("⚠️ NO REAL SUPABASE KEY CONFIGURED", "scan");
+                log("Data shown is STATIC. Configure .env for live data.", "system");
+            } else {
+                log("✅ SUPABASE CONNECTED", "mint");
+                // TODO: Implement real-time subscription here
+            }
 
-            // 2. Setup Realtime Subscription (Mocked for Demo until Keys provided/injected)
-            simulateTraffic();
-
-            // 3. Generate initial QR
+            // 2. Generate initial QR
             generateStageQR();
         }
 

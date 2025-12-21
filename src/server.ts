@@ -135,20 +135,23 @@ app.post('/mint', async (req, res) => {
 
     console.log(`🎫 Minting Event: ${evtId} (${metadataConfig.name})`);
 
-    // Track referral (Persistent - Supabase)
-    if (referrer && receiverAddress && referrer !== receiverAddress) {
+    // Track mint in Supabase (ALWAYS, even without referrer - for /verify accuracy)
+    const referrerWallet = (referrer && referrer !== receiverAddress) ? referrer : null;
+    if (referrerWallet) {
         console.log(`🔗 Referral: ${referrer.slice(0, 8)}... → ${receiverAddress.slice(0, 8)}...`);
-
-        // Insert into DB (fire and forget to not block minting, or await if critical)
-        supabase.from('referrals').insert({
-            referrer_wallet: referrer,
-            referee_wallet: receiverAddress,
-            event_id: evtId
-        }).then(({ error }) => {
-            if (error) console.error("❌ Referral DB Error:", error.message);
-            else console.log("   ✅ Referral saved to DB");
-        });
+    } else {
+        console.log(`📥 Direct mint for: ${receiverAddress.slice(0, 8)}...`);
     }
+
+    // Insert into DB (fire and forget to not block minting)
+    supabase.from('referrals').insert({
+        referrer_wallet: referrerWallet,
+        referee_wallet: receiverAddress,
+        event_id: evtId
+    }).then(({ error }) => {
+        if (error) console.error("❌ Mint DB Log Error:", error.message);
+        else console.log("   ✅ Mint logged to DB");
+    });
 
     try {
         const { umi, mySigner, merkleTreePK } = getUmi();
