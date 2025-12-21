@@ -240,7 +240,7 @@ app.get('/referrals', async (req, res) => {
     res.json({ leaderboard });
 });
 
-// 3. Verify Endpoint - Check NFT Holdings for Levels
+// 3. Verify Endpoint - Check NFT Holdings for Levels (Source of Truth: Supabase)
 app.get('/verify', async (req, res) => {
     const { address } = req.query;
 
@@ -251,51 +251,30 @@ app.get('/verify', async (req, res) => {
     console.log(`🔍 Verificando holdings para: ${address}`);
 
     try {
-        // Use DAS API to get user's assets
-        // NOTE: Default Devnet RPC may not support DAS. Use Helius if available.
-        const RPC_URL = process.env.RPC_URL || 'https://api.devnet.solana.com';
+        // STRATEGY: Use Supabase 'referrals' table as the Indexer of Truth.
+        // This ensures zero-latency updates after injection, even if Solana Indexers are slow.
 
-        const response = await fetch(RPC_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                jsonrpc: '2.0',
-                id: 'verify-nfts',
-                method: 'getAssetsByOwner',
-                params: {
-                    ownerAddress: address,
-                    page: 1,
-                    limit: 100
-                }
-            })
-        });
+        const { count, error } = await supabase
+            .from('referrals')
+            .select('*', { count: 'exact', head: true })
+            .eq('referee_wallet', address);
 
-        const data = await response.json() as any;
-
-        if (data.error) {
-            // DAS not supported, return mock count
-            console.log("⚠️ DAS API not available, returning mock data");
-            return res.json({ success: true, count: 1, note: "DAS unavailable, mock data" });
+        if (error) {
+            console.error("❌ Supabase Verify Error:", error.message);
+            // Fallback to 0 or Mock if DB fails
+            return res.json({ success: true, count: 0, error: error.message });
         }
 
-        // Filter for our collection (by name prefix or other criteria)
-        const allAssets = data.result?.items || [];
-        const garoNfts = allAssets.filter((nft: any) =>
-            nft.content?.metadata?.name?.includes('GΛRO') ||
-            nft.content?.metadata?.symbol === 'VIBE'
-        );
-
-        console.log(`✅ Found ${garoNfts.length} GΛRO NFTs for ${address}`);
+        console.log(`✅ Found ${count} Memory Pulses (DB) for ${address}`);
 
         res.json({
             success: true,
-            count: garoNfts.length,
+            count: count || 0,
             address: address
         });
 
     } catch (error: any) {
         console.error("❌ Verify Error:", error.message);
-        // Fallback to 0 on error
         res.json({ success: true, count: 0, error: error.message });
     }
 });

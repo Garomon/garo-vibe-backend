@@ -532,7 +532,7 @@
             }).join('');
 
             document.getElementById('content').innerHTML = `
-                <!-- VIBE CORE UI -->
+                <!-- COLLECTION VISUALIZATION -->
                 <div class="core-container ${nftCount === 0 ? 'core-level-0' : (nftCount > 5 ? 'core-level-max' : '')}">
                     <div class="core-sphere"></div>
                     <div class="core-wireframe"></div>
@@ -541,7 +541,7 @@
 
                 <div style="text-align:center; margin-bottom:30px;">
                     <h2 class="level-badge" style="font-size:2rem; margin:0;">${level.name}</h2>
-                    <p style="color:var(--text-muted); letter-spacing:1px; margin-top:5px;">CORE ENERGY: <span style="color:var(--neon-blue);">${nftCount} SHARDS</span></p>
+                    <p style="color:var(--text-muted); letter-spacing:1px; margin-top:5px; font-family:'Outfit', sans-serif;">MY COLLECTION: <span style="color:var(--neon-blue);">${nftCount} MEMORIES</span></p>
                 </div>
 
                 <button class="btn" onclick="toggleQR()" style="background:var(--neon-purple); border:none; color:white; font-weight:700; box-shadow:0 0 20px rgba(188,19,254,0.4);">SHOW ACCESS PASS</button>

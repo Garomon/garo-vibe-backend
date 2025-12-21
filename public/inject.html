@@ -226,8 +226,8 @@
     <!-- MAIN INTERFACE -->
     <div class="container" id="mainUI">
         <div class="cyber-header">
-            SECURE LINK DETECTED<br>
-            PROTOCOL V1.0 // <span id="eventIdDisp">GENESIS</span>
+            EVENT SIGNAL DETECTED<br>
+            ANTHOLOGY V1.0 // <span id="eventIdDisp">GENESIS</span>
         </div>
 
         <div class="event-title" id="eventTitle">
@@ -238,29 +238,29 @@
             <div class="injector-ring"></div>
             <div class="injector-fill" id="fillRing"></div>
             <div class="injector-btn" id="holdBtn">
-                <div class="fingerprint-icon" id="fpIcon">⏳</div>
+                <div class="fingerprint-icon" id="fpIcon">📸</div>
             </div>
         </div>
 
-        <div class="status-text" id="statusText">HOLD TO INJECT MEMORY</div>
+        <div class="status-text" id="statusText">HOLD TO CAPTURE</div>
     </div>
 
     <!-- AUTH OVERLAY (If not logged in) -->
     <div id="authOverlay" class="success-overlay" style="background:rgba(0,0,0,0.9); display:none;">
-        <h2 style="text-align:center">IDENTITY REQUIRED<br>FOR INJECTION</h2>
+        <h2 style="text-align:center">MEMBER ACCESS<br>REQUIRED</h2>
         <button id="loginBtn"
-            style="padding:15px 30px; background:white; color:black; border:none; border-radius:30px; font-weight:900;">CONNECT
-            SOUL</button>
+            style="padding:15px 30px; background:white; color:black; border:none; border-radius:30px; font-weight:900;">ACTIVATE
+            ID</button>
     </div>
 
     <!-- SUCCESS OVERLAY -->
     <div id="successUI" class="success-overlay">
         <div class="shard-visual"></div>
-        <h1 style="font-size:2.5rem; text-align:center">MEMORY<br>SECURED</h1>
-        <p style="font-family:'Space Mono'; color:#888;">SHARD ADDED TO CORE</p>
+        <h1 style="font-size:2.5rem; text-align:center">MOMENT<br>CAPTURED</h1>
+        <p style="font-family:'Outfit'; color:#888;">SAVED TO ANTHOLOGY</p>
         <button onclick="window.location.href='/dashboard.html'"
             style="margin-top:30px; background:transparent; border:1px solid #333; color:#fff; padding:10px 20px;">VIEW
-            CORE</button>
+            COLLECTION</button>
     </div>
 
     <script>
@@ -354,7 +354,7 @@
             if (progress % 10 === 0) vibrate(10);
 
             // Text Glitch
-            status.innerText = `DOWNLOADING... ${Math.floor(progress)}%`;
+            status.innerText = `CAPTURING... ${Math.floor(progress)}%`;
 
             if (progress >= 100) {
                 completeInjection();
@@ -367,13 +367,13 @@
             if (progress >= 100) return; // Already done
             progress = 0;
             document.getElementById('fillRing').style.clipPath = `circle(0% at 50% 50%)`;
-            document.getElementById('statusText').innerText = "HOLD TO INJECT";
+            document.getElementById('statusText').innerText = "HOLD TO CAPTURE";
         }
 
         async function completeInjection() {
             holding = false;
             vibrate(200);
-            document.getElementById('statusText').innerText = "INJECTION COMPLETE. MINTING...";
+            document.getElementById('statusText').innerText = "CAPTURE COMPLETE. SAVING...";
             document.getElementById('holdBtn').style.background = "#bc13fe";
 
             // --- MINT LOGIC ---
