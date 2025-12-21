@@ -300,6 +300,24 @@ app.get('/verify', async (req, res) => {
     }
 });
 
+// 3.b Scan Log Endpoint (Audit Trail)
+app.post('/api/scan-log', async (req, res) => {
+    const { scanned_address, scanner_id, status } = req.body;
+    console.log(`📝 Log Scan: ${scanned_address} [${status}]`);
+
+    // Insert into Supabase (Allow failure without blocking UI)
+    supabase.from('scan_logs').insert({
+        scanned_address,
+        scanner_id: scanner_id || 'DOORMAN_1',
+        status,
+        timestamp: new Date().toISOString()
+    }).then(({ error }) => {
+        if (error) console.error("Error logging scan:", error.message);
+    });
+
+    res.json({ success: true });
+});
+
 // --- SOLANA ACTIONS (BLINKS) CONFIG ---
 
 // Middleware to set specific CORS for Actions (Must allow all origins)

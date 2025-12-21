@@ -255,12 +255,91 @@
             margin-top: 20px;
             opacity: 0.5;
         }
+
+        /* Terminal Log Override */
+        .terminal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 16, 0.95);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+        }
+
+        .terminal-window {
+            width: 100%;
+            max-width: 500px;
+            text-align: left;
+        }
+
+        .log-line {
+            color: var(--neon-blue);
+            margin-bottom: 8px;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .log-line.success {
+            color: #00ff9d;
+        }
+
+        .log-line.error {
+            color: #ff0055;
+        }
+
+        .log-line.system {
+            color: #8a8a9a;
+            font-style: italic;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: var(--neon-purple);
+            animation: blink 1s infinite;
+            margin-left: 5px;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 
 <body>
 
     <div class="ambient-glow"></div>
+
+    <!-- TERMINAL OVERLAY -->
+    <div id="terminalArea" class="terminal-overlay">
+        <div class="terminal-window">
+            <div style="margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px; color:#666;">
+                SYSTEM_ROOT // GΛRO_PROTOCOL_V1
+            </div>
+            <div id="logContainer"></div>
+            <div class="log-line" style="opacity:1"><span class="cursor"></span></div>
+        </div>
+    </div>
 
     <div class="app-container">
         <div class="logo">GΛRO</div>
@@ -307,14 +386,35 @@
 
         const log = (msg) => console.log(`[VIBE]: ${msg}`);
 
-        function showLoading(msg) {
+        function showTerminal() {
             document.getElementById('loginArea').style.display = 'none';
-            const el = document.getElementById('statusArea');
-            el.style.display = 'block';
-            el.innerHTML = `<div class="spinner"></div><p class="status-text">${msg}</p>`;
+            document.getElementById('statusArea').style.display = 'none';
+            document.getElementById('terminalArea').style.display = 'flex';
+        }
+
+        function addLog(text, type = 'normal') {
+            showTerminal();
+            const container = document.getElementById('logContainer');
+            const div = document.createElement('div');
+            div.className = `log-line ${type}`;
+
+            // Add timestamp
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+            let icon = '>';
+            if (type === 'success') icon = '✅';
+            if (type === 'error') icon = '❌';
+            if (type === 'system') icon = '⚙️';
+
+            div.innerHTML = `<span style="opacity:0.5">[${time}]</span> ${icon} ${text}`;
+            container.appendChild(div);
+
+            // Auto scroll
+            // window.scrollTo(0, document.body.scrollHeight);
         }
 
         function showCards() {
+            document.getElementById('terminalArea').style.display = 'none';
             document.getElementById('statusArea').style.display = 'none';
             document.getElementById('loginArea').style.display = 'block';
         }
@@ -425,7 +525,7 @@
         }
 
         async function handleSuccess() {
-            showLoading("Verificando identidad...");
+            addLog("Identidad Confirmada. Obteniendo Wallet...", "system");
             try {
                 const accounts = await web3auth.provider.request({ method: "getAccounts" });
                 const userAddress = accounts[0];
@@ -444,10 +544,11 @@
         }
 
         async function mintNFT(address, eventId, localKey, referrer) {
-            showLoading(`Generando VIBE para ${address.slice(0, 4)}...${address.slice(-4)}`);
+            addLog(`Iniciando Protocolo de Minteo...`, "normal");
+            addLog(`Target: ${address.slice(0, 6)}...`, "system");
             try {
                 // --- SECURITY: Sign Message (Doctrina Garo) ---
-                log("Solicitando firma de seguridad...");
+                addLog("Solicitando Firma de Seguridad (Proof of Request)...", "normal");
                 const message = `Minting GARO VIBE for ${address}`;
                 const msgEncoded = new TextEncoder().encode(message);
 
@@ -479,12 +580,16 @@
                 };
 
                 if (referrer) body.referrer = referrer;
+
+                addLog("Firma Recibida. Enviando a la Blockchain...", "success");
+
                 const response = await fetch('/mint', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 const data = await response.json();
                 if (data.success) { localStorage.setItem(localKey, data.explorer); showSuccessState(data.explorer, false, address); }
                 else { throw new Error(data.error || "Mint Error"); }
             } catch (error) {
                 log("API Error: " + error.message);
+                addLog("ERROR CRÍTICO: " + error.message, "error");
                 document.getElementById('statusArea').innerHTML = `<div style="color:#ff5555;">❌ ${error.message}</div><button class="btn" style="margin-top:15px" onclick="window.location.reload()">Reintentar</button>`;
             }
         }

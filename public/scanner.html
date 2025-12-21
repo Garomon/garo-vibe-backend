@@ -30,25 +30,66 @@
             margin-bottom: 20px;
             text-transform: uppercase;
             letter-spacing: 2px;
+            text-shadow: 0 0 10px white;
         }
 
+        /* HUD STYLES */
         #reader {
             width: 100%;
             max-width: 400px;
-            border: 2px solid #333;
-            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
             overflow: hidden;
             margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 157, 0.1);
+        }
+
+        #reader::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 2px solid rgba(0, 255, 157, 0.5);
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+            pointer-events: none;
+            clip-path: polygon(0 0, 20px 0, 20px 2px, 2px 2px, 2px 20px, 0 20px,
+                    0 calc(100% - 20px), 2px calc(100% - 20px), 2px calc(100% - 2px), 20px calc(100% - 2px), 20px 100%, 0 100%,
+                    100% 100%, calc(100% - 20px) 100%, calc(100% - 20px) calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) calc(100% - 20px), 100% calc(100% - 20px),
+                    100% 0, calc(100% - 20px) 0, calc(100% - 20px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 20px, 100% 20px);
+        }
+
+        .scan-line-anim {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 255, 157, 0.8);
+            animation: scan-vertical 2s infinite ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes scan-vertical {
+            0% {
+                top: 0
+            }
+
+            100% {
+                top: 100%
+            }
         }
 
         .result-card {
-            background: #111;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #333;
             padding: 30px;
-            border-radius: 20px;
+            border-radius: 4px;
+            /* Tech look */
             text-align: center;
             width: 100%;
             max-width: 400px;
             display: none;
+            position: relative;
         }
 
         .status-big {
@@ -60,29 +101,71 @@
         .status-granted {
             color: var(--neon-green);
             text-shadow: 0 0 20px var(--neon-green);
+            border: 2px solid var(--neon-green);
+            padding: 10px;
+            display: inline-block;
         }
 
         .status-denied {
             color: var(--neon-red);
             text-shadow: 0 0 20px var(--neon-red);
+            border: 2px solid var(--neon-red);
+            padding: 10px;
+            display: inline-block;
         }
 
         .user-details {
-            font-size: 1.2rem;
-            color: #ccc;
-            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 1rem;
+            color: #00ff9d;
+            margin: 20px 0;
+            border-top: 1px solid #333;
+            padding-top: 10px;
         }
 
         .btn-scan {
+            background: transparent;
+            color: white;
+            border: 1px solid white;
+            padding: 15px 30px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.2s;
+        }
+
+        .btn-scan:hover {
             background: white;
             color: black;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 1.2rem;
-            cursor: pointer;
-            margin-top: 20px;
+            box-shadow: 0 0 15px white;
+        }
+
+        /* HISTORY LOG */
+        .history-log {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 30px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #666;
+            text-align: left;
+        }
+
+        .log-item {
+            border-bottom: 1px solid #222;
+            padding: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .log-success {
+            color: var(--neon-green);
+        }
+
+        .log-fail {
+            color: var(--neon-red);
         }
     </style>
 </head>
@@ -90,13 +173,22 @@
 <body>
 
     <h1>🏰 The Doorman</h1>
-    <div id="reader"></div>
+    <div id="reader">
+        <div class="scan-line-anim"></div>
+    </div>
 
     <div id="result" class="result-card">
         <div id="statusIcon" class="status-big"></div>
-        <div id="statusText" style="font-size: 1.5rem; font-weight: bold; margin-bottom:10px"></div>
+        <div id="statusText"
+            style="font-size: 1.5rem; font-weight: bold; margin-bottom:10px; text-transform:uppercase;"></div>
         <div id="userDetails" class="user-details"></div>
-        <button class="btn-scan" onclick="startScanner()">ESCANEAR SIGUIENTE</button>
+        <button class="btn-scan" onclick="startScanner()">SCAN NEXT TARGET</button>
+    </div>
+
+    <!-- History Log -->
+    <div class="history-log">
+        <div style="border-bottom:1px solid #444; margin-bottom:5px; padding-bottom:5px;">ACCESS LOG (LAST 5)</div>
+        <div id="logList"></div>
     </div>
 
     <script>
@@ -126,6 +218,43 @@
             html5QrcodeScanner.render(onScanSuccess);
         }
 
+        // Sound Synth (No external files needed)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function beep(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'success') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            }
+        }
+
+        function addToHistory(address, status) {
+            const list = document.getElementById('logList');
+            const item = document.createElement('div');
+            item.className = 'log-item';
+            const time = new Date().toLocaleTimeString();
+            const colorClass = status === 'GRANTED' ? 'log-success' : 'log-fail';
+            item.innerHTML = `<span>${time}</span> <span class="${colorClass}">${address.slice(0, 4)}... ${status}</span>`;
+            list.prepend(item);
+            if (list.children.length > 5) list.lastChild.remove();
+        }
+
         async function verifyUser(address) {
             const resDiv = document.getElementById('result');
             const icon = document.getElementById('statusIcon');
@@ -133,7 +262,7 @@
             const details = document.getElementById('userDetails');
 
             resDiv.style.display = 'block';
-            resDiv.innerHTML = '<div class="status-big">⏳</div><p>Verificando...</p>';
+            resDiv.innerHTML = '<div class="status-big">⏳</div><p style="font-family:monospace; color:#00ff9d;">DECRYPTION_IN_PROGRESS...</p>';
 
             try {
                 const response = await fetch(`/verify?address=${address}`);
@@ -141,32 +270,52 @@
 
                 resDiv.innerHTML = `
                     <div id="statusIcon" class="status-big"></div>
-                    <div id="statusText" style="font-size: 1.5rem; font-weight: bold; margin-bottom:10px"></div>
+                    <div id="statusText" style="font-size: 1.5rem; font-weight: bold; margin-bottom:10px; text-transform:uppercase;"></div>
                     <div id="userDetails" class="user-details"></div>
-                    <button class="btn-scan" onclick="startScanner()">ESCANEAR SIGUIENTE</button>
+                    <button class="btn-scan" onclick="startScanner()">SCAN NEXT TARGET</button>
                 `;
 
                 if (data.count > 0) {
                     // ACCESS GRANTED
-                    document.getElementById('statusIcon').innerText = "✅";
+                    beep('success');
+                    document.getElementById('statusIcon').innerText = "ACCESS GRANTED"; // Just text or icon? CSS handles look
+                    document.getElementById('statusIcon').innerText = "🔓";
                     document.getElementById('statusIcon').className = "status-big status-granted";
-                    document.getElementById('statusText').innerText = "ACCESO CONCEDIDO";
-                    document.getElementById('userDetails').innerText = `Address: ${address.slice(0, 4)}...${address.slice(-4)}\nNivel: ${data.count} NFTs`;
+                    document.getElementById('statusText').innerText = "WELCOME VIP";
+                    document.getElementById('statusText').style.color = "#00ff9d";
+                    document.getElementById('userDetails').innerHTML = `
+                        ID: <span style="color:white">${address.slice(0, 6)}...</span><br>
+                        LEVEL: <span style="color:yellow">🏆 ${data.count} VALID NFTs</span>
+                    `;
 
-                    // Playsound check (optional)
-                    // new Audio('/success.mp3').play().catch(e=>{}); 
+                    addToHistory(address, 'GRANTED');
+                    logScan(address, 'GRANTED');
 
                 } else {
                     // ACCESS DENIED
-                    document.getElementById('statusIcon').innerText = "⛔";
+                    beep('fail');
+                    document.getElementById('statusIcon').innerText = "🚫";
                     document.getElementById('statusIcon').className = "status-big status-denied";
-                    document.getElementById('statusText').innerText = "ACCESO DENEGADO";
-                    document.getElementById('userDetails').innerText = "No se encontraron NFTs de GΛRO VIBE.";
+                    document.getElementById('statusText').innerText = "ACCESS DENIED";
+                    document.getElementById('statusText').style.color = "#ff0055";
+                    document.getElementById('userDetails').innerHTML = `NO_ASSETS_FOUND<br><span style="font-size:0.8rem; color:#666">${address}</span>`;
+
+                    addToHistory(address, 'DENIED');
+                    logScan(address, 'DENIED');
                 }
 
             } catch (e) {
-                resDiv.innerHTML = `<p style="color:red">Error de conexión: ${e.message}</p><button class="btn-scan" onclick="startScanner()">Reintentar</button>`;
+                resDiv.innerHTML = `<p style="color:red">NET_ERROR: ${e.message}</p><button class="btn-scan" onclick="startScanner()">RETRY</button>`;
             }
+        }
+
+        function logScan(address, status) {
+            // Send to backend (Fire and forget)
+            fetch('/api/scan-log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ scanned_address: address, status: status })
+            }).catch(e => console.error(e));
         }
 
         // Auto-start

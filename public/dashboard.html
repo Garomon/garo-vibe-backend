@@ -194,7 +194,52 @@
             margin: 0 auto 15px;
         }
 
-        /* QR Code Section */
+        /* Scrollbar Hide */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        /* Holographic Card Effect */
+        .level-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s;
+        }
+
+        .level-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg,
+                    transparent 45%,
+                    rgba(255, 255, 255, 0.1) 50%,
+                    transparent 55%);
+            animation: holo-sweep 4s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes holo-sweep {
+            0% {
+                transform: rotate(0deg) translateY(0);
+            }
+
+            100% {
+                transform: rotate(360deg) translateY(20px);
+            }
+        }
+
+        /* QR Scanner Animation */
         .qr-section {
             background: white;
             padding: 20px;
@@ -207,23 +252,42 @@
             overflow: hidden;
         }
 
-        .qr-label {
-            color: black;
-            font-weight: 700;
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: var(--neon-blue);
+            box-shadow: 0 0 10px var(--neon-blue);
+            top: 0;
+            left: 0;
+            animation: scan-move 2s infinite linear;
+            z-index: 10;
+        }
+
+        @keyframes scan-move {
+            0% {
+                top: 0;
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
+        }
+
+        .level-badge {
+            font-size: 4rem;
             margin-bottom: 10px;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        #qrcode {
-            margin: 10px auto;
-        }
-
-        .scan-hint {
-            color: #333;
-            font-size: 0.8rem;
-            margin-top: 5px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
         }
     </style>
     <!-- QR Code Lib -->
@@ -378,6 +442,7 @@
                 </div>
 
                 <div class="qr-section">
+                    <div class="scan-line"></div>
                     <div class="qr-label">ENTRY PASS</div>
                     <div id="qrcode"></div>
                     <p class="scan-hint">Muestra este código en la entrada</p>
