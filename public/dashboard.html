@@ -194,12 +194,40 @@
             margin: 0 auto 15px;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        /* QR Code Section */
+        .qr-section {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 25px;
+            text-align: center;
+            border: 4px solid var(--neon-purple);
+            box-shadow: 0 0 30px rgba(188, 19, 254, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .qr-label {
+            color: black;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #qrcode {
+            margin: 10px auto;
+        }
+
+        .scan-hint {
+            color: #333;
+            font-size: 0.8rem;
+            margin-top: 5px;
         }
     </style>
+    <!-- QR Code Lib -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -348,7 +376,29 @@
                     <h3 style="font-size:1rem; margin-bottom:15px; color:var(--text-muted);">BENEFICIOS</h3>
                     ${benefitsHtml}
                 </div>
+
+                <div class="qr-section">
+                    <div class="qr-label">ENTRY PASS</div>
+                    <div id="qrcode"></div>
+                    <p class="scan-hint">Muestra este código en la entrada</p>
+                </div>
             `;
+
+            // Generate QR
+            setTimeout(() => {
+                const qrContainer = document.getElementById("qrcode");
+                if (qrContainer) {
+                    qrContainer.innerHTML = ""; // Clear
+                    new QRCode(qrContainer, {
+                        text: address,
+                        width: 180,
+                        height: 180,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                }
+            }, 100);
         }
 
         window.addEventListener('load', init);

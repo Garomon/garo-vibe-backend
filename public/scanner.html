@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GΛRO SCANNER | Doorman</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        :root {
+            --neon-green: #00ff9d;
+            --neon-red: #ff0055;
+            --deep-bg: #050510;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--deep-bg);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #reader {
+            width: 100%;
+            max-width: 400px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .result-card {
+            background: #111;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            display: none;
+        }
+
+        .status-big {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .status-granted {
+            color: var(--neon-green);
+            text-shadow: 0 0 20px var(--neon-green);
+        }
+
+        .status-denied {
+            color: var(--neon-red);
+            text-shadow: 0 0 20px var(--neon-red);
+        }
+
+        .user-details {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .btn-scan {
+            background: white;
+            color: black;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🏰 The Doorman</h1>
+    <div id="reader"></div>
+
+    <div id="result" class="result-card">
+        <div id="statusIcon" class="status-big"></div>
+        <div id="statusText" style="font-size: 1.5rem; font-weight: bold; margin-bottom:10px"></div>
+        <div id="userDetails" class="user-details"></div>
+        <button class="btn-scan" onclick="startScanner()">ESCANEAR SIGUIENTE</button>
+    </div>
+
+    <script>
+        let html5QrcodeScanner;
+
+        function onScanSuccess(decodedText, decodedResult) {
+            // Handle valid QR (Wallet Address)
+            console.log(`Scan result: ${decodedText}`);
+            stopScanner();
+            verifyUser(decodedText);
+        }
+
+        function stopScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+                document.getElementById('reader').style.display = 'none';
+            }
+        }
+
+        function startScanner() {
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('reader').style.display = 'block';
+
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader", { fps: 10, qrbox: 250 }
+            );
+            html5QrcodeScanner.render(onScanSuccess);
+        }
+
+        async function verifyUser(address) {
+            const resDiv = document.getElementById('result');
+            const icon = document.getElementById('statusIcon');
+            const text = document.getElementById('statusText');
+            const details = document.getElementById('userDetails');
+
+            resDiv.style.display = 'block';
+            resDiv.innerHTML = '<div class="status-big">⏳</div><p>Verificando...</p>';
+
+            try {
+                const response = await fetch(`/verify?address=${address}`);
+                const data = await response.json();
+
+                resDiv.innerHTML = `
+                    <div id="statusIcon" class="status-big"></div>
+                    <div id="statusText" style="font-size: 1.5rem; font-weight: bold; margin-bottom:10px"></div>
+                    <div id="userDetails" class="user-details"></div>
+                    <button class="btn-scan" onclick="startScanner()">ESCANEAR SIGUIENTE</button>
+                `;
+
+                if (data.count > 0) {
+                    // ACCESS GRANTED
+                    document.getElementById('statusIcon').innerText = "✅";
+                    document.getElementById('statusIcon').className = "status-big status-granted";
+                    document.getElementById('statusText').innerText = "ACCESO CONCEDIDO";
+                    document.getElementById('userDetails').innerText = `Address: ${address.slice(0, 4)}...${address.slice(-4)}\nNivel: ${data.count} NFTs`;
+
+                    // Playsound check (optional)
+                    // new Audio('/success.mp3').play().catch(e=>{}); 
+
+                } else {
+                    // ACCESS DENIED
+                    document.getElementById('statusIcon').innerText = "⛔";
+                    document.getElementById('statusIcon').className = "status-big status-denied";
+                    document.getElementById('statusText').innerText = "ACCESO DENEGADO";
+                    document.getElementById('userDetails').innerText = "No se encontraron NFTs de GΛRO VIBE.";
+                }
+
+            } catch (e) {
+                resDiv.innerHTML = `<p style="color:red">Error de conexión: ${e.message}</p><button class="btn-scan" onclick="startScanner()">Reintentar</button>`;
+            }
+        }
+
+        // Auto-start
+        window.addEventListener('load', startScanner);
+    </script>
+</body>
+
+</html>
