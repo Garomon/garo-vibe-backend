@@ -917,6 +917,167 @@ app.get('/api/collection', async (req, res) => {
     res.json({ success: true, collection });
 });
 
+// === TICKETING SYSTEM (Anti-Ticketmaster) ===
+
+// Create Event (Admin)
+app.post('/api/event/create', async (req, res) => {
+    const { pin, id, name, date, location, ticket_price, max_tickets, max_resale_multiplier } = req.body;
+
+    if (pin !== 'ADMIN2025') {
+        return res.status(403).json({ error: "Acceso admin requerido" });
+    }
+
+    if (!id || !name || !ticket_price || !max_tickets) {
+        return res.status(400).json({ error: "Campos requeridos: id, name, ticket_price, max_tickets" });
+    }
+
+    const { error } = await supabase.from('events').insert({
+        id,
+        name,
+        date: date || null,
+        location: location || null,
+        ticket_price,
+        max_tickets,
+        tickets_sold: 0,
+        max_resale_multiplier: max_resale_multiplier || 1.20
+    });
+
+    if (error) {
+        if (error.code === '23505') {
+            return res.status(400).json({ error: "Evento ya existe" });
+        }
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true, event_id: id, message: "Evento creado" });
+});
+
+// List Events
+app.get('/api/events', async (req, res) => {
+    const { data } = await supabase
+        .from('events')
+        .select('*')
+        .order('date', { ascending: true });
+
+    res.json({ events: data || [] });
+});
+
+// Get Event
+app.get('/api/event/:id', async (req, res) => {
+    const { data } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', req.params.id)
+        .single();
+
+    if (!data) {
+        return res.status(404).json({ error: "Evento no encontrado" });
+    }
+
+    const available = data.max_tickets - (data.tickets_sold || 0);
+    res.json({ event: data, available });
+});
+
+// Buy Ticket (creates ENTRY NFT)
+app.post('/api/ticket/buy', async (req, res) => {
+    const { address, event_id } = req.body;
+
+    if (!address || !event_id) {
+        return res.status(400).json({ error: "Dirección y event_id requeridos" });
+    }
+
+    // Get event
+    const { data: event } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', event_id)
+        .single();
+
+    if (!event) {
+        return res.status(404).json({ error: "Evento no encontrado" });
+    }
+
+    // Check availability
+    if (event.tickets_sold >= event.max_tickets) {
+        return res.status(400).json({ error: "Entradas agotadas" });
+    }
+
+    // Check if already has ticket
+    const { data: existing } = await supabase
+        .from('mints')
+        .select('id')
+        .eq('referee_wallet', address)
+        .eq('event_id', event_id)
+        .eq('nft_type', 'ENTRY')
+        .single();
+
+    if (existing) {
+        return res.status(400).json({ error: "Ya tienes entrada para este evento" });
+    }
+
+    // Create ENTRY NFT
+    const { error: mintError } = await supabase.from('mints').insert({
+        referee_wallet: address,
+        event_id,
+        nft_type: 'ENTRY',
+        is_tradeable: true,
+        is_soulbound: false,
+        edition_number: event.tickets_sold + 1,
+        max_edition: event.max_tickets
+    });
+
+    if (mintError) {
+        return res.status(500).json({ error: mintError.message });
+    }
+
+    // Update tickets sold
+    await supabase
+        .from('events')
+        .update({ tickets_sold: event.tickets_sold + 1 })
+        .eq('id', event_id);
+
+    res.json({
+        success: true,
+        message: "¡Entrada comprada!",
+        ticket: {
+            event: event.name,
+            edition: event.tickets_sold + 1,
+            max: event.max_tickets
+        }
+    });
+});
+
+// Convert ENTRY to PROOF (Admin - after event)
+app.post('/api/ticket/convert', async (req, res) => {
+    const { pin, event_id } = req.body;
+
+    if (pin !== 'ADMIN2025') {
+        return res.status(403).json({ error: "Acceso admin requerido" });
+    }
+
+    if (!event_id) {
+        return res.status(400).json({ error: "event_id requerido" });
+    }
+
+    // Convert all ENTRY for this event to PROOF
+    const { data, error } = await supabase
+        .from('mints')
+        .update({ nft_type: 'PROOF' })
+        .eq('event_id', event_id)
+        .eq('nft_type', 'ENTRY')
+        .select();
+
+    if (error) {
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({
+        success: true,
+        converted: data?.length || 0,
+        message: `${data?.length || 0} entradas convertidas a PROOF`
+    });
+});
+
 // Start Server
 app.listen(PORT, () => {
     console.log(`🚀 Servidor listo en http://localhost:${PORT}`);
