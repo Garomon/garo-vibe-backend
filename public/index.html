@@ -343,28 +343,31 @@
 
     <div class="app-container">
         <div class="logo">GΛRO</div>
-        <div class="sub-logo">Genesis Access</div>
+        <div class="sub-logo">SYSTEM ACCESS</div>
 
         <!-- LOGIN CARD -->
         <div id="loginArea" class="glass-card">
-            <p style="margin-bottom: 25px; font-weight: 400; color: var(--text-muted);">Conecta para reclamar tu VIBE
+            <p
+                style="margin-bottom: 25px; font-weight: 700; color: var(--text-main); letter-spacing:1px; font-size:1.1rem;">
+                IDENTIFICATION REQUIRED
+            </p>
+            <p style="margin-bottom: 25px; color: var(--text-muted); font-size:0.85rem;">
+                Select your uplink protocol to synchronize your Neural ID.
             </p>
 
-            <button class="btn" onclick="login('google')">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
-                Continuar con Google
+            <button class="btn" onclick="login('google')"
+                style="justify-content: space-between; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2);">
+                <span>PROTOCOL [G]</span>
+                <span style="opacity:0.5; font-size:0.8rem;">GOOGLE UPLINK</span>
             </button>
 
-            <button class="btn" onclick="login('twitter')">
-                <svg viewBox="0 0 24 24" fill="white">
-                    <path
-                        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z">
-                    </path>
-                </svg>
-                Continuar con X
+            <button class="btn" onclick="login('twitter')"
+                style="justify-content: space-between; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2);">
+                <span>PROTOCOL [X]</span>
+                <span style="opacity:0.5; font-size:0.8rem;">TWITTER UPLINK</span>
             </button>
 
-            <p class="footer-text">Powered by Solana • Gas-Free</p>
+            <p class="footer-text" style="font-family:'Courier New', monospace;">SECURE CONNECTION • NO GAS FEES</p>
         </div>
 
         <!-- STATUS AREA (Hidden by default) -->
