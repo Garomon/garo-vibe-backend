@@ -241,6 +241,59 @@
             text-shadow: 0 0 20px var(--neon-purple);
         }
 
+        /* XP BAR */
+        .xp-container {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .xp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .xp-value {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--neon-purple);
+        }
+
+        .xp-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .xp-bar-bg {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+
+        .streak-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, #ff6b00, #ff9500);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
         /* Benefits */
         .benefits {
             margin-top: 30px;
@@ -572,15 +625,21 @@
             document.getElementById('content').innerHTML = `<div class="loader"><div class="spinner"></div><p>Loading your Anthology...</p></div>`;
 
             try {
-                // Call backend to get full Memory collection
-                const res = await fetch(`/api/memories?address=${address}`);
-                const data = await res.json();
-                const memories = data.memories || [];
+                // Fetch memories and XP in parallel
+                const [memoriesRes, xpRes] = await Promise.all([
+                    fetch(`/api/memories?address=${address}`),
+                    fetch(`/api/xp?address=${address}`)
+                ]);
 
-                renderDashboard(memories, address);
+                const memoriesData = await memoriesRes.json();
+                const xpData = await xpRes.json();
+
+                const memories = memoriesData.memories || [];
+                const xp = xpData.success ? xpData : { xp: 0, streak: 0, level: { name: 'New Fan' }, progress: 0 };
+
+                renderDashboard(memories, address, xp);
             } catch (e) {
-                // If API fails, fallback to empty
-                renderDashboard([], address);
+                renderDashboard([], address, { xp: 0, streak: 0, level: { name: 'New Fan' }, progress: 0 });
             }
         }
 
@@ -635,7 +694,7 @@
             }
         }
 
-        function renderDashboard(memories, address) {
+        function renderDashboard(memories, address, xpData) {
             currentUserAddress = address; // Store for sharing
             const nftCount = memories.length;
             const level = getLevel(nftCount);
@@ -649,6 +708,26 @@
                     <span class="benefit-text">${b.text} ${unlocked ? '✓' : `(${b.required} Memories)`}</span>
                 </div>`;
             }).join('');
+
+            // XP Bar HTML
+            const xpBarHtml = `
+                <div class="xp-container">
+                    <div class="xp-header">
+                        <div>
+                            <span class="xp-value">${xpData.xp || 0}</span>
+                            <span class="xp-label"> XP</span>
+                        </div>
+                        ${xpData.streak > 0 ? `<span class="streak-badge">🔥 ${xpData.streak} STREAK</span>` : ''}
+                    </div>
+                    <div class="xp-bar-bg">
+                        <div class="xp-bar-fill" style="width: ${xpData.progress || 0}%"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.7rem; color:rgba(255,255,255,0.4);">
+                        <span>${xpData.level?.name || 'New Fan'}</span>
+                        <span>${xpData.nextLevel ? xpData.nextLevel.name + ' →' : 'MAX LEVEL'}</span>
+                    </div>
+                </div>
+            `;
 
             // Memory Gallery HTML
             let galleryHtml = '';
@@ -674,6 +753,8 @@
                     <h2 class="level-badge" style="font-size:2rem; margin:0;">${level.name}</h2>
                     <p style="color:var(--text-muted); letter-spacing:1px; margin-top:5px; font-family:'Outfit', sans-serif;">MY ANTHOLOGY: <span style="color:var(--neon-blue);">${nftCount} MEMORIES</span></p>
                 </div>
+
+                ${xpBarHtml}
 
                 <h3 style="font-size:0.9rem; color:#888; letter-spacing:2px; margin-bottom:10px; text-align:center;">MY MEMORIES</h3>
                 ${galleryHtml}

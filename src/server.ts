@@ -332,7 +332,92 @@ app.get('/api/stats', async (req, res) => {
     }
 });
 
-// 2d. Memories Endpoint - Get user's Memory collection with metadata
+// 2d. XP Endpoint - Calculate user XP with streak bonus
+app.get('/api/xp', async (req, res) => {
+    const { address } = req.query;
+    if (!address || typeof address !== 'string') {
+        return res.status(400).json({ error: "Address required" });
+    }
+
+    try {
+        // Get user's memories
+        const { data: mints, error } = await supabase
+            .from('referrals')
+            .select('created_at, event_id')
+            .eq('referee_wallet', address)
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        const memories = mints || [];
+        let xp = 0;
+        let streak = 0;
+        let lastEventDate: Date | null = null;
+
+        // XP Rules:
+        // - Each mint: 100 XP
+        // - First mint: +200 XP bonus
+        // - Streak (events within 30 days): +50 XP per consecutive
+
+        memories.forEach((m: any, i: number) => {
+            xp += 100; // Base XP per memory
+
+            if (i === 0) {
+                xp += 200; // First mint bonus
+            }
+
+            // Check streak
+            const mintDate = new Date(m.created_at);
+            if (lastEventDate) {
+                const daysBetween = (mintDate.getTime() - lastEventDate.getTime()) / (1000 * 60 * 60 * 24);
+                if (daysBetween <= 30 && daysBetween > 0) {
+                    streak++;
+                    xp += 50 * streak; // Increasing streak bonus
+                } else {
+                    streak = 0; // Reset streak if gap too long
+                }
+            }
+            lastEventDate = mintDate;
+        });
+
+        // Level calculation
+        const levels = [
+            { min: 0, name: 'New Fan', level: 1 },
+            { min: 300, name: 'Bronze', level: 2 },
+            { min: 700, name: 'Silver', level: 3 },
+            { min: 1500, name: 'Gold VIP', level: 4 },
+            { min: 3000, name: 'Diamond Elite', level: 5 },
+            { min: 6000, name: 'Legend', level: 6 }
+        ];
+
+        type LevelType = { min: number; name: string; level: number };
+        let currentLevel: LevelType = levels[0]!;
+        let nextLevel: LevelType | undefined = levels[1];
+        for (let i = levels.length - 1; i >= 0; i--) {
+            if (xp >= levels[i]!.min) {
+                currentLevel = levels[i]!;
+                nextLevel = levels[i + 1];
+                break;
+            }
+        }
+
+        res.json({
+            success: true,
+            xp,
+            streak,
+            level: currentLevel,
+            nextLevel: nextLevel || null,
+            progress: nextLevel ? Math.round((xp - currentLevel.min) / (nextLevel.min - currentLevel.min) * 100) : 100,
+            memoriesCount: memories.length
+        });
+
+    } catch (e: any) {
+        console.error("XP Error:", e.message);
+        res.json({ success: false, xp: 0, streak: 0, level: { name: 'New Fan', level: 1 } });
+    }
+});
+
+// 2e. Memories Endpoint - Get user's Memory collection with metadata
 app.get('/api/memories', async (req, res) => {
     const { address } = req.query;
 
