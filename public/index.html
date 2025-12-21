@@ -527,9 +527,15 @@
         async function handleSuccess() {
             addLog("Identidad Confirmada. Obteniendo Wallet...", "system");
             try {
-                const accounts = await web3auth.provider.request({ method: "getAccounts" });
+                // FIX: Add Timeout to prevent hanging
+                const getAccountsPromise = web3auth.provider.request({ method: "getAccounts" });
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Tiempo de espera agotado (RPC)")), 10000));
+
+                const accounts = await Promise.race([getAccountsPromise, timeoutPromise]);
                 const userAddress = accounts[0];
                 log("User: " + userAddress);
+
+                addLog(`Wallet Conectada: ${userAddress.slice(0, 4)}...${userAddress.slice(-4)}`, "success");
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const eventId = urlParams.get('event') || 'GENESIS_2025';
@@ -540,7 +546,20 @@
                 if (cached) { showSuccessState(cached, true, userAddress); }
                 else { await mintNFT(userAddress, eventId, localKey, referrer); }
 
-            } catch (e) { log("Wallet Error: " + e.message); document.getElementById('statusArea').innerHTML = `<p style="color:#ff5555;">Error: ${e.message}</p>`; }
+            } catch (e) {
+                log("Wallet Error: " + e.message);
+                addLog("ERROR: " + e.message, "error");
+
+                // Show manual reset options
+                document.getElementById('statusArea').style.display = 'block';
+                document.getElementById('statusArea').innerHTML = `
+                    <div style="color:#ff5555; margin-bottom:10px;">❌ Error de Conexión: ${e.message}</div>
+                    <p style="font-size:0.8rem; color:#888;">La sesión parece estancada.</p>
+                    <button class="btn" style="background:#333; margin-top:15px" onclick="logout()">Cerrar Sesión (Reset)</button>
+                    <button class="btn" onclick="window.location.reload()">Reintentar</button>
+                `;
+                document.getElementById('terminalArea').style.display = 'none'; // Hide terminal to show error
+            }
         }
 
         async function mintNFT(address, eventId, localKey, referrer) {
