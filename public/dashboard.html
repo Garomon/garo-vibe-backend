@@ -272,6 +272,124 @@
             color: var(--accent-primary);
         }
 
+        /* NFT Cards */
+        .nft-card {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-lg);
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-md);
+        }
+
+        .nft-card.soul-card {
+            border-color: rgba(168, 85, 247, 0.3);
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(6, 182, 212, 0.05));
+        }
+
+        .nft-card.empty-soul {
+            cursor: pointer;
+            border-style: dashed;
+        }
+
+        .nft-icon {
+            font-size: 2.5rem;
+        }
+
+        .nft-info {
+            flex: 1;
+        }
+
+        .nft-type {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .nft-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .soul-progress {
+            flex: 1;
+        }
+
+        .soul-next {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: var(--space-xs);
+        }
+
+        /* Badges */
+        .badges-row {
+            display: flex;
+            gap: var(--space-sm);
+            justify-content: center;
+            margin-top: var(--space-md);
+        }
+
+        .badge-item {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* Gems */
+        .gems-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+        }
+
+        .gem-item {
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            border-radius: var(--radius-full);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        /* Memory items */
+        .memory-item.proof {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-md);
+        }
+
+        .memory-emoji {
+            font-size: 2rem;
+            margin-bottom: var(--space-xs);
+        }
+
+        .memory-event {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .memory-item.more {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
         /* Loading */
         .loading-screen {
             display: flex;
@@ -392,54 +510,105 @@
             localStorage.setItem('garo_wallet', address);
 
             try {
-                const [memoriesRes, xpRes] = await Promise.all([
-                    fetch(`/api/memories?address=${address}`),
-                    fetch(`/api/xp?address=${address}`)
+                const [collectionRes, xpRes, badgesRes] = await Promise.all([
+                    fetch(`/api/collection?address=${address}`),
+                    fetch(`/api/xp?address=${address}`),
+                    fetch(`/api/badges?address=${address}`)
                 ]);
 
-                const memoriesData = await memoriesRes.json();
+                const collection = await collectionRes.json();
                 const xpData = await xpRes.json();
+                const badgesData = await badgesRes.json();
 
-                const memories = memoriesData.memories || [];
-                const xp = xpData.success ? xpData : { xp: 0, streak: 0, level: { name: 'New Fan' }, progress: 0 };
+                const xp = xpData.success ? xpData : { xp: 0, streak: 0, level: { name: 'Novato' }, progress: 0 };
 
-                renderDashboard(memories, address, xp);
+                renderDashboard(collection.collection || {}, address, xp, badgesData.badges || []);
             } catch (e) {
-                renderDashboard([], address, { xp: 0, streak: 0, level: { name: 'New Fan' }, progress: 0 });
+                console.error("Load error:", e);
+                renderDashboard({}, address, { xp: 0, streak: 0, level: { name: 'Novato' }, progress: 0 }, []);
             }
         }
 
-        function renderDashboard(memories, address, xpData) {
-            const count = memories.length;
-            const level = getLevel(count);
+        function renderDashboard(collection, address, xpData, badges) {
+            const proofs = collection.PROOF || [];
+            const soul = collection.SOUL;
+            const gems = collection.GEM || [];
+            const entries = collection.ENTRY || [];
+            const totalCount = proofs.length + gems.length + entries.length;
+            const level = getLevel(totalCount);
 
-            const galleryHtml = memories.length > 0
-                ? `<div class="gallery">${memories.map(m => `
-                    <div class="memory-item">
-                        <img src="${m.image}" alt="${m.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/150/141423/a855f7?text=✨'">
-                        <div class="memory-date">${new Date(m.date).toLocaleDateString('en', { month: 'short', day: 'numeric' })}</div>
+            // SOUL Section
+            const soulHtml = soul ? `
+                <div class="nft-card soul-card">
+                    <div class="nft-icon">👻</div>
+                    <div class="nft-info">
+                        <div class="nft-type">ALMA</div>
+                        <div class="nft-name">Nivel ${soul.evolution_stage || 1}</div>
                     </div>
-                `).join('')}</div>`
-                : `<div class="empty-state">
-                    <div class="empty-icon">📸</div>
-                    <p>Your collection is empty</p>
-                    <p style="font-size: 0.8rem; margin-top: var(--space-sm); opacity: 0.6;">Capture your first memory at an event!</p>
-                </div>`;
+                    <div class="soul-progress">
+                        <div class="progress">
+                            <div class="progress-fill" style="width: ${Math.min((proofs.length / 30) * 100, 100)}%"></div>
+                        </div>
+                        <div class="soul-next">${proofs.length}/30 → Siguiente evolución</div>
+                    </div>
+                </div>
+            ` : `
+                <div class="nft-card empty-soul" onclick="createSoul()">
+                    <div class="nft-icon">✨</div>
+                    <div class="nft-info">
+                        <div class="nft-type">ALMA</div>
+                        <div class="nft-name">¡Crea tu Alma!</div>
+                    </div>
+                </div>
+            `;
 
-            const benefitsHtml = BENEFITS.map(b => {
-                const unlocked = count >= b.required;
-                return `<div class="reward-item ${unlocked ? 'unlocked' : 'locked'}">
-                    <span class="reward-icon">${b.icon}</span>
-                    <span class="reward-text">${b.text}</span>
-                    <span class="reward-status">${unlocked ? '✓' : `${b.required} needed`}</span>
-                </div>`;
-            }).join('');
+            // Badges
+            const badgesHtml = badges.length > 0 ? `
+                <div class="badges-row">
+                    ${badges.map(b => `
+                        <div class="badge-item" title="${b.badges?.name_es || b.badge_id}">
+                            ${b.badges?.icon || '🏅'}
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
+
+            // Proofs Gallery
+            const proofsHtml = proofs.length > 0 ? `
+                <div class="gallery">
+                    ${proofs.slice(0, 9).map(p => `
+                        <div class="memory-item proof">
+                            <div class="memory-emoji">🔊</div>
+                            <div class="memory-event">${p.event_id || 'Evento'}</div>
+                        </div>
+                    `).join('')}
+                    ${proofs.length > 9 ? `<div class="memory-item more">+${proofs.length - 9}</div>` : ''}
+                </div>
+            ` : `
+                <div class="empty-state">
+                    <div class="empty-icon">📸</div>
+                    <p>Tu colección está vacía</p>
+                    <p style="font-size: 0.8rem; margin-top: var(--space-sm); opacity: 0.6;">¡Captura tu primer recuerdo!</p>
+                </div>
+            `;
+
+            // Gems
+            const gemsHtml = gems.length > 0 ? `
+                <div class="gems-row">
+                    ${gems.map(g => `
+                        <div class="gem-item">
+                            💎 <span>${g.event_id}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
 
             document.getElementById('content').innerHTML = `
                 <div class="hero animate-fade-in">
                     <div class="avatar">${level.emoji}</div>
                     <h1 class="level-title text-gradient">${level.name}</h1>
-                    <p class="memory-count"><strong>${count}</strong> memories collected</p>
+                    <p class="memory-count"><strong>${totalCount}</strong> pruebas coleccionadas</p>
+                    ${badgesHtml}
                 </div>
 
                 <div class="xp-card animate-slide-up">
@@ -453,39 +622,46 @@
                         </div>
                     </div>
                     <div class="xp-levels">
-                        <span>${xpData.level?.name || 'New Fan'}</span>
+                        <span>${xpData.level?.name || 'Novato'}</span>
                         <span>${xpData.nextLevel ? '→ ' + xpData.nextLevel.name : '✨ MAX'}</span>
                     </div>
                 </div>
 
-                <div style="animation: slideUp 0.5s ease-out 0.2s both;">
-                    <h3 class="section-title">My Memories</h3>
-                    ${galleryHtml}
+                <div style="animation: slideUp 0.5s ease-out 0.1s both;">
+                    <h3 class="section-title">👻 Mi Alma</h3>
+                    ${soulHtml}
                 </div>
 
-                <button class="btn btn-primary" style="width: 100%; margin-bottom: var(--space-lg);" onclick="toggleQR()">
-                    Show Access Pass
+                ${gems.length > 0 ? `
+                <div style="animation: slideUp 0.5s ease-out 0.15s both;">
+                    <h3 class="section-title">💎 Gemas Raras</h3>
+                    ${gemsHtml}
+                </div>
+                ` : ''}
+
+                <div style="animation: slideUp 0.5s ease-out 0.2s both;">
+                    <h3 class="section-title">🔊 Mis Pruebas</h3>
+                    ${proofsHtml}
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%; margin: var(--space-lg) 0;" onclick="toggleQR()">
+                    Mostrar Pase de Acceso
                 </button>
 
                 <div class="qr-section" id="qrSection">
-                    <div class="qr-label">ACCESS PASS</div>
+                    <div class="qr-label">PASE DE ACCESO</div>
                     <div id="qrcode"></div>
-                    <p class="qr-hint">Show at entrance for verification</p>
+                    <p class="qr-hint">Muestra esto en la entrada</p>
                 </div>
 
                 <div style="animation: slideUp 0.5s ease-out 0.3s both;">
-                    <h3 class="section-title">Rewards</h3>
-                    <div class="rewards-list">${benefitsHtml}</div>
-                </div>
-
-                <div style="animation: slideUp 0.5s ease-out 0.4s both;">
-                    <h3 class="section-title">Explore</h3>
+                    <h3 class="section-title">Explorar</h3>
                     <div class="nav-grid">
-                        <button class="nav-btn" onclick="shareProfile()">📤 Share</button>
-                        <button class="nav-btn" onclick="location.href='/leaderboard.html'">🏆 Leaderboard</button>
-                        <button class="nav-btn" onclick="location.href='/story.html?a=${address}'">📸 Story</button>
-                        <button class="nav-btn" onclick="location.href='/downloads.html'">🎵 Downloads</button>
-                        <button class="nav-btn" onclick="location.href='/inject.html'" style="grid-column: span 2;">✨ Capture Memory</button>
+                        <button class="nav-btn" onclick="shareProfile()">📤 Compartir</button>
+                        <button class="nav-btn" onclick="location.href='/leaderboard.html'">🏆 Ranking</button>
+                        <button class="nav-btn" onclick="location.href='/story.html?a=${address}'">📸 Historia</button>
+                        <button class="nav-btn" onclick="location.href='/downloads.html'">🎵 Descargas</button>
+                        <button class="nav-btn" onclick="location.href='/inject.html'" style="grid-column: span 2;">✨ Capturar Recuerdo</button>
                     </div>
                 </div>
             `;
