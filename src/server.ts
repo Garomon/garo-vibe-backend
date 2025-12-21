@@ -173,14 +173,17 @@ app.post('/mint', async (req, res) => {
         console.log(`📥 Direct mint for: ${receiverAddress.slice(0, 8)}...`);
     }
 
-    // Insert into DB (fire and forget to not block minting)
-    supabase.from('referrals').insert({
-        referrer_wallet: referrerWallet,
+    // Log to DB with nft_type
+    const nftType = req.body.nft_type || 'PROOF';
+    supabase.from('mints').insert({
         referee_wallet: receiverAddress,
-        event_id: evtId
+        event_id: evtId,
+        nft_type: nftType,
+        is_tradeable: nftType === 'PROOF' || nftType === 'GEM',
+        is_soulbound: nftType === 'BADGE' || nftType === 'SOUL'
     }).then(({ error }) => {
         if (error) console.error("❌ Mint DB Log Error:", error.message);
-        else console.log("   ✅ Mint logged to DB");
+        else console.log(`   ✅ ${nftType} logged to DB`);
     });
 
     try {
@@ -775,6 +778,143 @@ app.get('/api/admin/stats', async (req, res) => {
         console.error("Admin Stats Error:", e);
         res.status(500).json({ error: "Server Error" });
     }
+});
+
+// === NFT TYPE ENDPOINTS ===
+
+// SOUL Evolution - Evolve user's SOUL NFT
+app.post('/api/soul/evolve', async (req, res) => {
+    const { address } = req.body;
+    if (!address) return res.status(400).json({ error: "Address required" });
+
+    // Get user's SOUL
+    const { data: soul } = await supabase
+        .from('mints')
+        .select('*')
+        .eq('referee_wallet', address)
+        .eq('nft_type', 'SOUL')
+        .single();
+
+    if (!soul) {
+        return res.json({ success: false, message: "No SOUL found. Create one first." });
+    }
+
+    // Check evolution thresholds (1→5→15→30 events)
+    const { data: proofs } = await supabase
+        .from('mints')
+        .select('id')
+        .eq('referee_wallet', address)
+        .eq('nft_type', 'PROOF');
+
+    const eventCount = proofs?.length || 0;
+    const stages = [1, 5, 15, 30];
+    let newStage = 1;
+    for (const threshold of stages) {
+        if (eventCount >= threshold) newStage = stages.indexOf(threshold) + 1;
+    }
+
+    if (newStage > soul.evolution_stage) {
+        await supabase
+            .from('mints')
+            .update({ evolution_stage: newStage })
+            .eq('id', soul.id);
+
+        return res.json({
+            success: true,
+            evolved: true,
+            oldStage: soul.evolution_stage,
+            newStage,
+            eventCount
+        });
+    }
+
+    res.json({
+        success: true,
+        evolved: false,
+        currentStage: soul.evolution_stage,
+        nextThreshold: stages[soul.evolution_stage] || "MAX",
+        eventCount
+    });
+});
+
+// Award BADGE
+app.post('/api/badge/award', async (req, res) => {
+    const { address, badge_id, pin } = req.body;
+
+    // Admin PIN check
+    if (pin !== 'ADMIN2025') {
+        return res.status(403).json({ error: "Admin access required" });
+    }
+
+    if (!address || !badge_id) {
+        return res.status(400).json({ error: "Address and badge_id required" });
+    }
+
+    // Check badge exists
+    const { data: badge } = await supabase
+        .from('badges')
+        .select('*')
+        .eq('id', badge_id)
+        .single();
+
+    if (!badge) {
+        return res.status(404).json({ error: "Badge not found" });
+    }
+
+    // Award badge
+    const { error } = await supabase
+        .from('user_badges')
+        .insert({ wallet_address: address, badge_id });
+
+    if (error) {
+        if (error.code === '23505') {
+            return res.json({ success: true, message: "Already has this badge" });
+        }
+        return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true, badge: badge.name_es, message: "Badge awarded!" });
+});
+
+// Get user badges
+app.get('/api/badges', async (req, res) => {
+    const { address } = req.query;
+    if (!address) return res.status(400).json({ error: "Address required" });
+
+    const { data } = await supabase
+        .from('user_badges')
+        .select('badge_id, awarded_at, badges(*)')
+        .eq('wallet_address', address);
+
+    res.json({ badges: data || [] });
+});
+
+// Get user NFTs by type
+app.get('/api/collection', async (req, res) => {
+    const { address } = req.query;
+    if (!address) return res.status(400).json({ error: "Address required" });
+
+    const { data: nfts } = await supabase
+        .from('mints')
+        .select('*')
+        .eq('referee_wallet', address)
+        .order('created_at', { ascending: false });
+
+    const { data: badges } = await supabase
+        .from('user_badges')
+        .select('badge_id, awarded_at, badges(*)')
+        .eq('wallet_address', address);
+
+    // Group by type
+    const collection = {
+        PROOF: (nfts || []).filter((n: any) => n.nft_type === 'PROOF'),
+        SOUL: (nfts || []).find((n: any) => n.nft_type === 'SOUL'),
+        BADGE: badges || [],
+        GEM: (nfts || []).filter((n: any) => n.nft_type === 'GEM'),
+        ENTRY: (nfts || []).filter((n: any) => n.nft_type === 'ENTRY')
+    };
+
+    res.json({ success: true, collection });
 });
 
 // Start Server
