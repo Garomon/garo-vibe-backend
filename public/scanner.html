@@ -171,6 +171,18 @@
     </div>
 
     <script>
+        // PIN Protection for Staff
+        const STAFF_PIN = 'GARO2025';
+        const params = new URLSearchParams(location.search);
+        const pin = params.get('pin');
+
+        if (pin === STAFF_PIN) {
+            sessionStorage.setItem('scanner_auth', 'true');
+        } else if (sessionStorage.getItem('scanner_auth') !== 'true') {
+            alert('⛔ Staff access required');
+            location.href = '/dashboard.html';
+        }
+
         let html5QrcodeScanner = null;
 
         function startScan() {

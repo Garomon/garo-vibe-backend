@@ -264,6 +264,18 @@
     </div>
 
     <script>
+        // PIN Protection for Admin
+        const ADMIN_PIN = 'ADMIN2025';
+        const params = new URLSearchParams(location.search);
+        const pin = params.get('pin');
+
+        if (pin === ADMIN_PIN) {
+            sessionStorage.setItem('godmode_auth', 'true');
+        } else if (sessionStorage.getItem('godmode_auth') !== 'true') {
+            alert('⛔ Admin access required');
+            location.href = '/dashboard.html';
+        }
+
         let chart = null;
 
         async function init() {
