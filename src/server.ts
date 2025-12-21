@@ -243,7 +243,71 @@ app.get('/referrals', async (req, res) => {
     res.json({ leaderboard });
 });
 
-// 2c. Memories Endpoint - Get user's Memory collection with metadata
+// 2c. Stats Endpoint - Get live stats for God Mode
+app.get('/api/stats', async (req, res) => {
+    try {
+        // Get total mint count
+        const { count: mintCount } = await supabase
+            .from('referrals')
+            .select('*', { count: 'exact', head: true });
+
+        // Get total scan count
+        const { count: scanCount } = await supabase
+            .from('scan_logs')
+            .select('*', { count: 'exact', head: true });
+
+        // Get unique users
+        const { data: uniqueUsers } = await supabase
+            .from('referrals')
+            .select('referee_wallet');
+
+        // Get recent mints (last 10)
+        const { data: recentMints } = await supabase
+            .from('referrals')
+            .select('referee_wallet, event_id, created_at')
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        // Get recent scans (last 10)
+        const { data: recentScans } = await supabase
+            .from('scan_logs')
+            .select('wallet_address, status, created_at')
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        // Combine and sort recent activity
+        const recentActivity = [
+            ...(recentMints || []).map((m: any) => ({
+                type: 'mint',
+                wallet: m.referee_wallet?.slice(0, 8) + '...',
+                event: m.event_id,
+                time: m.created_at
+            })),
+            ...(recentScans || []).map((s: any) => ({
+                type: 'scan',
+                wallet: s.wallet_address?.slice(0, 8) + '...',
+                status: s.status,
+                time: s.created_at
+            }))
+        ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 15);
+
+        res.json({
+            success: true,
+            stats: {
+                mints: mintCount || 0,
+                scans: scanCount || 0,
+                uniqueUsers: new Set((uniqueUsers || []).map((u: any) => u.referee_wallet)).size
+            },
+            recentActivity
+        });
+
+    } catch (e: any) {
+        console.error("Stats Error:", e.message);
+        res.json({ success: false, stats: { mints: 0, scans: 0, uniqueUsers: 0 }, recentActivity: [] });
+    }
+});
+
+// 2d. Memories Endpoint - Get user's Memory collection with metadata
 app.get('/api/memories', async (req, res) => {
     const { address } = req.query;
 

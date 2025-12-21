@@ -301,18 +301,44 @@
 
         async function init() {
             log("ESTABLISHING UPLINK...", "system");
+            log("Connecting to backend...", "system");
 
-            // 1. Check if real keys are available
-            if (SUPABASE_KEY.includes('dummy')) {
-                log("⚠️ NO REAL SUPABASE KEY CONFIGURED", "scan");
-                log("Data shown is STATIC. Configure .env for live data.", "system");
-            } else {
-                log("✅ SUPABASE CONNECTED", "mint");
-                // TODO: Implement real-time subscription here
-            }
+            // Fetch real stats from backend
+            await fetchStats();
 
-            // 2. Generate initial QR
+            // Start polling every 10 seconds
+            setInterval(fetchStats, 10000);
+
+            // Generate initial QR
             generateStageQR();
+        }
+
+        async function fetchStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('stat-mints').innerText = data.stats.mints;
+                    document.getElementById('stat-scans').innerText = data.stats.scans;
+
+                    // Log recent activity that's not already shown
+                    if (data.recentActivity && data.recentActivity.length > 0) {
+                        const newest = data.recentActivity[0];
+                        if (newest.type === 'mint') {
+                            log(`MINT: ${newest.wallet} → ${newest.event || 'EVENT'}`, "mint");
+                        } else {
+                            log(`SCAN: ${newest.wallet} → ${newest.status || 'VERIFIED'}`, "scan");
+                        }
+                    }
+
+                    log("✅ LIVE DATA UPDATED", "system");
+                } else {
+                    log("⚠️ Stats fetch error", "scan");
+                }
+            } catch (e) {
+                log("❌ CONNECTION ERROR: " + e.message, "scan");
+            }
         }
 
         function log(msg, type, time) {
@@ -332,7 +358,6 @@
             container.innerHTML = "";
 
             // This QR points to the INJECT PAGE with the event ID
-            // In a real event, this is what goes on the Big Screen
             const url = `${window.location.origin}/inject.html?event=${eventId}`;
 
             new QRCode(container, {
@@ -345,34 +370,6 @@
             });
 
             log(`QR GENERATED FOR EVENT: ${eventId}`, "system");
-        }
-
-        // SIMULATION FOR "ALIVE" FEELING (Replace with Supabase Realtime in V2)
-        function simulateTraffic() {
-            const actions = [
-                { msg: "NEW INJECTION DETECTED: 8A2F...99X1", type: "mint" },
-                { msg: "SCAN VERIFIED: ACCESS GRANTED", type: "scan" },
-                { msg: "SCAN FAILED: NO_TOKEN", type: "scan" },
-                { msg: "INJECTION PENDING...", type: "mint" }
-            ];
-
-            setInterval(() => {
-                if (Math.random() > 0.7) {
-                    const action = actions[Math.floor(Math.random() * actions.length)];
-                    log(action.msg, action.type);
-                    updateCounters(action.type);
-                }
-            }, 2000);
-        }
-
-        let mints = 142;
-        let scans = 89;
-
-        function updateCounters(type) {
-            if (type === 'mint') mints++;
-            if (type === 'scan') scans++;
-            document.getElementById('stat-mints').innerText = mints;
-            document.getElementById('stat-scans').innerText = scans;
         }
 
         window.onload = init;
