@@ -614,12 +614,20 @@
         }
 
         function showSuccessState(explorerLink, isCached, userAddress) {
+            // HIDE TERMINAL & LOGIN
+            document.getElementById('terminalArea').style.display = 'none';
+            document.getElementById('loginArea').style.display = 'none';
+
+            // SHOW STATUS AREA
+            const statusArea = document.getElementById('statusArea');
+            statusArea.style.display = 'block';
+
             const title = isCached ? "YA ERES MIEMBRO" : "¡ACCESO CONCEDIDO!";
             const desc = isCached ? "Tu pase Genesis ya está activo." : "Bienvenido al ecosistema GΛRO.";
             const imgUrl = "https://ipfs.io/ipfs/bafybeicilwj77izwenlikir6uomtgjkuslhpiubgggho7c374677yymqwi";
             const referralLink = `${window.location.origin}/?ref=${userAddress}`;
 
-            document.getElementById('statusArea').innerHTML = `
+            statusArea.innerHTML = `
                 <img src="${imgUrl}" class="nft-img" alt="NFT">
                 <div class="success-title">${title}</div>
                 <div class="success-desc">${desc}</div>
