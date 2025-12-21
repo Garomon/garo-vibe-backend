@@ -7,6 +7,7 @@ import { mplBubblegum, mintV1 } from '@metaplex-foundation/mpl-bubblegum';
 import { keypairIdentity, createSignerFromKeypair, none, publicKey } from '@metaplex-foundation/umi';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import Stripe from 'stripe';
 
 // Configure dotenv to load .env file
 dotenv.config();
@@ -34,6 +35,14 @@ const supabase = createClient(
     supabaseUrl || "https://placeholder.supabase.co",
     supabaseKey || "placeholder-key"
 );
+
+// --- Stripe Setup ---
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripe = stripeSecretKey ? new Stripe(stripeSecretKey) : null;
+
+if (!stripe) {
+    console.log("⚠️ Stripe not configured - card payments disabled");
+}
 
 // --- Serve Static Files ---
 app.use(express.static(path.join(__dirname, '../public')));
@@ -1076,6 +1085,132 @@ app.post('/api/ticket/convert', async (req, res) => {
         converted: data?.length || 0,
         message: `${data?.length || 0} entradas convertidas a PROOF`
     });
+});
+
+// === STRIPE CARD PAYMENTS ===
+
+// Create checkout session
+app.post('/api/checkout/create', async (req, res) => {
+    if (!stripe) {
+        return res.status(503).json({ error: "Pagos con tarjeta no disponibles" });
+    }
+
+    const { event_id, address, success_url, cancel_url } = req.body;
+
+    if (!event_id || !address) {
+        return res.status(400).json({ error: "event_id y address requeridos" });
+    }
+
+    // Get event details
+    const { data: event } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', event_id)
+        .single();
+
+    if (!event) {
+        return res.status(404).json({ error: "Evento no encontrado" });
+    }
+
+    if (event.tickets_sold >= event.max_tickets) {
+        return res.status(400).json({ error: "Entradas agotadas" });
+    }
+
+    try {
+        // Convert SOL price to MXN (approximate, you can use an API for real rate)
+        const solToMxn = 2000; // 1 SOL ≈ 2000 MXN (update as needed)
+        const priceInMxn = Math.round(event.ticket_price * solToMxn * 100); // Stripe uses cents
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: 'mxn',
+                    product_data: {
+                        name: `Entrada: ${event.name}`,
+                        description: `Tu entrada digital para ${event.name}`,
+                    },
+                    unit_amount: priceInMxn,
+                },
+                quantity: 1,
+            }],
+            mode: 'payment',
+            success_url: success_url || `${req.headers.origin}/dashboard.html?payment=success`,
+            cancel_url: cancel_url || `${req.headers.origin}/dashboard.html?payment=cancelled`,
+            metadata: {
+                event_id,
+                wallet_address: address,
+            },
+        });
+
+        res.json({ success: true, url: session.url, session_id: session.id });
+    } catch (e: any) {
+        console.error("Stripe Error:", e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Stripe Webhook - auto mint after payment
+app.post('/api/webhook/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+    if (!stripe) {
+        return res.status(503).send();
+    }
+
+    const sig = req.headers['stripe-signature'];
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    let stripeEvent;
+
+    try {
+        if (webhookSecret && sig) {
+            stripeEvent = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+        } else {
+            stripeEvent = JSON.parse(req.body.toString());
+        }
+    } catch (err: any) {
+        console.error('Webhook signature error:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    if (stripeEvent.type === 'checkout.session.completed') {
+        const session = stripeEvent.data.object;
+        const { event_id, wallet_address } = session.metadata || {};
+
+        if (event_id && wallet_address) {
+            console.log(`💳 Payment confirmed for ${wallet_address} -> ${event_id}`);
+
+            // Create ENTRY NFT
+            const { error } = await supabase.from('mints').insert({
+                referee_wallet: wallet_address,
+                event_id,
+                nft_type: 'ENTRY',
+                is_tradeable: true,
+                is_soulbound: false,
+            });
+
+            if (error) {
+                console.error("Mint after payment error:", error);
+            } else {
+                console.log(`✅ ENTRY minted for ${wallet_address}`);
+
+                // Update tickets sold
+                const { data: event } = await supabase
+                    .from('events')
+                    .select('tickets_sold')
+                    .eq('id', event_id)
+                    .single();
+
+                if (event) {
+                    await supabase
+                        .from('events')
+                        .update({ tickets_sold: (event.tickets_sold || 0) + 1 })
+                        .eq('id', event_id);
+                }
+            }
+        }
+    }
+
+    res.json({ received: true });
 });
 
 // Start Server
