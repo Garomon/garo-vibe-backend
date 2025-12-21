@@ -243,6 +243,48 @@ app.get('/referrals', async (req, res) => {
     res.json({ leaderboard });
 });
 
+// 2c. Memories Endpoint - Get user's Memory collection with metadata
+app.get('/api/memories', async (req, res) => {
+    const { address } = req.query;
+
+    if (!address || typeof address !== 'string') {
+        return res.status(400).json({ success: false, error: "Address required" });
+    }
+
+    try {
+        // Fetch all mints for this user from Supabase
+        const { data, error } = await supabase
+            .from('referrals')
+            .select('event_id, created_at')
+            .eq('referee_wallet', address)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Map to Memory objects with metadata from events.json
+        const memories = (data || []).map((mint: any) => {
+            const eventMeta = EVENTS[mint.event_id as keyof typeof EVENTS] ?? EVENTS['GENESIS_2025'];
+            return {
+                eventId: mint.event_id,
+                name: eventMeta?.name || 'GΛRO Memory',
+                image: "https://ipfs.io/ipfs/bafybeicilwj77izwenlikir6uomtgjkuslhpiubgggho7c374677yymqwi",
+                date: mint.created_at,
+                symbol: eventMeta?.symbol || 'VIBE'
+            };
+        });
+
+        res.json({
+            success: true,
+            count: memories.length,
+            memories: memories
+        });
+
+    } catch (e: any) {
+        console.error("Memories Error:", e.message);
+        res.json({ success: true, count: 0, memories: [], error: e.message });
+    }
+});
+
 // 3. Verify Endpoint - Check NFT Holdings for Levels (Source of Truth: Supabase)
 app.get('/verify', async (req, res) => {
     const { address } = req.query;

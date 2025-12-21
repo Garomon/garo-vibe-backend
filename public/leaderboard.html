@@ -190,28 +190,28 @@
     <script>
         async function loadLeaderboard() {
             try {
-                const res = await fetch('/referrals');
+                const res = await fetch('/api/leaderboard');
                 const data = await res.json();
                 const lb = data.leaderboard || [];
 
                 if (lb.length === 0) {
-                    document.getElementById('content').innerHTML = `<div class="empty"><p>Aún no hay referidos.</p><p style="margin-top:10px;">¡Sé el primero en compartir!</p></div>`;
+                    document.getElementById('content').innerHTML = `<div class="empty"><p>No collectors yet.</p><p style="margin-top:10px;">Be the first to capture a Memory!</p></div>`;
                     return;
                 }
 
                 // Podium (top 3)
                 let podiumHtml = '';
-                if (lb[0]) podiumHtml += `<div class="podium-item podium-1"><div class="podium-rank">🥇</div><div class="podium-count">${lb[0].count}</div><div class="podium-addr">${lb[0].address.slice(0, 4)}...${lb[0].address.slice(-4)}</div></div>`;
-                if (lb[1]) podiumHtml += `<div class="podium-item podium-2"><div class="podium-rank">🥈</div><div class="podium-count">${lb[1].count}</div><div class="podium-addr">${lb[1].address.slice(0, 4)}...${lb[1].address.slice(-4)}</div></div>`;
-                if (lb[2]) podiumHtml += `<div class="podium-item podium-3"><div class="podium-rank">🥉</div><div class="podium-count">${lb[2].count}</div><div class="podium-addr">${lb[2].address.slice(0, 4)}...${lb[2].address.slice(-4)}</div></div>`;
+                if (lb[0]) podiumHtml += `<div class="podium-item podium-1"><div class="podium-rank">🥇</div><div class="podium-count">${lb[0].count}</div><div class="podium-addr">${lb[0].wallet.slice(0, 4)}...${lb[0].wallet.slice(-4)}</div></div>`;
+                if (lb[1]) podiumHtml += `<div class="podium-item podium-2"><div class="podium-rank">🥈</div><div class="podium-count">${lb[1].count}</div><div class="podium-addr">${lb[1].wallet.slice(0, 4)}...${lb[1].wallet.slice(-4)}</div></div>`;
+                if (lb[2]) podiumHtml += `<div class="podium-item podium-3"><div class="podium-rank">🥉</div><div class="podium-count">${lb[2].count}</div><div class="podium-addr">${lb[2].wallet.slice(0, 4)}...${lb[2].wallet.slice(-4)}</div></div>`;
 
                 // List (4-10)
                 let listHtml = '';
                 for (let i = 3; i < lb.length; i++) {
                     listHtml += `<div class="list-item">
                         <span class="rank">#${i + 1}</span>
-                        <span class="address">${lb[i].address.slice(0, 6)}...${lb[i].address.slice(-4)}</span>
-                        <span class="count">${lb[i].count} refs</span>
+                        <span class="address">${lb[i].wallet.slice(0, 6)}...${lb[i].wallet.slice(-4)}</span>
+                        <span class="count">${lb[i].count} Memories</span>
                     </div>`;
                 }
 

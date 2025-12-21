@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GΛRO | Memory Collection</title>
+    <meta name="theme-color" content="#050510">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+
+    <!-- Open Graph for sharing -->
+    <meta property="og:title" content="My GΛRO Collection">
+    <meta property="og:description" content="Check out my Memory collection on GΛRO VIBE">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?w=600">
+    <meta property="og:type" content="website">
+
+    <style>
+        :root {
+            --neon-purple: #bc13fe;
+            --neon-blue: #0ff0fc;
+            --deep-bg: #050510;
+            --card-bg: rgba(15, 15, 30, 0.9);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--deep-bg);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--neon-purple), var(--neon-blue));
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 0 30px rgba(188, 19, 254, 0.5);
+        }
+
+        .wallet-id {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .level-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--neon-purple), #9000ff);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 25px 0;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--neon-blue);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .memory-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+
+        .memory-card {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .memory-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .memory-date {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+            padding: 8px 6px 4px;
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        .empty-gallery {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.4);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .cta-btn {
+            display: block;
+            max-width: 300px;
+            margin: 20px auto;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--neon-purple), #9000ff);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .share-btns {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .share-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .share-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content">
+        <div class="loading">Loading profile...</div>
+    </div>
+
+    <script>
+        const LEVELS = [
+            { name: 'NEWCOMER', min: 0, icon: '🌑' },
+            { name: 'REGULAR', min: 1, icon: '🌘' },
+            { name: 'INSIDER', min: 3, icon: '🌗' },
+            { name: 'VIP', min: 5, icon: '🌖' },
+            { name: 'LEGEND', min: 10, icon: '🌕' },
+            { name: 'ICON', min: 20, icon: '👑' }
+        ];
+
+        function getLevel(count) {
+            for (let i = LEVELS.length - 1; i >= 0; i--) {
+                if (count >= LEVELS[i].min) return LEVELS[i];
+            }
+            return LEVELS[0];
+        }
+
+        async function loadProfile() {
+            // Get address from URL
+            const params = new URLSearchParams(window.location.search);
+            const address = params.get('a') || params.get('address');
+
+            if (!address) {
+                document.getElementById('content').innerHTML = `<div class="empty-gallery"><p>No wallet address provided</p><a href="/onboarding.html" class="cta-btn">Start Your Collection</a></div>`;
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/memories?address=${address}`);
+                const data = await res.json();
+                const memories = data.memories || [];
+                const level = getLevel(memories.length);
+
+                let galleryHtml = '';
+                if (memories.length > 0) {
+                    galleryHtml = `<div class="memory-gallery">
+                        ${memories.map(m => `
+                            <div class="memory-card">
+                                <img src="${m.image}" alt="${m.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/150/1a1a2e/bc13fe?text=VIBE'">
+                                <div class="memory-date">${new Date(m.date).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}</div>
+                            </div>
+                        `).join('')}
+                    </div>`;
+                } else {
+                    galleryHtml = `<div class="empty-gallery"><p>This collector hasn't captured any Memories yet.</p></div>`;
+                }
+
+                document.getElementById('content').innerHTML = `
+                    <div class="profile-header">
+                        <div class="avatar">${level.icon}</div>
+                        <div class="wallet-id">${address.slice(0, 6)}...${address.slice(-4)}</div>
+                        <div class="level-badge">${level.name}</div>
+                    </div>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-num">${memories.length}</div>
+                            <div class="stat-label">MEMORIES</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-num">${new Set(memories.map(m => m.eventId)).size}</div>
+                            <div class="stat-label">EVENTS</div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">COLLECTION</div>
+                    ${galleryHtml}
+
+                    <div class="share-btns">
+                        <button class="share-btn" onclick="copyLink()">📋 Copy Link</button>
+                        <button class="share-btn" onclick="shareTwitter()">𝕏 Share</button>
+                    </div>
+
+                    <a href="/onboarding.html" class="cta-btn">JOIN GΛRO VIBE</a>
+                `;
+
+            } catch (e) {
+                document.getElementById('content').innerHTML = `<div class="empty-gallery"><p>Error loading profile</p></div>`;
+            }
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href);
+            alert('Link copied!');
+        }
+
+        function shareTwitter() {
+            const text = encodeURIComponent("Check out my Memory collection on GΛRO VIBE 🔥");
+            const url = encodeURIComponent(window.location.href);
+            window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+        }
+
+        loadProfile();
+    </script>
+</body>
+
+</html>

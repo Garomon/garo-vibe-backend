@@ -145,6 +145,61 @@
             transition: width 0.5s;
         }
 
+        /* MEMORY GALLERY */
+        .memory-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .memory-card {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .memory-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.5);
+        }
+
+        .memory-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .memory-date {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+            padding: 8px 6px 4px;
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+
+        .empty-gallery {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .empty-gallery-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
         /* Benefits */
         .benefits {
             margin-top: 30px;
@@ -473,18 +528,18 @@
         }
 
         async function loadDashboard(address) {
-            document.getElementById('content').innerHTML = `<div class="loader"><div class="spinner"></div><p>Cargando tu perfil...</p></div>`;
+            document.getElementById('content').innerHTML = `<div class="loader"><div class="spinner"></div><p>Loading your Anthology...</p></div>`;
 
             try {
-                // Call backend to get NFT count
-                const res = await fetch(`/verify?address=${address}`);
+                // Call backend to get full Memory collection
+                const res = await fetch(`/api/memories?address=${address}`);
                 const data = await res.json();
-                const nftCount = data.count || 0;
+                const memories = data.memories || [];
 
-                renderDashboard(nftCount, address);
+                renderDashboard(memories, address);
             } catch (e) {
-                // If API fails, fallback to 0
-                renderDashboard(0, address);
+                // If API fails, fallback to empty
+                renderDashboard([], address);
             }
         }
 
@@ -518,7 +573,30 @@
             }
         }
 
-        function renderDashboard(nftCount, address) {
+        // Store current user address for sharing
+        let currentUserAddress = '';
+
+        function shareProfile() {
+            if (!currentUserAddress) {
+                alert('No profile to share yet');
+                return;
+            }
+            const profileUrl = `${window.location.origin}/profile.html?a=${currentUserAddress}`;
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My GΛRO Collection',
+                    text: 'Check out my Memory collection on GΛRO VIBE!',
+                    url: profileUrl
+                });
+            } else {
+                navigator.clipboard.writeText(profileUrl);
+                alert('Profile link copied!');
+            }
+        }
+
+        function renderDashboard(memories, address) {
+            currentUserAddress = address; // Store for sharing
+            const nftCount = memories.length;
             const level = getLevel(nftCount);
             const nextLevel = getNextLevel(nftCount);
             const progressPercent = nextLevel ? Math.min(100, (nftCount / nextLevel.min) * 100) : 100;
@@ -531,53 +609,67 @@
                 </div>`;
             }).join('');
 
+            // Memory Gallery HTML
+            let galleryHtml = '';
+            if (memories.length > 0) {
+                galleryHtml = `<div class="memory-gallery">
+                    ${memories.map(m => `
+                        <div class="memory-card" title="${m.name}">
+                            <img src="${m.image}" alt="${m.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/150/1a1a2e/bc13fe?text=VIBE'">
+                            <div class="memory-date">${new Date(m.date).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}</div>
+                        </div>
+                    `).join('')}
+                </div>`;
+            } else {
+                galleryHtml = `<div class="empty-gallery">
+                    <div class="empty-gallery-icon">📸</div>
+                    <p>Your Anthology is empty</p>
+                    <p style="font-size:0.8rem; margin-top:10px;">Capture your first Memory at an event!</p>
+                </div>`;
+            }
+
             document.getElementById('content').innerHTML = `
-                <!-- COLLECTION VISUALIZATION -->
-                <div class="core-container ${nftCount === 0 ? 'core-level-0' : (nftCount > 5 ? 'core-level-max' : '')}">
-                    <div class="core-sphere"></div>
-                    <div class="core-wireframe"></div>
-                    ${generateOrbits(nftCount)}
+                <div style="text-align:center; margin-bottom:20px;">
+                    <h2 class="level-badge" style="font-size:2rem; margin:0;">${level.name}</h2>
+                    <p style="color:var(--text-muted); letter-spacing:1px; margin-top:5px; font-family:'Outfit', sans-serif;">MY ANTHOLOGY: <span style="color:var(--neon-blue);">${nftCount} MEMORIES</span></p>
                 </div>
 
-                <div style="text-align:center; margin-bottom:30px;">
-                    <h2 class="level-badge" style="font-size:2rem; margin:0;">${level.name}</h2>
-                    <p style="color:var(--text-muted); letter-spacing:1px; margin-top:5px; font-family:'Outfit', sans-serif;">MY COLLECTION: <span style="color:var(--neon-blue);">${nftCount} MEMORIES</span></p>
-                </div>
+                <h3 style="font-size:0.9rem; color:#888; letter-spacing:2px; margin-bottom:10px; text-align:center;">MY MEMORIES</h3>
+                ${galleryHtml}
 
                 <button class="btn" onclick="toggleQR()" style="background:var(--neon-purple); border:none; color:white; font-weight:700; box-shadow:0 0 20px rgba(188,19,254,0.4);">SHOW ACCESS PASS</button>
 
-
                 <div class="benefits">
-                    <h3 style="font-size:1rem; margin-bottom:15px; color:var(--text-muted);">BENEFICIOS</h3>
+                    <h3 style="font-size:1rem; margin-bottom:15px; color:var(--text-muted);">REWARDS</h3>
                     ${benefitsHtml}
                 </div>
 
                 <div class="qr-section">
                     <div class="scan-line"></div>
-                    <div class="qr-label">ENTRY PASS</div>
+                    <div class="qr-label">ACCESS PASS</div>
                     <div id="qrcode"></div>
-                    <p class="scan-hint">Muestra este código en la entrada</p>
+                    <p class="scan-hint">Show this code at the entrance</p>
                 </div>
 
-                <!-- NAVIGATION HUB (For easy access during Dev/Testing) -->
+                <!-- NAVIGATION HUB -->
                 <div style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
-                    <h3 style="font-size:0.8rem; color:#666; letter-spacing:2px; margin-bottom:15px;">SYSTEM NAVIGATION</h3>
+                    <h3 style="font-size:0.8rem; color:#666; letter-spacing:2px; margin-bottom:15px;">EXPLORE</h3>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <button onclick="shareProfile()" class="btn" style="font-size:0.8rem;">📤 SHARE PROFILE</button>
+                        <button onclick="window.location.href='/leaderboard.html'" class="btn" style="font-size:0.8rem;">🏆 LEADERBOARD</button>
+                        <button onclick="window.location.href='/inject.html'" class="btn" style="font-size:0.8rem;">📸 CAPTURE</button>
                         <button onclick="window.location.href='/scanner.html'" class="btn" style="font-size:0.8rem;">👮 SCANNER</button>
-                        <button onclick="window.location.href='/inject.html'" class="btn" style="font-size:0.8rem;">📸 CAPTURE (TEST)</button>
                         <button onclick="window.location.href='/godmode.html'" class="btn" style="font-size:0.8rem; grid-column: span 2; border-color:var(--neon-purple); color:var(--neon-purple);">👁️ GOD MODE</button>
                     </div>
                 </div>
             `;
 
-            // Generate QR (Hidden by default now)
+            // Generate QR
             setTimeout(() => {
                 const qrContainer = document.getElementById("qrcode");
                 if (qrContainer) {
-                    qrContainer.innerHTML = ""; // Clear
-                    // Store address for safety if we need to regen
+                    qrContainer.innerHTML = "";
                     qrContainer.setAttribute('data-address', address);
-
                     new QRCode(qrContainer, {
                         text: address,
                         width: 180,
