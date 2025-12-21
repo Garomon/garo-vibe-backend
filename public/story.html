@@ -3,89 +3,97 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>GΛRO | Create Story</title>
-    <meta name="theme-color" content="#050510">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <meta name="theme-color" content="#08080f">
+
     <style>
-        :root {
-            --neon-purple: #bc13fe;
-            --neon-blue: #0ff0fc;
-            --deep-bg: #050510;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--deep-bg);
-            color: white;
+        .page {
+            padding: var(--space-xl) var(--space-md);
             min-height: 100vh;
-            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
+        .header {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+
+        .back-btn {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: var(--space-sm) var(--space-md);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 700;
         }
 
         #storyCanvas {
-            border-radius: 12px;
-            box-shadow: 0 0 40px rgba(188, 19, 254, 0.3);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
             max-width: 100%;
+            margin-bottom: var(--space-xl);
         }
 
         .controls {
-            margin-top: 20px;
             display: flex;
-            gap: 10px;
+            gap: var(--space-md);
             flex-wrap: wrap;
             justify-content: center;
         }
 
         .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 700;
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-weight: 600;
             cursor: pointer;
-            border: none;
-            font-size: 0.9rem;
+            transition: all var(--transition-normal);
+            font-family: inherit;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--neon-purple), #9000ff);
+            background: var(--accent-gradient);
+            border: none;
             color: white;
         }
 
         .btn-secondary {
             background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
         }
 
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: rgba(255, 255, 255, 0.5);
+        .btn:hover {
+            transform: translateY(-2px);
         }
     </style>
 </head>
 
-<body>
-    <h1>📸 Create Story</h1>
-    <canvas id="storyCanvas" width="540" height="960"></canvas>
-    <div class="controls">
-        <button class="btn btn-primary" onclick="downloadStory()">📥 Download</button>
-        <button class="btn btn-secondary" onclick="shareStory()">📤 Share</button>
-        <a href="/dashboard.html" class="btn btn-secondary">← Back</a>
+<body class="safe-area-top safe-area-bottom">
+    <div class="page">
+        <div class="header">
+            <button class="back-btn" onclick="history.back()">←</button>
+            <h1 class="page-title">📸 Create Story</h1>
+        </div>
+
+        <canvas id="storyCanvas" width="540" height="960"></canvas>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="downloadStory()">📥 Download</button>
+            <button class="btn btn-secondary" onclick="shareStory()">📤 Share</button>
+        </div>
     </div>
 
     <script>
@@ -93,78 +101,86 @@
         const ctx = canvas.getContext('2d');
 
         async function renderStory() {
-            // Get address from URL or localStorage
-            const params = new URLSearchParams(window.location.search);
+            const params = new URLSearchParams(location.search);
             const address = params.get('a') || localStorage.getItem('garo_wallet');
 
             if (!address) {
-                ctx.fillStyle = '#050510';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#fff';
-                ctx.font = '24px Outfit';
-                ctx.textAlign = 'center';
-                ctx.fillText('Login required', canvas.width / 2, canvas.height / 2);
+                showError('Login required');
                 return;
             }
 
-            // Fetch XP data
-            const res = await fetch(`/api/xp?address=${address}`);
-            const xp = await res.json();
+            try {
+                const res = await fetch(`/api/xp?address=${address}`);
+                const xp = await res.json();
+                draw(xp, address);
+            } catch (e) {
+                draw({ xp: 0, level: { name: 'New Fan' }, streak: 0, memoriesCount: 0 }, address);
+            }
+        }
 
-            // Draw gradient background
+        function draw(xp, address) {
+            // Background
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
             gradient.addColorStop(0, '#1a0030');
-            gradient.addColorStop(0.5, '#050510');
+            gradient.addColorStop(0.5, '#08080f');
             gradient.addColorStop(1, '#0a0020');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw decorative elements
-            ctx.strokeStyle = 'rgba(188,19,254,0.3)';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < 5; i++) {
+            // Decorative circles
+            ctx.strokeStyle = 'rgba(168, 85, 247, 0.2)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 6; i++) {
                 ctx.beginPath();
-                ctx.arc(canvas.width / 2, 300, 80 + i * 40, 0, Math.PI * 2);
+                ctx.arc(canvas.width / 2, 300, 60 + i * 35, 0, Math.PI * 2);
                 ctx.stroke();
             }
 
-            // Draw logo
-            ctx.font = '900 72px Outfit';
+            // Logo
+            ctx.font = '900 80px Inter, sans-serif';
             ctx.fillStyle = '#fff';
             ctx.textAlign = 'center';
             ctx.fillText('GΛRO', canvas.width / 2, 200);
 
-            // Draw level
-            ctx.font = '700 36px Outfit';
-            ctx.fillStyle = '#bc13fe';
-            ctx.fillText(xp.level?.name || 'New Fan', canvas.width / 2, 420);
+            // Level
+            ctx.font = '700 40px Inter, sans-serif';
+            ctx.fillStyle = '#a855f7';
+            ctx.fillText(xp.level?.name || 'New Fan', canvas.width / 2, 450);
 
-            // Draw XP
-            ctx.font = '900 64px Outfit';
-            ctx.fillStyle = '#0ff0fc';
-            ctx.fillText(`${xp.xp || 0} XP`, canvas.width / 2, 520);
+            // XP
+            ctx.font = '900 72px Inter, sans-serif';
+            ctx.fillStyle = '#06b6d4';
+            ctx.fillText(`${xp.xp || 0} XP`, canvas.width / 2, 550);
 
-            // Draw streak
+            // Streak
             if (xp.streak > 0) {
-                ctx.font = '700 28px Outfit';
-                ctx.fillStyle = '#ff6b00';
-                ctx.fillText(`🔥 ${xp.streak} STREAK`, canvas.width / 2, 580);
+                ctx.font = '700 28px Inter, sans-serif';
+                ctx.fillStyle = '#f59e0b';
+                ctx.fillText(`🔥 ${xp.streak} STREAK`, canvas.width / 2, 610);
             }
 
-            // Draw memories count
-            ctx.font = '500 24px Outfit';
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
-            ctx.fillText(`${xp.memoriesCount || 0} Memories Collected`, canvas.width / 2, 650);
+            // Memories
+            ctx.font = '500 22px Inter, sans-serif';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fillText(`${xp.memoriesCount || 0} Memories Collected`, canvas.width / 2, 680);
 
-            // Draw call to action
-            ctx.font = '700 20px Outfit';
-            ctx.fillStyle = '#bc13fe';
+            // Footer
+            ctx.font = '600 18px Inter, sans-serif';
+            ctx.fillStyle = '#a855f7';
             ctx.fillText('garo-vibe.onrender.com', canvas.width / 2, 900);
 
-            // Draw wallet
-            ctx.font = '400 16px monospace';
-            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '400 14px monospace';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
             ctx.fillText(`${address.slice(0, 8)}...${address.slice(-4)}`, canvas.width / 2, 930);
+        }
+
+        function showError(msg) {
+            ctx.fillStyle = '#08080f';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = '500 24px Inter, sans-serif';
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
         }
 
         function downloadStory() {
@@ -176,18 +192,13 @@
 
         async function shareStory() {
             try {
-                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
                 const file = new File([blob], 'garo-story.png', { type: 'image/png' });
 
                 if (navigator.share && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: 'My GΛRO Collection',
-                        text: 'Check out my level on GΛRO VIBE! 🔥'
-                    });
+                    await navigator.share({ files: [file], title: 'My GΛRO Stats' });
                 } else {
                     downloadStory();
-                    alert('Saved! Share manually from your gallery.');
                 }
             } catch (e) {
                 downloadStory();

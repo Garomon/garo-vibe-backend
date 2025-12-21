@@ -1,96 +1,184 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GΛRO VIBE | Enter The Rave</title>
-
-    <!-- PWA -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GΛRO VIBE</title>
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#050510">
+    <meta name="theme-color" content="#08080f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
 
     <style>
-        :root {
-            --neon-purple: #bc13fe;
-            --neon-blue: #0ff0fc;
-            --deep-bg: #050510;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--deep-bg);
-            color: white;
-            min-height: 100vh;
             overflow: hidden;
+        }
+
+        .landing {
+            position: fixed;
+            inset: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-        }
-
-        /* AMBIENT VIDEO/IMAGE */
-        .bg-video {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.25;
-            z-index: 0;
-            filter: blur(2px);
-        }
-
-        /* NOISE OVERLAY */
-        .noise {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJibHVyIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC42NSIgbnVtT2N0YXZlcz0iMyIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNibHVyKSIgb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==');
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.4;
-        }
-
-        /* CONTENT */
-        .content {
-            position: relative;
-            z-index: 10;
+            padding: var(--space-xl);
             text-align: center;
-            padding: 20px;
-            max-width: 420px;
         }
 
+        /* Animated Background */
+        .bg-gradient {
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 100% 80% at 50% 0%, rgba(168, 85, 247, 0.2), transparent 50%),
+                radial-gradient(ellipse 80% 50% at 80% 50%, rgba(6, 182, 212, 0.15), transparent 50%),
+                radial-gradient(ellipse 60% 40% at 20% 80%, rgba(168, 85, 247, 0.1), transparent 50%),
+                var(--bg-primary);
+            animation: bgPulse 8s ease-in-out infinite;
+            z-index: -2;
+        }
+
+        @keyframes bgPulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        /* Particles */
+        .particles {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(168, 85, 247, 0.6);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Logo */
         .logo {
-            font-size: 4.5rem;
+            font-size: 4rem;
             font-weight: 900;
-            letter-spacing: -3px;
-            background: linear-gradient(135deg, #fff 20%, var(--neon-purple) 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 50px rgba(188, 19, 254, 0.5);
-            margin-bottom: 5px;
-            animation: pulse-logo 3s infinite ease-in-out;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--space-sm);
+            animation: logoGlow 3s ease-in-out infinite;
         }
 
-        @keyframes pulse-logo {
+        @keyframes logoGlow {
+
+            0%,
+            100% {
+                text-shadow: 0 0 40px rgba(168, 85, 247, 0.5);
+            }
+
+            50% {
+                text-shadow: 0 0 80px rgba(168, 85, 247, 0.8), 0 0 120px rgba(6, 182, 212, 0.4);
+            }
+        }
+
+        .tagline {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-2xl);
+            max-width: 280px;
+        }
+
+        /* Value Props */
+        .values {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin-bottom: var(--space-2xl);
+            max-width: 300px;
+        }
+
+        .value-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            opacity: 0;
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        .value-item:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .value-item:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .value-item:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        .value-icon {
+            font-size: 1.5rem;
+        }
+
+        .value-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-align: left;
+        }
+
+        /* CTA Button */
+        .cta-btn {
+            padding: var(--space-lg) var(--space-2xl);
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: var(--radius-full);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 8px 40px var(--accent-glow);
+            transition: all var(--transition-normal);
+            animation: slideUp 0.6s ease-out 0.8s both, ctaPulse 2s ease-in-out infinite 1.5s;
+        }
+
+        @keyframes ctaPulse {
 
             0%,
             100% {
@@ -102,234 +190,102 @@
             }
         }
 
-        .tagline {
-            font-size: 1rem;
-            font-weight: 300;
-            color: rgba(255, 255, 255, 0.6);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-bottom: 50px;
-        }
-
-        .value-props {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 40px;
-        }
-
-        .prop {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 15px 18px;
-            opacity: 0;
-            animation: fadeIn 0.5s forwards;
-        }
-
-        .prop:nth-child(1) {
-            animation-delay: 0.3s;
-        }
-
-        .prop:nth-child(2) {
-            animation-delay: 0.5s;
-        }
-
-        .prop:nth-child(3) {
-            animation-delay: 0.7s;
-        }
-
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-            }
-        }
-
-        .prop-icon {
-            font-size: 1.4rem;
-        }
-
-        .prop-text {
-            text-align: left;
-        }
-
-        .prop-title {
-            font-weight: 700;
-            font-size: 0.95rem;
-            margin-bottom: 2px;
-        }
-
-        .prop-desc {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* CTA BUTTON */
-        .cta-btn {
-            background: linear-gradient(135deg, var(--neon-purple), #9000ff);
-            border: none;
-            color: white;
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 900;
-            padding: 18px 45px;
-            border-radius: 50px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            box-shadow: 0 0 40px rgba(188, 19, 254, 0.5);
-            transition: all 0.3s;
-            opacity: 0;
-            animation: fadeIn 0.5s forwards 1s;
-        }
-
         .cta-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 60px rgba(188, 19, 254, 0.8);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 16px 60px var(--accent-glow);
         }
 
         .cta-btn:active {
-            transform: scale(0.98);
+            transform: translateY(0) scale(0.98);
         }
 
-        /* FOOTER */
+        /* Footer */
         .footer {
             position: fixed;
-            bottom: 20px;
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.3);
-            letter-spacing: 2px;
-        }
-
-        /* STROBE EFFECT ON ENTER */
-        .strobe {
-            position: fixed;
-            top: 0;
+            bottom: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .strobe.flash {
-            animation: strobe 0.4s;
-        }
-
-        @keyframes strobe {
-
-            0%,
-            100% {
-                opacity: 0;
-            }
-
-            20% {
-                opacity: 0.9;
-            }
-
-            40% {
-                opacity: 0;
-            }
-
-            60% {
-                opacity: 0.6;
-            }
-
-            80% {
-                opacity: 0;
-            }
+            right: 0;
+            padding: var(--space-lg);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
         }
     </style>
 </head>
 
 <body>
+    <div class="bg-gradient"></div>
 
-    <!-- BG VISUAL -->
-    <img class="bg-video" src="https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?w=1200" alt="Rave">
+    <div class="particles" id="particles"></div>
 
-    <div class="noise"></div>
-    <div class="strobe" id="strobe"></div>
+    <div class="landing">
+        <h1 class="logo text-gradient">GΛRO</h1>
+        <p class="tagline">Collect memories. Unlock rewards. Join the vibe.</p>
 
-    <div class="content">
-        <div class="logo">GΛRO</div>
-        <div class="tagline">Proof of Rave</div>
-
-        <div class="value-props">
-            <div class="prop">
-                <span class="prop-icon">📸</span>
-                <div class="prop-text">
-                    <div class="prop-title">Capture Moments</div>
-                    <div class="prop-desc">Mint memories at every event</div>
-                </div>
+        <div class="values">
+            <div class="value-item">
+                <span class="value-icon">📸</span>
+                <span class="value-text">Capture moments as digital collectibles</span>
             </div>
-            <div class="prop">
-                <span class="prop-icon">💎</span>
-                <div class="prop-text">
-                    <div class="prop-title">Build Your Legacy</div>
-                    <div class="prop-desc">Your collection grows with each party</div>
-                </div>
+            <div class="value-item">
+                <span class="value-icon">🏆</span>
+                <span class="value-text">Earn XP and climb the leaderboard</span>
             </div>
-            <div class="prop">
-                <span class="prop-icon">🎁</span>
-                <div class="prop-text">
-                    <div class="prop-title">Unlock Rewards</div>
-                    <div class="prop-desc">VIP access, exclusive tracks, merch</div>
-                </div>
+            <div class="value-item">
+                <span class="value-icon">🎵</span>
+                <span class="value-text">Unlock exclusive music & rewards</span>
             </div>
         </div>
 
-        <button class="cta-btn" onclick="enterTheRave()">ENTER THE RAVE</button>
+        <button class="cta-btn" onclick="enter()">Enter The Rave</button>
     </div>
 
-    <div class="footer">NO WALLET REQUIRED • POWERED BY SOLANA</div>
+    <div class="footer">
+        Powered by Solana
+    </div>
 
     <script>
-        // Sound
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-        function playEnterSound() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(80, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.4);
-            gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.4);
+        // Generate particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+            particle.style.animation = `floatParticle ${10 + Math.random() * 10}s infinite linear ${Math.random() * 15}s`;
+            particle.style.width = (2 + Math.random() * 4) + 'px';
+            particle.style.height = particle.style.width;
+            particlesContainer.appendChild(particle);
         }
 
-        function enterTheRave() {
-            // Strobe flash
-            const strobe = document.getElementById('strobe');
-            strobe.classList.add('flash');
+        function enter() {
+            // Sound
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 220;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } catch (e) { }
 
             // Haptic
-            if (navigator.vibrate) navigator.vibrate([50, 30, 100]);
+            if (navigator.vibrate) navigator.vibrate(50);
 
-            // Sound
-            playEnterSound();
+            // Transition
+            document.body.style.transition = 'opacity 0.3s';
+            document.body.style.opacity = '0';
 
-            // Redirect after effect
             setTimeout(() => {
                 window.location.href = '/index.html';
-            }, 450);
+            }, 300);
         }
-
-        // Check for PWA install prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        });
     </script>
 </body>
 

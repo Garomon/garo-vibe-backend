@@ -1,443 +1,319 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GΛRO | CAPTURE MOMENT</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
-        rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GΛRO | Capture Memory</title>
+    <link rel="stylesheet" href="/styles.css">
+    <meta name="theme-color" content="#08080f">
 
-    <!-- Web3Auth & Solana -->
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@9.6.0/dist/modal.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@9.6.0/dist/solanaProvider.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js"></script>
-    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
 
     <style>
-        :root {
-            --neon-core: #bc13fe;
-            --neon-flash: #fff;
-            --bg-dark: #000;
-            --error: #ff0055;
-        }
-
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            margin: 0;
-            height: 100vh;
-            background: var(--bg-dark);
-            color: white;
-            font-family: 'Outfit', sans-serif;
-            overflow: hidden;
+        .capture-page {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-        }
-
-        /* Ambient Noise/Grain */
-        .noise {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJibHVyIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC42NSIgbnVtT2N0YXZlcz0iMyIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNibHVyKSIgb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==');
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.5;
-        }
-
-        .container {
-            z-index: 10;
+            padding: var(--space-xl);
             text-align: center;
-            width: 100%;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
 
-        /* HEADER */
-        .cyber-header {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 40px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+        .capture-icon {
+            font-size: 5rem;
+            margin-bottom: var(--space-lg);
+            animation: float 3s ease-in-out infinite;
         }
 
-        .event-title {
-            font-size: 2.5rem;
-            font-weight: 900;
-            line-height: 1;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(188, 19, 254, 0.5);
-            opacity: 0;
-            animation: glitch-in 1s forwards 0.5s;
+        .capture-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
         }
 
-        /* THE INJECTOR BUTTON */
-        .injector-wrapper {
-            position: relative;
-            width: 250px;
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 30px 0;
+        .capture-desc {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-2xl);
+            max-width: 280px;
         }
 
-        .injector-ring {
-            position: absolute;
-            width: 100%;
-            height: 100%;
+        .event-badge {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: var(--radius-full);
+            font-family: monospace;
+            font-size: 0.875rem;
+            color: var(--accent-primary);
+            margin-bottom: var(--space-2xl);
+        }
+
+        /* Capture Button */
+        .capture-btn {
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
-            border: 2px solid #333;
-            transition: all 0.3s;
-        }
-
-        .injector-fill {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 6px solid var(--neon-core);
-            /* Clip path for circular progress */
-            clip-path: polygon(50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%);
-            transition: clip-path 0.1s linear;
-            box-shadow: 0 0 30px var(--neon-core);
-            opacity: 0.8;
-        }
-
-        .injector-btn {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #222 0%, #000 70%);
-            border: 1px solid #444;
+            background: var(--accent-gradient);
+            border: none;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            position: relative;
-            z-index: 20;
-            transition: transform 0.1s;
-            touch-action: none;
-            /* Prevent scroll */
+            box-shadow: var(--shadow-glow);
+            transition: all var(--transition-normal);
+            font-size: 3rem;
+            color: white;
         }
 
-        .injector-btn:active {
+        .capture-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 60px var(--accent-glow);
+        }
+
+        .capture-btn:active,
+        .capture-btn.active {
             transform: scale(0.95);
         }
 
-        .fingerprint-icon {
+        .capture-hint {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: var(--space-lg);
+        }
+
+        /* Progress Ring */
+        .progress-ring {
+            position: absolute;
+            width: 160px;
+            height: 160px;
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.3);
+            stroke-width: 4;
+        }
+
+        .progress-ring .progress {
+            stroke: white;
+            stroke-linecap: round;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 1.5s linear;
+        }
+
+        /* Status */
+        .status-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            max-width: 320px;
+            text-align: center;
+        }
+
+        .status-icon {
             font-size: 4rem;
-            opacity: 0.3;
-            transition: opacity 0.3s, color 0.3s;
+            margin-bottom: var(--space-md);
         }
 
-        /* STATE TEXT */
-        .status-text {
-            font-family: 'Space Mono', monospace;
-            color: #888;
-            margin-top: 20px;
-            font-size: 0.9rem;
-            min-height: 1.2em;
+        .status-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
         }
 
-        /* SUCCESS OVERLAY */
-        .success-overlay {
+        .status-msg {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .status-btn {
+            margin-top: var(--space-lg);
+            padding: var(--space-md) var(--space-xl);
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-link {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: black;
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .shard-visual {
-            width: 150px;
-            height: 150px;
-            background: var(--neon-core);
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            animation: float 3s ease-in-out infinite, shine 2s infinite linear;
-            box-shadow: 0 0 50px var(--neon-core);
-        }
-
-        @keyframes glitch-in {
-            0% {
-                opacity: 0;
-                transform: translateX(-10px);
-            }
-
-            20% {
-                opacity: 1;
-                transform: translateX(10px);
-            }
-
-            40% {
-                transform: translateX(-5px);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        /* Utility */
-        .hidden {
-            display: none !important;
+            top: var(--space-lg);
+            left: var(--space-lg);
+            color: var(--text-muted);
+            text-decoration: none;
         }
     </style>
 </head>
 
 <body>
+    <a href="/dashboard.html" class="back-link">← Back</a>
 
-    <div class="noise"></div>
+    <div class="capture-page" id="main">
+        <div class="capture-icon">✨</div>
+        <h1 class="capture-title">Capture Memory</h1>
+        <p class="capture-desc">Hold the button to capture this moment as a digital collectible</p>
 
-    <!-- MAIN INTERFACE -->
-    <div class="container" id="mainUI">
-        <div class="cyber-header">
-            EVENT SIGNAL DETECTED<br>
-            ANTHOLOGY V1.0 // <span id="eventIdDisp">GENESIS</span>
+        <div class="event-badge" id="eventBadge">GENESIS_2025</div>
+
+        <div style="position: relative;">
+            <svg class="progress-ring" viewBox="0 0 160 160">
+                <circle cx="80" cy="80" r="70" />
+                <circle class="progress" id="progressCircle" cx="80" cy="80" r="70" />
+            </svg>
+            <button class="capture-btn" id="captureBtn">📸</button>
         </div>
 
-        <div class="event-title" id="eventTitle">
-            CLAN<br>GATHERING
-        </div>
-
-        <div class="injector-wrapper">
-            <div class="injector-ring"></div>
-            <div class="injector-fill" id="fillRing"></div>
-            <div class="injector-btn" id="holdBtn">
-                <div class="fingerprint-icon" id="fpIcon">📸</div>
-            </div>
-        </div>
-
-        <div class="status-text" id="statusText">HOLD TO CAPTURE</div>
-    </div>
-
-    <!-- AUTH OVERLAY (If not logged in) -->
-    <div id="authOverlay" class="success-overlay" style="background:rgba(0,0,0,0.9); display:none;">
-        <h2 style="text-align:center">MEMBER ACCESS<br>REQUIRED</h2>
-        <button id="loginBtn"
-            style="padding:15px 30px; background:white; color:black; border:none; border-radius:30px; font-weight:900;">ACTIVATE
-            ID</button>
-    </div>
-
-    <!-- SUCCESS OVERLAY -->
-    <div id="successUI" class="success-overlay">
-        <div class="shard-visual"></div>
-        <h1 style="font-size:2.5rem; text-align:center">MOMENT<br>CAPTURED</h1>
-        <p style="font-family:'Outfit'; color:#888;">SAVED TO ANTHOLOGY</p>
-        <button onclick="window.location.href='/dashboard.html'"
-            style="margin-top:30px; background:transparent; border:1px solid #333; color:#fff; padding:10px 20px;">VIEW
-            COLLECTION</button>
+        <p class="capture-hint">Hold for 1.5 seconds</p>
     </div>
 
     <script>
-        // --- CONSTANTS ---
-        const CLIENT_ID = "BNznLZTpfKoLB91mdfsvD-jDQa15tp_Nn7X32dBo3pMGDZqJKArglP0PsW50KkrtKl_uiDrQvT4NovFaosOT6aI";
+        const CLIENT_ID = "BLVk4nc6lfY2oRnqR7tDjkZn-Kpv8JbgS3lE6iDDWNh5zhIW2WdM3_h6fBu8n92Y0FuHOflV0TwIKc6yPNK0cSI";
         const NETWORK = "sapphire_devnet";
-
-        // --- STATE ---
-        let holding = false;
-        let progress = 0;
-        let holdTimer = null;
         let web3auth = null;
-        let provider = null;
-        let userAddress = null;
+        let holdTimer = null;
+        let isHolding = false;
 
-        // --- PARAMS ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const EVENT_ID = urlParams.get('event') || 'GENESIS_2025';
+        // Get event from URL
+        const params = new URLSearchParams(location.search);
+        const eventId = params.get('event') || 'GENESIS_2025';
+        document.getElementById('eventBadge').textContent = eventId;
 
-        // --- INIT ---
-        window.onload = async () => {
-            document.getElementById('eventIdDisp').innerText = EVENT_ID;
-            await initWeb3();
-        };
-
-        async function initWeb3() {
-            // Web3Auth Setup
+        async function initWeb3Auth() {
             const Web3AuthModal = window.Modal?.Web3Auth || window.Web3Auth;
             const SolanaProvider = window.SolanaProvider?.SolanaPrivateKeyProvider || window.SolanaPrivateKeyProvider;
 
-            const chainConfig = { chainNamespace: "solana", chainId: "0x3", rpcTarget: "https://api.devnet.solana.com", displayName: "Devnet", ticker: "SOL", tickerName: "Solana" };
+            const chainConfig = {
+                chainNamespace: "solana",
+                chainId: "0x3",
+                rpcTarget: "https://api.devnet.solana.com",
+                displayName: "Solana Devnet",
+                blockExplorer: "https://explorer.solana.com",
+                ticker: "SOL",
+                tickerName: "Solana",
+            };
+
             const privateKeyProvider = new SolanaProvider({ config: { chainConfig } });
 
             web3auth = new Web3AuthModal({
-                clientId: CLIENT_ID, web3AuthNetwork: NETWORK, chainConfig, privateKeyProvider,
-                uiConfig: { mode: "dark", loginMethodsOrder: ["google", "twitter"] }
+                clientId: CLIENT_ID,
+                web3AuthNetwork: NETWORK,
+                chainConfig,
+                privateKeyProvider,
+                uiConfig: { mode: "dark", uxMode: "redirect" }
             });
 
             await web3auth.initModal();
-
-            if (web3auth.connected) {
-                const accounts = await web3auth.provider.request({ method: "getAccounts" });
-                userAddress = accounts[0];
-                readyToInject();
-            } else {
-                showAuth();
-            }
         }
 
-        function showAuth() {
-            const authDiv = document.getElementById('authOverlay');
-            authDiv.style.display = 'flex';
-            document.getElementById('loginBtn').onclick = async () => {
-                await web3auth.connect();
-                window.location.reload(); // Reload to capture state
-            };
+        function startHold() {
+            if (isHolding) return;
+            isHolding = true;
+
+            const btn = document.getElementById('captureBtn');
+            const progress = document.getElementById('progressCircle');
+
+            btn.classList.add('active');
+            progress.style.strokeDashoffset = '0';
+
+            holdTimer = setTimeout(() => {
+                capture();
+            }, 1500);
         }
 
-        function readyToInject() {
-            const btn = document.getElementById('holdBtn');
-            const fp = document.getElementById('fpIcon');
-            fp.innerText = '👆'; // Fingerprint
-            fp.style.opacity = '0.8';
-            document.getElementById('statusText').innerText = "HOLD TO CAPTURE";
+        function endHold() {
+            if (!isHolding) return;
+            isHolding = false;
 
-            // EVENTS
-            const start = (e) => { e.preventDefault(); holding = true; animateHold(); vibrate(50); };
-            const end = (e) => { e.preventDefault(); holding = false; resetHold(); };
+            clearTimeout(holdTimer);
 
-            btn.addEventListener('mousedown', start);
-            btn.addEventListener('touchstart', start);
-            btn.addEventListener('mouseup', end);
-            btn.addEventListener('mouseleave', end);
-            btn.addEventListener('touchend', end);
+            const btn = document.getElementById('captureBtn');
+            const progress = document.getElementById('progressCircle');
+
+            btn.classList.remove('active');
+            progress.style.strokeDashoffset = '440';
         }
 
-        function animateHold() {
-            if (!holding) return;
-            progress += 2; // Speed of fill
+        async function capture() {
+            endHold();
+            showStatus('loading', 'Capturing...', 'Connecting to your wallet');
 
-            // Visual Update
-            const fill = document.getElementById('fillRing');
-            const status = document.getElementById('statusText');
-
-            // Calculate Polygon Clip based on progress (Rough approx for circle fill)
-            // Ideally use SVG dasharray, but doing CSS Polygon for glitch effect
-            // A simple scale/opacity hack is safer for "Energy building" feel
-            fill.style.clipPath = `circle(${progress}% at 50% 50%)`;
-
-            // Haptic Pulse
-            if (progress % 10 === 0) vibrate(10);
-
-            // Text Glitch
-            status.innerText = `CAPTURING... ${Math.floor(progress)}%`;
-
-            if (progress >= 100) {
-                completeInjection();
-            } else {
-                requestAnimationFrame(animateHold);
-            }
-        }
-
-        function resetHold() {
-            if (progress >= 100) return; // Already done
-            progress = 0;
-            document.getElementById('fillRing').style.clipPath = `circle(0% at 50% 50%)`;
-            document.getElementById('statusText').innerText = "HOLD TO CAPTURE";
-        }
-
-        async function completeInjection() {
-            holding = false;
-            vibrate(200);
-            document.getElementById('statusText').innerText = "CAPTURE COMPLETE. SAVING...";
-            document.getElementById('holdBtn').style.background = "#bc13fe";
-
-            // --- MINT LOGIC ---
             try {
-                // 1. Sign Message (Proof of Presence)
-                const message = `Minting GARO VIBE for ${userAddress}`;
-                const msgEncoded = new TextEncoder().encode(message);
+                if (!web3auth) await initWeb3Auth();
 
-                // Request signature from wallet
-                const signedMessage = await web3auth.provider.request({
+                if (!web3auth.connected) {
+                    await web3auth.connect();
+                }
+
+                const accounts = await web3auth.provider.request({ method: "getAccounts" });
+                const address = accounts[0];
+
+                showStatus('loading', 'Minting...', 'Creating your memory');
+
+                const message = `GΛRO Capture: ${Date.now()}`;
+                const encodedMessage = new TextEncoder().encode(message);
+                const signature = await web3auth.provider.request({
                     method: "signMessage",
-                    params: {
-                        message: msgEncoded,
-                        display: "utf8" // Standard for Solana
-                    }
+                    params: { message: encodedMessage }
                 });
 
-                // Convert signature (Uint8Array) to Base64 for the server (Browser native)
-                let binary = '';
-                const bytes = new Uint8Array(signedMessage);
-                const len = bytes.byteLength;
-                for (let i = 0; i < len; i++) {
-                    binary += String.fromCharCode(bytes[i]);
-                }
-                const signatureBase64 = window.btoa(binary);
-
-                // Call Mint Endpoint with SECURITY
                 const res = await fetch('/mint', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        receiverAddress: userAddress,
-                        eventId: EVENT_ID,
-                        signature: signatureBase64,
-                        publicKey: userAddress,
-                        message: message
+                        receiverAddress: address,
+                        eventId: eventId,
+                        signature: Array.from(new Uint8Array(signature)),
+                        publicKey: address,
+                        message
                     })
                 });
 
                 const data = await res.json();
 
                 if (data.success) {
-                    showSuccess();
+                    showStatus('success', 'Captured!', 'Memory added to your collection');
                 } else {
-                    throw new Error(data.error || "Mint Failed");
+                    showStatus('error', 'Failed', data.error || 'Something went wrong');
                 }
 
             } catch (e) {
-                console.error(e);
-                document.getElementById('statusText').innerText = "ERROR: LINK BROKEN";
-                document.getElementById('statusText').style.color = "red";
+                showStatus('error', 'Error', e.message);
             }
         }
 
-        function showSuccess() {
-            document.getElementById('mainUI').style.display = 'none';
-            document.getElementById('successUI').style.display = 'flex';
-            // Confetti or Particles could go here
+        function showStatus(type, title, msg) {
+            const icons = { loading: '⏳', success: '✅', error: '❌' };
+
+            document.getElementById('main').innerHTML = `
+                <div class="status-card">
+                    <div class="status-icon">${icons[type]}</div>
+                    <h2 class="status-title">${title}</h2>
+                    <p class="status-msg">${msg}</p>
+                    ${type !== 'loading' ? '<a href="/dashboard.html" class="status-btn">View Collection</a>' : ''}
+                </div>
+            `;
         }
 
-        function vibrate(ms) {
-            if (navigator.vibrate) navigator.vibrate(ms);
-        }
+        // Setup hold events
+        const btn = document.getElementById('captureBtn');
+        btn.addEventListener('mousedown', startHold);
+        btn.addEventListener('mouseup', endHold);
+        btn.addEventListener('mouseleave', endHold);
+        btn.addEventListener('touchstart', e => { e.preventDefault(); startHold(); });
+        btn.addEventListener('touchend', endHold);
 
+        initWeb3Auth();
     </script>
 </body>
 

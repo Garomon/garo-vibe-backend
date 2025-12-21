@@ -3,114 +3,97 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GΛRO | Exclusive Downloads</title>
-    <meta name="theme-color" content="#050510">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GΛRO | Downloads</title>
+    <link rel="stylesheet" href="/styles.css">
+    <meta name="theme-color" content="#08080f">
+
     <style>
-        :root {
-            --neon-purple: #bc13fe;
-            --neon-blue: #0ff0fc;
-            --neon-gold: #ffd700;
-            --deep-bg: #050510;
-            --card-bg: rgba(15, 15, 30, 0.9);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--deep-bg);
-            color: white;
+        .page {
+            padding: var(--space-xl) var(--space-md);
             min-height: 100vh;
-            padding: 20px;
         }
 
         .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 1.8rem;
-            font-weight: 900;
-            letter-spacing: 2px;
-        }
-
-        .header p {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        .user-level {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0;
-            padding: 15px 25px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            max-width: 300px;
-            margin-left: auto;
-            margin-right: auto;
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
         }
 
-        .level-icon {
+        .back-btn {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: var(--space-sm) var(--space-md);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .back-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .page-title {
             font-size: 1.5rem;
-        }
-
-        .level-info {
-            text-align: left;
-        }
-
-        .level-name {
             font-weight: 700;
-            font-size: 1rem;
         }
 
-        .level-count {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
+        .intro {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-xl);
+            line-height: 1.6;
         }
 
+        /* Downloads List */
         .downloads-list {
-            max-width: 500px;
-            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
         }
 
         .download-card {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px 20px;
-            margin-bottom: 12px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s;
-        }
-
-        .download-card.locked {
-            opacity: 0.5;
-            filter: grayscale(0.8);
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
+            transition: all var(--transition-normal);
         }
 
         .download-card.unlocked {
-            border-color: var(--neon-purple);
-            box-shadow: 0 0 15px rgba(188, 19, 254, 0.2);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .download-card.unlocked:hover {
+            border-color: var(--success);
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+        }
+
+        .download-card.locked {
+            opacity: 0.6;
+        }
+
+        .download-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
         }
 
         .download-icon {
-            font-size: 2rem;
-            width: 50px;
-            text-align: center;
+            width: 48px;
+            height: 48px;
+            background: var(--bg-glass);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .download-card.unlocked .download-icon {
+            background: rgba(34, 197, 94, 0.15);
         }
 
         .download-info {
@@ -119,201 +102,139 @@
 
         .download-title {
             font-weight: 700;
-            font-size: 1rem;
-            margin-bottom: 3px;
+            margin-bottom: var(--space-xs);
         }
 
         .download-desc {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
 
-        .download-action {
-            text-align: right;
+        .download-badge {
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-sm);
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .download-badge.unlocked {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .download-badge.locked {
+            background: var(--bg-glass);
+            color: var(--text-muted);
         }
 
         .download-btn {
-            padding: 8px 16px;
-            background: linear-gradient(135deg, var(--neon-purple), #9000ff);
+            width: 100%;
+            padding: var(--space-md);
+            background: var(--accent-gradient);
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             color: white;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.8rem;
-            font-weight: 700;
+            font-family: inherit;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all var(--transition-normal);
         }
 
         .download-btn:hover {
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px var(--accent-glow);
         }
 
-        .locked-badge {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.4);
-            padding: 5px 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
+        .download-btn:disabled {
+            background: var(--bg-glass);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
-        .back-btn {
-            display: block;
-            max-width: 200px;
-            margin: 30px auto;
-            padding: 12px;
-            text-align: center;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            color: rgba(255, 255, 255, 0.5);
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-
+        /* Loading */
         .loading {
-            text-align: center;
-            padding: 50px;
-            color: rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-2xl);
+            gap: var(--space-lg);
         }
     </style>
 </head>
 
-<body>
-    <div class="header">
-        <h1>🎵 EXCLUSIVE DROPS</h1>
-        <p>Unlock rewards with your Memories</p>
-    </div>
+<body class="safe-area-top safe-area-bottom">
+    <div class="container page">
+        <div class="header">
+            <button class="back-btn" onclick="history.back()">←</button>
+            <h1 class="page-title">🎵 Downloads</h1>
+        </div>
 
-    <div id="content">
-        <div class="loading">Loading your rewards...</div>
-    </div>
+        <p class="intro">Unlock exclusive content as you collect more memories. Each level comes with new rewards.</p>
 
-    <a href="/dashboard.html" class="back-btn">← Back to Dashboard</a>
+        <div id="content">
+            <div class="loading">
+                <div class="loader"></div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        const LEVELS = [
-            { name: 'NEWCOMER', min: 0, icon: '🌑' },
-            { name: 'REGULAR', min: 1, icon: '🌘' },
-            { name: 'INSIDER', min: 3, icon: '🌗' },
-            { name: 'VIP', min: 5, icon: '🌖' },
-            { name: 'LEGEND', min: 10, icon: '🌕' },
-            { name: 'ICON', min: 20, icon: '👑' }
-        ];
-
         const DOWNLOADS = [
-            {
-                id: 'welcome_pack',
-                title: 'Welcome Pack',
-                desc: 'Exclusive wallpapers & logo assets',
-                icon: '🖼️',
-                requiredMemories: 1,
-                url: '#'
-            },
-            {
-                id: 'unreleased_track_1',
-                title: 'GΛRO - Unreleased ID',
-                desc: 'Exclusive track not on streaming',
-                icon: '🎧',
-                requiredMemories: 3,
-                url: '#'
-            },
-            {
-                id: 'dj_set_recording',
-                title: 'Live Set Recording',
-                desc: 'Full 2hr DJ set from Genesis event',
-                icon: '📀',
-                requiredMemories: 5,
-                url: '#'
-            },
-            {
-                id: 'sample_pack',
-                title: 'Producer Sample Pack',
-                desc: 'Loops, one-shots, and presets',
-                icon: '🎹',
-                requiredMemories: 10,
-                url: '#'
-            },
-            {
-                id: 'remix_stems',
-                title: 'Remix Stems',
-                desc: 'Official stems for remixing',
-                icon: '🔊',
-                requiredMemories: 15,
-                url: '#'
-            }
+            { id: 1, required: 1, icon: "📦", title: "Welcome Pack", desc: "Phone wallpapers + logo assets" },
+            { id: 2, required: 3, icon: "🎵", title: "Unreleased Track", desc: "Exclusive unreleased song" },
+            { id: 3, required: 5, icon: "🎧", title: "Live Set Recording", desc: "Full live set from Genesis 2024" },
+            { id: 4, required: 10, icon: "🎹", title: "Sample Pack", desc: "Loops and one-shots used in productions" },
+            { id: 5, required: 15, icon: "🔊", title: "Remix Stems", desc: "Full stems for official remix" }
         ];
-
-        function getLevel(count) {
-            for (let i = LEVELS.length - 1; i >= 0; i--) {
-                if (count >= LEVELS[i].min) return LEVELS[i];
-            }
-            return LEVELS[0];
-        }
 
         async function loadDownloads() {
-            // Get address from localStorage (set by dashboard)
-            let address = localStorage.getItem('garo_wallet');
+            const address = localStorage.getItem('garo_wallet');
+            let count = 0;
 
-            if (!address) {
-                document.getElementById('content').innerHTML = `
-                    <div class="loading">
-                        <p>Login required to view rewards</p>
-                        <a href="/index.html" style="color:var(--neon-purple);">Login →</a>
-                    </div>
-                `;
-                return;
+            if (address) {
+                try {
+                    const res = await fetch(`/api/memories?address=${address}`);
+                    const data = await res.json();
+                    count = data.memories?.length || 0;
+                } catch (e) { }
             }
 
-            try {
-                const res = await fetch(`/api/memories?address=${address}`);
-                const data = await res.json();
-                const count = data.count || 0;
-                const level = getLevel(count);
+            render(count);
+        }
 
-                let downloadsHtml = DOWNLOADS.map(d => {
-                    const unlocked = count >= d.requiredMemories;
-                    return `
-                        <div class="download-card ${unlocked ? 'unlocked' : 'locked'}">
+        function render(userCount) {
+            const html = DOWNLOADS.map(d => {
+                const unlocked = userCount >= d.required;
+                return `
+                    <div class="download-card ${unlocked ? 'unlocked' : 'locked'}">
+                        <div class="download-header">
                             <div class="download-icon">${d.icon}</div>
                             <div class="download-info">
                                 <div class="download-title">${d.title}</div>
                                 <div class="download-desc">${d.desc}</div>
                             </div>
-                            <div class="download-action">
-                                ${unlocked
-                            ? `<button class="download-btn" onclick="download('${d.id}')">DOWNLOAD</button>`
-                            : `<span class="locked-badge">🔒 ${d.requiredMemories} Memories</span>`
-                        }
-                            </div>
+                            <span class="download-badge ${unlocked ? 'unlocked' : 'locked'}">
+                                ${unlocked ? '✓ Unlocked' : `${d.required} needed`}
+                            </span>
                         </div>
-                    `;
-                }).join('');
-
-                document.getElementById('content').innerHTML = `
-                    <div class="user-level">
-                        <div class="level-icon">${level.icon}</div>
-                        <div class="level-info">
-                            <div class="level-name">${level.name}</div>
-                            <div class="level-count">${count} Memories collected</div>
-                        </div>
-                    </div>
-                    <div class="downloads-list">
-                        ${downloadsHtml}
+                        <button class="download-btn" ${unlocked ? `onclick="download('${d.title}')"` : 'disabled'}>
+                            ${unlocked ? 'Download' : '🔒 Locked'}
+                        </button>
                     </div>
                 `;
+            }).join('');
 
-            } catch (e) {
-                document.getElementById('content').innerHTML = `<div class="loading">Error loading rewards</div>`;
-            }
+            document.getElementById('content').innerHTML = `<div class="downloads-list">${html}</div>`;
         }
 
-        function download(id) {
-            // In a real app, this would redirect to actual file or trigger download
-            alert(`Download for "${id}" would start here. Add actual file URLs to enable.`);
+        function download(title) {
+            alert(`📦 Download starting: ${title}\n\n(This would trigger actual download in production)`);
         }
 
-        loadDownloads();
+        window.addEventListener('load', loadDownloads);
     </script>
 </body>
 

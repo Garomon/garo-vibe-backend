@@ -1,659 +1,369 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GΛRO VIBE | Genesis Access</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GΛRO | Sign In</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#08080f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
-
-    <!-- Web3Auth Modal SDK (Bundled - CDN Friendly) -->
+    <link rel="stylesheet" href="/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@9.6.0/dist/modal.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@9.6.0/dist/solanaProvider.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.78.0/lib/index.iife.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js"></script>
+    <script src="https://unpkg.com/@solana/web3.js@1.91.8/lib/index.iife.min.js"></script>
 
     <style>
-        :root {
-            --neon-purple: #bc13fe;
-            --neon-blue: #0ff0fc;
-            --deep-bg: #050510;
-            --glass-bg: rgba(255, 255, 255, 0.04);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-main: #ffffff;
-            --text-muted: #8a8a9a;
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--deep-bg);
-            color: var(--text-main);
+        .login-container {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Ambient Glow */
-        .ambient-glow {
-            position: fixed;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(188, 19, 254, 0.2) 0%, rgba(5, 5, 16, 0) 60%);
-            top: -150px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 0;
-            pointer-events: none;
-            animation: pulse-glow 8s infinite alternate;
-        }
-
-        @keyframes pulse-glow {
-            0% {
-                opacity: 0.5;
-                transform: translateX(-50%) scale(1);
-            }
-
-            100% {
-                opacity: 0.9;
-                transform: translateX(-50%) scale(1.15);
-            }
-        }
-
-        /* Main Container */
-        .app-container {
-            position: relative;
-            z-index: 10;
-            width: 90%;
-            max-width: 380px;
-            padding: 20px;
+            padding: var(--space-xl);
             text-align: center;
         }
 
-        /* Logo */
         .logo {
-            font-size: 3.5rem;
+            font-size: 3rem;
             font-weight: 900;
-            letter-spacing: -2px;
-            background: linear-gradient(135deg, #fff 20%, var(--neon-purple) 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(188, 19, 254, 0.3);
-            margin-bottom: 5px;
+            margin-bottom: var(--space-sm);
         }
 
-        .sub-logo {
-            font-size: 0.9rem;
-            font-weight: 300;
+        .subtitle {
             color: var(--text-muted);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 40px;
+            font-size: 0.875rem;
+            margin-bottom: var(--space-2xl);
         }
 
-        /* Glass Card */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 30px 25px;
-        }
-
-        /* Buttons */
-        .btn {
+        /* Terminal */
+        .terminal {
             width: 100%;
-            padding: 15px 20px;
-            margin-bottom: 12px;
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 500;
-            font-size: 1rem;
-            cursor: pointer;
+            max-width: 360px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            margin-bottom: var(--space-xl);
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-md);
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .terminal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red {
+            background: #ef4444;
+        }
+
+        .terminal-dot.yellow {
+            background: #f59e0b;
+        }
+
+        .terminal-dot.green {
+            background: #22c55e;
+        }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .terminal-body {
+            padding: var(--space-lg);
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            min-height: 120px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-line {
+            margin-bottom: var(--space-sm);
+            display: flex;
+            gap: var(--space-sm);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .log-prefix {
+            color: var(--accent-primary);
+        }
+
+        .log-line.success {
+            color: var(--success);
+        }
+
+        .log-line.error {
+            color: var(--error);
+        }
+
+        .log-line.info {
+            color: var(--accent-secondary);
+        }
+
+        /* Login Buttons */
+        .login-options {
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+
+        .login-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.03);
-            color: white;
-            transition: all 0.2s ease;
+            gap: var(--space-md);
+            padding: var(--space-lg);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
         }
 
-        .btn:hover {
+        .login-btn:hover {
             background: rgba(255, 255, 255, 0.08);
+            border-color: var(--border-glow);
             transform: translateY(-2px);
-            border-color: rgba(255, 255, 255, 0.2);
         }
 
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, var(--neon-purple), #9600e0);
-            border: none;
-            font-weight: 700;
-            box-shadow: 0 4px 20px rgba(188, 19, 254, 0.4);
-        }
-
-        .btn-primary:hover {
-            box-shadow: 0 6px 25px rgba(188, 19, 254, 0.6);
-        }
-
-        .btn-disabled {
-            opacity: 0.4;
+        .login-btn:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
 
-        .btn img,
-        .btn svg {
+        .login-btn svg {
             width: 20px;
             height: 20px;
         }
 
-        /* Status / Loader */
-        .spinner {
-            width: 30px;
-            height: 30px;
-            border: 3px solid var(--glass-border);
-            border-radius: 50%;
-            border-top-color: var(--neon-purple);
-            animation: spin 0.8s linear infinite;
-            margin: 15px auto;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .status-text {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        /* Success State */
-        .nft-img {
-            width: 160px;
-            height: 160px;
-            border-radius: 16px;
-            object-fit: cover;
-            border: 2px solid var(--glass-border);
-            box-shadow: 0 0 40px rgba(188, 19, 254, 0.25);
-            margin-bottom: 20px;
-            animation: float 5s ease-in-out infinite;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-8px);
-            }
-        }
-
-        .success-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--neon-blue);
-            margin-bottom: 5px;
-        }
-
-        .success-desc {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 20px;
-        }
-
-        /* Links */
-        .link-muted {
-            display: block;
-            margin-top: 15px;
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            text-decoration: none;
-            opacity: 0.6;
-        }
-
-        .link-muted:hover {
-            opacity: 1;
-            text-decoration: underline;
-        }
-
-        /* Divider */
         .divider {
-            border-top: 1px solid var(--glass-border);
-            margin: 20px 0;
-        }
-
-        /* Footer Text */
-        .footer-text {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-top: 20px;
-            opacity: 0.5;
-        }
-
-        /* Terminal Log Override */
-        .terminal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(5, 5, 16, 0.95);
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Courier New', Courier, monospace;
-            padding: 20px;
-        }
-
-        .terminal-window {
-            width: 100%;
-            max-width: 500px;
-            text-align: left;
-        }
-
-        .log-line {
-            color: var(--neon-blue);
-            margin-bottom: 8px;
-            opacity: 0;
-            animation: fadeIn 0.3s forwards;
-            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: var(--space-md);
+            color: var(--text-muted);
+            font-size: 0.75rem;
         }
 
-        .log-line.success {
-            color: #00ff9d;
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
         }
 
-        .log-line.error {
-            color: #ff0055;
+        .back-link {
+            position: fixed;
+            top: var(--space-lg);
+            left: var(--space-lg);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            transition: color var(--transition-fast);
         }
 
-        .log-line.system {
-            color: #8a8a9a;
-            font-style: italic;
-        }
-
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-            }
-        }
-
-        .cursor {
-            display: inline-block;
-            width: 8px;
-            height: 14px;
-            background: var(--neon-purple);
-            animation: blink 1s infinite;
-            margin-left: 5px;
-        }
-
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
+        .back-link:hover {
+            color: var(--text-primary);
         }
     </style>
 </head>
 
 <body>
+    <a href="/onboarding.html" class="back-link">← Back</a>
 
-    <div class="ambient-glow"></div>
+    <div class="login-container">
+        <h1 class="logo text-gradient">GΛRO</h1>
+        <p class="subtitle">Sign in to access your collection</p>
 
-    <!-- TERMINAL OVERLAY -->
-    <div id="terminalArea" class="terminal-overlay">
-        <div class="terminal-window">
-            <div style="margin-bottom:20px; border-bottom:1px solid #333; padding-bottom:10px; color:#666;">
-                GΛRO_ANTHOLOGY // V1.0
+        <div class="terminal">
+            <div class="terminal-header">
+                <span class="terminal-dot red"></span>
+                <span class="terminal-dot yellow"></span>
+                <span class="terminal-dot green"></span>
+                <span class="terminal-title">session.log</span>
             </div>
-            <div id="logContainer"></div>
-            <div class="log-line" style="opacity:1"><span class="cursor"></span></div>
-        </div>
-    </div>
-
-    <div class="app-container">
-        <div class="logo">GΛRO</div>
-        <div class="sub-logo">MEMBER ACCESS</div>
-
-        <!-- LOGIN CARD -->
-        <div id="loginArea" class="glass-card">
-            <p
-                style="margin-bottom: 25px; font-weight: 700; color: var(--text-main); letter-spacing:1px; font-size:1.1rem;">
-                WELCOME BACK
-            </p>
-            <p style="margin-bottom: 25px; color: var(--text-muted); font-size:0.85rem;">
-                Sync your Member ID to access your Anthology.
-            </p>
-
-            <button class="btn" onclick="login('google')"
-                style="justify-content: space-between; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2);">
-                <span>GOOGLE</span>
-                <span style="opacity:0.5; font-size:0.8rem;">INSTANT SYNC</span>
-            </button>
-
-            <button class="btn" onclick="login('twitter')"
-                style="justify-content: space-between; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2);">
-                <span>TWITTER / X</span>
-                <span style="opacity:0.5; font-size:0.8rem;">SOCIAL LINK</span>
-            </button>
-
-            <p class="footer-text" style="font-family:'Courier New', monospace;">NO WALLET REQUIRED • SECURE</p>
+            <div class="terminal-body" id="logs">
+                <div class="log-line"><span class="log-prefix">$</span> awaiting_authentication...</div>
+            </div>
         </div>
 
-        <!-- STATUS AREA (Hidden by default) -->
-        <div id="statusArea" class="glass-card" style="display:none;"></div>
-
+        <div class="login-options">
+            <button class="login-btn" id="loginBtn" onclick="login()">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        fill="#4285F4" />
+                    <path
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        fill="#34A853" />
+                    <path
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        fill="#FBBC05" />
+                    <path
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="#EA4335" />
+                </svg>
+                Continue with Google
+            </button>
+        </div>
     </div>
 
     <script>
-        // Polyfills
-        window.global = window;
-        window.process = { env: { DEBUG: undefined }, version: '' };
-
-        // Config
-        const CLIENT_ID = "BNznLZTpfKoLB91mdfsvD-jDQa15tp_Nn7X32dBo3pMGDZqJKArglP0PsW50KkrtKl_uiDrQvT4NovFaosOT6aI";
+        const CLIENT_ID = "BLVk4nc6lfY2oRnqR7tDjkZn-Kpv8JbgS3lE6iDDWNh5zhIW2WdM3_h6fBu8n92Y0FuHOflV0TwIKc6yPNK0cSI";
         const NETWORK = "sapphire_devnet";
-
         let web3auth = null;
-        let privateKeyProvider = null;
 
-        const log = (msg) => console.log(`[VIBE]: ${msg}`);
-
-        function showTerminal() {
-            document.getElementById('loginArea').style.display = 'none';
-            document.getElementById('statusArea').style.display = 'none';
-            document.getElementById('terminalArea').style.display = 'flex';
+        function log(msg, type = '') {
+            const logs = document.getElementById('logs');
+            const line = document.createElement('div');
+            line.className = `log-line ${type}`;
+            line.innerHTML = `<span class="log-prefix">$</span> ${msg}`;
+            logs.appendChild(line);
+            logs.scrollTop = logs.scrollHeight;
         }
 
-        function addLog(text, type = 'normal') {
-            showTerminal();
-            const container = document.getElementById('logContainer');
-            const div = document.createElement('div');
-            div.className = `log-line ${type}`;
-
-            // Add timestamp
-            const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
-
-            let icon = '>';
-            if (type === 'success') icon = '✅';
-            if (type === 'error') icon = '❌';
-            if (type === 'system') icon = '⚙️';
-
-            div.innerHTML = `<span style="opacity:0.5">[${time}]</span> ${icon} ${text}`;
-            container.appendChild(div);
-
-            // Auto scroll
-            // window.scrollTo(0, document.body.scrollHeight);
-        }
-
-        function showCards() {
-            document.getElementById('terminalArea').style.display = 'none';
-            document.getElementById('statusArea').style.display = 'none';
-            document.getElementById('loginArea').style.display = 'block';
-        }
-
-        async function init() {
+        async function initWeb3Auth() {
             try {
-                log("Inicializando Web3Auth Modal SDK...");
-                log("Globals disponibles: " + Object.keys(window).filter(k => k.toLowerCase().includes('web3') || k.toLowerCase().includes('modal')).join(', '));
+                log('initializing_web3auth...');
 
-                // Modal SDK globals
                 const Web3AuthModal = window.Modal?.Web3Auth || window.Web3Auth;
                 const SolanaProvider = window.SolanaProvider?.SolanaPrivateKeyProvider || window.SolanaPrivateKeyProvider;
-                const CHAIN_NAMESPACES = window.Modal?.CHAIN_NAMESPACES || { SOLANA: "solana" };
-
-                if (!Web3AuthModal) {
-                    throw new Error("Web3Auth Modal SDK no cargó. Globals: " + Object.keys(window).filter(k => k.toLowerCase().includes('web3') || k.toLowerCase().includes('modal')).join(', '));
-                }
-                if (!SolanaProvider) {
-                    throw new Error("Solana Provider SDK no cargó.");
-                }
-
-                log("SDKs cargados correctamente");
 
                 const chainConfig = {
-                    chainNamespace: CHAIN_NAMESPACES.SOLANA || "solana",
+                    chainNamespace: "solana",
                     chainId: "0x3",
                     rpcTarget: "https://api.devnet.solana.com",
                     displayName: "Solana Devnet",
-                    blockExplorerUrl: "https://explorer.solana.com",
+                    blockExplorer: "https://explorer.solana.com",
                     ticker: "SOL",
-                    tickerName: "Solana"
+                    tickerName: "Solana",
                 };
 
-                privateKeyProvider = new SolanaProvider({ config: { chainConfig } });
+                const privateKeyProvider = new SolanaProvider({ config: { chainConfig } });
 
                 web3auth = new Web3AuthModal({
                     clientId: CLIENT_ID,
                     web3AuthNetwork: NETWORK,
                     chainConfig,
                     privateKeyProvider,
-                    uiConfig: {
-                        mode: "dark",
-                        uxMode: "redirect",
-                        loginMethodsOrder: ["google", "twitter"]
-                    }
+                    uiConfig: { mode: "dark", uxMode: "redirect" }
                 });
 
-                log("Ejecutando web3auth.initModal() con uxMode redirect...");
-
-                // Configure to use redirect mode instead of popup
-                await web3auth.initModal({
-                    modalConfig: {
-                        openlogin: {
-                            label: "openlogin",
-                            loginMethods: {
-                                google: { name: "google", mainOption: true },
-                                twitter: { name: "twitter", mainOption: true }
-                            },
-                            showOnModal: true
-                        }
-                    }
-                });
-
-                log("Web3Auth inicializado correctamente");
+                await web3auth.initModal();
+                log('ready', 'success');
 
                 if (web3auth.connected) {
-                    log("Usuario ya conectado, procesando...");
-                    handleSuccess();
-                } else {
-                    log("Mostrando opciones de login");
-                    showCards();
+                    log('session_found', 'info');
+                    await handleConnected();
                 }
 
-            } catch (error) {
-                console.error("[VIBE] Init Error:", error);
-                log("Critical Init Error: " + error.message);
-                let msg = error.message;
-                if (msg.includes("validate redirect") || msg.includes("whitelist")) {
-                    msg = `Dominio no autorizado.<br><br>Verifica que <b>${window.location.origin}</b> esté en la Whitelist del Dashboard de Web3Auth.`;
-                }
-                document.getElementById('statusArea').innerHTML = `<p style="color:#ff5555;">Error: ${msg}</p><button class="btn" style="margin-top:15px" onclick="window.location.reload()">Reintentar</button>`;
-                document.getElementById('statusArea').style.display = 'block';
-                document.getElementById('loginArea').style.display = 'none';
+            } catch (e) {
+                log('error: ' + e.message, 'error');
             }
         }
 
-        async function login(provider) {
-            if (!web3auth) {
-                log("web3auth no inicializado");
-                return;
-            }
+        async function login() {
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+
             try {
-                log("Conectando con " + provider + "...");
-                // Modal SDK uses connect() which opens the modal
-                // For direct provider, we use connectTo with social login params
+                log('connecting...');
                 await web3auth.connect();
-                handleSuccess();
+                await handleConnected();
             } catch (e) {
-                console.error("Login Error:", e);
-                log("Login Error: " + e.message);
+                log('auth_failed: ' + e.message, 'error');
+                btn.disabled = false;
             }
         }
 
-        async function logout() {
-            if (!web3auth) return;
-            await web3auth.logout();
-            window.location.reload();
-        }
+        async function handleConnected() {
+            log('authenticated', 'success');
 
-        async function handleSuccess() {
-            addLog("Identidad Confirmada. Obteniendo Wallet...", "system");
-            try {
-                // FIX: Add Timeout to prevent hanging
-                const getAccountsPromise = web3auth.provider.request({ method: "getAccounts" });
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Tiempo de espera agotado (RPC)")), 10000));
+            const accounts = await web3auth.provider.request({ method: "getAccounts" });
+            const address = accounts[0];
+            log('wallet: ' + address.slice(0, 8) + '...', 'info');
+            localStorage.setItem('garo_wallet', address);
 
-                const accounts = await Promise.race([getAccountsPromise, timeoutPromise]);
-                const userAddress = accounts[0];
-                log("User: " + userAddress);
+            // Check if new user
+            log('checking_membership...');
+            const res = await fetch(`/verify?address=${address}`);
+            const data = await res.json();
 
-                addLog(`Wallet Conectada: ${userAddress.slice(0, 4)}...${userAddress.slice(-4)}`, "success");
-
-                const urlParams = new URLSearchParams(window.location.search);
-                const eventId = urlParams.get('event') || 'GENESIS_2025';
-                const referrer = urlParams.get('ref') || null;
-                const localKey = 'vibe_minted_' + userAddress + '_' + eventId;
-                const cached = localStorage.getItem(localKey);
-
-                if (cached) { showSuccessState(cached, true, userAddress); }
-                else { await mintNFT(userAddress, eventId, localKey, referrer); }
-
-            } catch (e) {
-                log("Wallet Error: " + e.message);
-                addLog("ERROR: " + e.message, "error");
-
-                // Show manual reset options
-                document.getElementById('statusArea').style.display = 'block';
-                document.getElementById('statusArea').innerHTML = `
-                    <div style="color:#ff5555; margin-bottom:10px;">❌ Error de Conexión: ${e.message}</div>
-                    <p style="font-size:0.8rem; color:#888;">La sesión parece estancada.</p>
-                    <button class="btn" style="background:#333; margin-top:15px" onclick="logout()">Cerrar Sesión (Reset)</button>
-                    <button class="btn" onclick="window.location.reload()">Reintentar</button>
-                `;
-                document.getElementById('terminalArea').style.display = 'none'; // Hide terminal to show error
+            if (data.valid) {
+                log('member_verified', 'success');
+                log('redirecting...', 'info');
+                setTimeout(() => window.location.href = '/dashboard.html', 500);
+            } else {
+                log('new_member_detected', 'info');
+                log('minting_genesis_memory...', 'info');
+                await mintGenesisNFT(address);
             }
         }
 
-        async function mintNFT(address, eventId, localKey, referrer) {
-            addLog(`Iniciando Protocolo de Minteo...`, "normal");
-            addLog(`Target: ${address.slice(0, 6)}...`, "system");
+        async function mintGenesisNFT(address) {
             try {
-                // --- SECURITY: Sign Message (Doctrina Garo) ---
-                addLog("Solicitando Firma de Seguridad (Proof of Request)...", "normal");
-                const message = `Minting GARO VIBE for ${address}`;
-                const msgEncoded = new TextEncoder().encode(message);
-
-                // Request signature from wallet
-                const signedMessage = await web3auth.provider.request({
+                const message = `GΛRO Genesis: ${Date.now()}`;
+                const encodedMessage = new TextEncoder().encode(message);
+                const signature = await web3auth.provider.request({
                     method: "signMessage",
-                    params: {
-                        message: msgEncoded,
-                        display: "utf8" // Standard for Solana
-                    }
+                    params: { message: encodedMessage }
                 });
 
-                // Convert signature (Uint8Array) to Base64 for the server (Browser native)
-                let binary = '';
-                const bytes = new Uint8Array(signedMessage);
-                const len = bytes.byteLength;
-                for (let i = 0; i < len; i++) {
-                    binary += String.fromCharCode(bytes[i]);
+                const pubKey = await web3auth.provider.request({ method: "getAccounts" });
+
+                const res = await fetch('/mint', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        receiverAddress: address,
+                        eventId: 'GENESIS_2025',
+                        signature: Array.from(new Uint8Array(signature)),
+                        publicKey: pubKey[0],
+                        message
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    log('genesis_memory_created', 'success');
+                    log('welcome_to_garo', 'success');
+                    setTimeout(() => window.location.href = '/dashboard.html', 1000);
+                } else {
+                    log('mint_error: ' + data.error, 'error');
                 }
-                const signatureBase64 = window.btoa(binary);
-                // ----------------------------------------------
-
-                const body = {
-                    receiverAddress: address,
-                    eventId: eventId,
-                    signature: signatureBase64,
-                    publicKey: address,
-                    message: message
-                };
-
-                if (referrer) body.referrer = referrer;
-
-                addLog("Firma Recibida. Enviando a la Blockchain...", "success");
-
-                const response = await fetch('/mint', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-                const data = await response.json();
-                if (data.success) { localStorage.setItem(localKey, data.explorer); showSuccessState(data.explorer, false, address); }
-                else { throw new Error(data.error || "Mint Error"); }
-            } catch (error) {
-                log("API Error: " + error.message);
-                addLog("ERROR CRÍTICO: " + error.message, "error");
-                document.getElementById('statusArea').innerHTML = `<div style="color:#ff5555;">❌ ${error.message}</div><button class="btn" style="margin-top:15px" onclick="window.location.reload()">Reintentar</button>`;
+            } catch (e) {
+                log('mint_failed: ' + e.message, 'error');
             }
         }
 
-        function showSuccessState(explorerLink, isCached, userAddress) {
-            // HIDE TERMINAL & LOGIN
-            document.getElementById('terminalArea').style.display = 'none';
-            document.getElementById('loginArea').style.display = 'none';
-
-            // SHOW STATUS AREA
-            const statusArea = document.getElementById('statusArea');
-            statusArea.style.display = 'block';
-
-            const title = isCached ? "YA ERES MIEMBRO" : "¡ACCESO CONCEDIDO!";
-            const desc = isCached ? "Tu pase Genesis ya está activo." : "Bienvenido al ecosistema GΛRO.";
-            const imgUrl = "https://ipfs.io/ipfs/bafybeicilwj77izwenlikir6uomtgjkuslhpiubgggho7c374677yymqwi";
-            const referralLink = `${window.location.origin}/?ref=${userAddress}`;
-
-            statusArea.innerHTML = `
-                <img src="${imgUrl}" class="nft-img" alt="NFT">
-                <div class="success-title">${title}</div>
-                <div class="success-desc">${desc}</div>
-                <a href="${explorerLink}" target="_blank" style="text-decoration:none;"><button class="btn btn-primary">VER EN BLOCKCHAIN ↗</button></a>
-                <div class="divider"></div>
-                <p style="font-size:0.85rem; color:var(--neon-blue); margin-bottom:8px;">🔗 Comparte y gana:</p>
-                <div style="display:flex; gap:8px; margin-bottom:15px;">
-                    <input type="text" id="refLink" value="${referralLink}" readonly style="flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; padding:10px; color:white; font-size:0.75rem;">
-                    <button class="btn" style="width:auto; padding:10px 15px; margin-bottom:0;" onclick="copyRefLink()">📋</button>
-                </div>
-                <a href="/dashboard.html" style="text-decoration:none;"><button class="btn">🔐 MI DASHBOARD</button></a>
-                <a href="#" onclick="logout()" class="link-muted">Cerrar Sesión</a>
-            `;
-        }
-
-        function copyRefLink() {
-            const input = document.getElementById('refLink');
-            input.select();
-            document.execCommand('copy');
-            alert('¡Link copiado!');
-        }
-
-        window.addEventListener('load', init);
+        window.addEventListener('load', initWeb3Auth);
     </script>
 </body>
 

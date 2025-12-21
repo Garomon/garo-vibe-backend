@@ -1,176 +1,142 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GΛRO VIBE | Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GΛRO | My Collection</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#08080f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <!-- Web3Auth SDKs -->
-    <!-- Web3Auth SDKs (Updated to v9 for Consistency) -->
+    <link rel="stylesheet" href="/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@9.6.0/dist/modal.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@9.6.0/dist/solanaProvider.umd.min.js"></script>
-    <!-- Removed Openlogin Adapter (included/not needed for basic redirect in v9 modal often, or we use defaults) -->
-    <!-- Buffer (required for polyfills) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
-        :root {
-            --neon-purple: #bc13fe;
-            --neon-blue: #0ff0fc;
-            --neon-gold: #ffd700;
-            --deep-bg: #050510;
-            --glass-bg: rgba(255, 255, 255, 0.04);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-main: #fff;
-            --text-muted: #8a8a9a;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--deep-bg);
-            color: var(--text-main);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 900;
-        }
-
-        .btn-back {
-            background: transparent;
-            border: 1px solid var(--glass-border);
-            color: var(--text-muted);
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.85rem;
-        }
-
-        .btn-back:hover {
-            border-color: var(--text-main);
-            color: var(--text-main);
-        }
-
-        /* Level Card */
-        .level-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 30px;
+        /* Dashboard Specific Styles */
+        .hero {
             text-align: center;
-            margin-bottom: 20px;
+            padding: var(--space-xl) 0;
         }
 
-        .level-badge {
-            font-size: 4rem;
-            margin-bottom: 10px;
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto var(--space-lg);
+            box-shadow: var(--shadow-glow);
+            animation: float 4s ease-in-out infinite;
         }
 
-        .level-name {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 5px;
+        .level-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: var(--space-xs);
         }
 
-        .level-genesis {
-            color: var(--neon-purple);
-            text-shadow: 0 0 10px var(--neon-purple);
-        }
-
-        .level-silver {
-            color: #c0c0c0;
-            text-shadow: 0 0 10px #c0c0c0;
-        }
-
-        .level-gold {
-            color: var(--neon-gold);
-            text-shadow: 0 0 10px var(--neon-gold);
-        }
-
-        .level-diamond {
-            color: var(--neon-blue);
-            text-shadow: 0 0 15px var(--neon-blue);
-        }
-
-        .nft-count {
-            color: var(--text-muted);
+        .memory-count {
+            color: var(--text-secondary);
             font-size: 0.9rem;
         }
 
-        /* Progress */
-        .progress-section {
-            margin-top: 25px;
+        .memory-count strong {
+            color: var(--accent-secondary);
+            font-weight: 700;
         }
 
-        .progress-label {
-            font-size: 0.8rem;
+        /* XP Section */
+        .xp-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .xp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md);
+        }
+
+        .xp-amount {
+            font-size: 1.75rem;
+            font-weight: 800;
+        }
+
+        .xp-amount span {
+            font-size: 0.875rem;
+            font-weight: 500;
             color: var(--text-muted);
-            margin-bottom: 8px;
+            margin-left: var(--space-xs);
         }
 
-        .progress-bar {
-            background: rgba(255, 255, 255, 0.1);
-            height: 10px;
-            border-radius: 5px;
-            overflow: hidden;
+        .streak-badge {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
-            transition: width 0.5s;
+        .xp-progress {
+            margin-bottom: var(--space-sm);
         }
 
-        /* MEMORY GALLERY */
-        .memory-gallery {
+        .xp-levels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Memory Gallery */
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: var(--space-md);
+        }
+
+        .gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-sm);
+            margin-bottom: var(--space-xl);
         }
 
-        .memory-card {
+        .memory-item {
             aspect-ratio: 1;
-            border-radius: 12px;
+            border-radius: var(--radius-lg);
             overflow: hidden;
             position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 0, 0, 0.5);
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            transition: all var(--transition-normal);
         }
 
-        .memory-card:hover {
+        .memory-item:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(188, 19, 254, 0.5);
+            border-color: var(--border-glow);
+            box-shadow: var(--shadow-glow);
         }
 
-        .memory-card img {
+        .memory-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -182,385 +148,177 @@
             left: 0;
             right: 0;
             background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
-            padding: 8px 6px 4px;
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.7);
+            padding: var(--space-lg) var(--space-sm) var(--space-sm);
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.8);
             text-align: center;
         }
 
-        .empty-gallery {
+        .empty-state {
             text-align: center;
-            padding: 40px 20px;
-            color: rgba(255, 255, 255, 0.4);
-        }
-
-        .empty-gallery-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            opacity: 0.3;
-        }
-
-        /* LEVEL UP ANIMATION */
-        @keyframes levelUpPulse {
-            0% {
-                transform: scale(1);
-                filter: brightness(1);
-            }
-
-            50% {
-                transform: scale(1.2);
-                filter: brightness(1.5);
-            }
-
-            100% {
-                transform: scale(1);
-                filter: brightness(1);
-            }
-        }
-
-        @keyframes levelUpGlow {
-            0% {
-                box-shadow: 0 0 0 rgba(188, 19, 254, 0);
-            }
-
-            50% {
-                box-shadow: 0 0 60px rgba(188, 19, 254, 0.8);
-            }
-
-            100% {
-                box-shadow: 0 0 0 rgba(188, 19, 254, 0);
-            }
-        }
-
-        .level-up-animation {
-            animation: levelUpPulse 0.6s ease-in-out, levelUpGlow 1s ease-in-out;
-        }
-
-        .level-badge.new-level {
-            animation: levelUpPulse 0.8s ease-in-out infinite;
-            text-shadow: 0 0 20px var(--neon-purple);
-        }
-
-        /* XP BAR */
-        .xp-container {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .xp-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .xp-value {
-            font-size: 1.5rem;
-            font-weight: 900;
-            color: var(--neon-purple);
-        }
-
-        .xp-label {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.5);
-            letter-spacing: 1px;
-        }
-
-        .xp-bar-bg {
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .xp-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue));
-            border-radius: 4px;
-            transition: width 1s ease-out;
-        }
-
-        .streak-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: linear-gradient(135deg, #ff6b00, #ff9500);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-
-        /* Benefits */
-        .benefits {
-            margin-top: 30px;
-        }
-
-        .benefit-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 15px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            margin-bottom: 10px;
-        }
-
-        .benefit-icon {
-            font-size: 1.5rem;
-        }
-
-        .benefit-text {
-            font-size: 0.9rem;
-        }
-
-        .benefit-locked {
-            opacity: 0.4;
-        }
-
-        .benefit-unlocked {
-            border-color: var(--neon-purple);
-        }
-
-        /* Loader */
-        .loader {
-            text-align: center;
-            padding: 50px;
+            padding: var(--space-2xl) var(--space-lg);
             color: var(--text-muted);
         }
 
-        .spinner {
-            width: 30px;
-            height: 30px;
-            border: 3px solid var(--glass-border);
-            border-radius: 50%;
-            border-top-color: var(--neon-purple);
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        /* Scrollbar Hide */
-        ::-webkit-scrollbar {
-            width: 0px;
-            background: transparent;
-        }
-
-        /* VIBE CORE VISUALIZATION */
-        .core-container {
-            position: relative;
-            width: 250px;
-            height: 250px;
-            margin: 40px auto;
-            perspective: 800px;
-        }
-
-        .core-sphere {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 120px;
-            height: 120px;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(188, 19, 254, 0.8), #000);
-            box-shadow: 0 0 40px var(--neon-purple), inset 0 0 20px var(--neon-purple);
-            animation: pulse-core 4s infinite ease-in-out;
-            z-index: 10;
-        }
-
-        .core-wireframe {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 140px;
-            height: 140px;
-            transform: translate(-50%, -50%);
-            border: 1px dashed rgba(0, 240, 252, 0.3);
-            border-radius: 50%;
-            animation: spin-wire 10s infinite linear;
-            pointer-events: none;
-        }
-
-        .shard-orbit {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 200px;
-            height: 200px;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            animation: spin-orbit 8s infinite linear;
-        }
-
-        .shard {
-            position: absolute;
-            top: -6px;
-            left: 50%;
-            width: 12px;
-            height: 12px;
-            background: var(--neon-blue);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        /* ENERGY LEVELS */
-        .core-level-0 .core-sphere {
-            opacity: 0.3;
-            box-shadow: none;
-            background: #222;
-        }
-
-        .core-level-max .core-sphere {
-            background: white;
-            box-shadow: 0 0 80px var(--neon-purple), 0 0 20px white;
-            animation: pulse-max 0.5s infinite alternate;
-        }
-
-        @keyframes pulse-core {
-            0% {
-                transform: translate(-50%, -50%) scale(1);
-            }
-
-            50% {
-                transform: translate(-50%, -50%) scale(1.05);
-            }
-
-            100% {
-                transform: translate(-50%, -50%) scale(1);
-            }
-        }
-
-        @keyframes pulse-max {
-            0% {
-                box-shadow: 0 0 50px var(--neon-purple);
-            }
-
-            100% {
-                box-shadow: 0 0 100px var(--neon-purple), 0 0 40px white;
-            }
-        }
-
-        @keyframes spin-wire {
-            0% {
-                transform: translate(-50%, -50%) rotate(0deg);
-            }
-
-            100% {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
-        }
-
-        @keyframes spin-orbit {
-            0% {
-                transform: translate(-50%, -50%) rotate(0deg);
-            }
-
-            100% {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
-        }
-
-        /* QR Scanner Animation */
-        .qr-section {
-            background: white;
-            padding: 20px;
-            border-radius: 20px;
-            margin-top: 25px;
-            text-align: center;
-            border: 4px solid var(--neon-purple);
-            box-shadow: 0 0 30px rgba(188, 19, 254, 0.3);
-            position: relative;
-            overflow: hidden;
-            display: none;
-            /* Hidden by default until clicked */
-        }
-
-        .scan-line {
-            position: absolute;
-            width: 100%;
-            height: 4px;
-            background: var(--neon-blue);
-            box-shadow: 0 0 10px var(--neon-blue);
-            top: 0;
-            left: 0;
-            animation: scan-move 2s infinite linear;
-            z-index: 10;
-        }
-
-        @keyframes scan-move {
-            0% {
-                top: 0;
-                opacity: 0;
-            }
-
-            10% {
-                opacity: 1;
-            }
-
-            90% {
-                opacity: 1;
-            }
-
-            100% {
-                top: 100%;
-                opacity: 0;
-            }
-        }
-
-        .level-badge {
+        .empty-icon {
             font-size: 4rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            margin-bottom: var(--space-md);
+            opacity: 0.3;
+        }
+
+        /* Rewards */
+        .rewards-list {
+            margin-bottom: var(--space-xl);
+        }
+
+        .reward-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-sm);
+            transition: all var(--transition-normal);
+        }
+
+        .reward-item.unlocked {
+            border-color: rgba(34, 197, 94, 0.3);
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .reward-item.locked {
+            opacity: 0.5;
+        }
+
+        .reward-icon {
+            font-size: 1.5rem;
+        }
+
+        .reward-text {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+
+        .reward-status {
+            font-size: 0.75rem;
+            color: var(--success);
+        }
+
+        /* QR Section */
+        .qr-section {
+            display: none;
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            position: relative;
+        }
+
+        .qr-label {
+            color: #000;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: var(--space-md);
+        }
+
+        #qrcode {
+            display: flex;
+            justify-content: center;
+        }
+
+        .qr-hint {
+            color: #666;
+            font-size: 0.75rem;
+            margin-top: var(--space-md);
+        }
+
+        /* Navigation Grid */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-sm);
+        }
+
+        .nav-btn {
+            padding: var(--space-md);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border-color: var(--border-glow);
+        }
+
+        .nav-btn.highlight {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Loading */
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: var(--space-lg);
+        }
+
+        .loading-text {
+            color: var(--text-muted);
+            font-size: 0.875rem;
         }
     </style>
-    <!-- QR Code Lib -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
-<body>
-
-    <div class="container">
-        <div class="header">
-            <h1>MI DASHBOARD</h1>
-            <a href="/" class="btn-back">← Volver</a>
-        </div>
-
+<body class="safe-area-top safe-area-bottom">
+    <div class="container" style="padding-top: var(--space-lg); padding-bottom: var(--space-2xl);">
         <div id="content">
-            <div class="loader">
-                <div class="spinner"></div>
-                <p>Conectando...</p>
+            <div class="loading-screen">
+                <div class="loader"></div>
+                <p class="loading-text">Loading your collection...</p>
             </div>
         </div>
     </div>
 
     <script>
-        window.global = window;
-        window.process = { env: { DEBUG: undefined }, version: '' };
-
-        const CLIENT_ID = "BNznLZTpfKoLB91mdfsvD-jDQa15tp_Nn7X32dBo3pMGDZqJKArglP0PsW50KkrtKl_uiDrQvT4NovFaosOT6aI";
+        // Web3Auth Config
+        const CLIENT_ID = "BLVk4nc6lfY2oRnqR7tDjkZn-Kpv8JbgS3lE6iDDWNh5zhIW2WdM3_h6fBu8n92Y0FuHOflV0TwIKc6yPNK0cSI";
         const NETWORK = "sapphire_devnet";
         let web3auth = null;
+        let currentUserAddress = '';
 
-        // Level Definitions
         const LEVELS = [
-            { min: 0, name: "Newcomer", emoji: "🌱", class: "" },
-            { min: 1, name: "Genesis Holder", emoji: "🥉", class: "level-genesis" },
-            { min: 3, name: "Silver Fan", emoji: "🥈", class: "level-silver" },
-            { min: 5, name: "Gold VIP", emoji: "🥇", class: "level-gold" },
-            { min: 10, name: "Diamond Elite", emoji: "💎", class: "level-diamond" }
+            { min: 0, name: "New Fan", emoji: "✨" },
+            { min: 1, name: "Bronze", emoji: "🥉" },
+            { min: 3, name: "Silver", emoji: "🥈" },
+            { min: 5, name: "Gold VIP", emoji: "🥇" },
+            { min: 10, name: "Diamond", emoji: "💎" },
+            { min: 20, name: "Legend", emoji: "👑" }
         ];
 
-        // Benefits
         const BENEFITS = [
-            { required: 1, icon: "🎵", text: "Acceso a contenido exclusivo" },
-            { required: 3, icon: "🎟️", text: "Early access a tickets" },
-            { required: 5, icon: "🎧", text: "Stems descargables" },
-            { required: 10, icon: "📞", text: "Llamada 1:1 con GΛRO" }
+            { required: 1, icon: "🎵", text: "Exclusive content access" },
+            { required: 3, icon: "🎟️", text: "Early ticket access" },
+            { required: 5, icon: "🎧", text: "Downloadable stems" },
+            { required: 10, icon: "📞", text: "1:1 call with GΛRO" }
         ];
 
         function getLevel(count) {
@@ -569,20 +327,14 @@
             return level;
         }
 
-        function getNextLevel(count) {
-            for (const l of LEVELS) { if (count < l.min) return l; }
-            return null;
-        }
-
         async function init() {
             try {
-                // v9 Logic (Consistent with index.html)
                 const Web3AuthModal = window.Modal?.Web3Auth || window.Web3Auth;
                 const SolanaProvider = window.SolanaProvider?.SolanaPrivateKeyProvider || window.SolanaPrivateKeyProvider;
 
                 const chainConfig = {
                     chainNamespace: "solana",
-                    chainId: "0x3", // Devnet
+                    chainId: "0x3",
                     rpcTarget: "https://api.devnet.solana.com",
                     displayName: "Solana Devnet",
                     blockExplorer: "https://explorer.solana.com",
@@ -597,35 +349,48 @@
                     web3AuthNetwork: NETWORK,
                     chainConfig,
                     privateKeyProvider,
-                    uiConfig: {
-                        mode: "dark",
-                        uxMode: "redirect", // Key for session persistence across pages
-                        loginMethodsOrder: ["google", "twitter"]
-                    }
+                    uiConfig: { mode: "dark", uxMode: "redirect" }
                 });
 
-                // Init with redirect settings to pick up session from index.html
                 await web3auth.initModal();
 
                 if (web3auth.connected) {
                     const accounts = await web3auth.provider.request({ method: "getAccounts" });
-                    const userAddress = accounts[0];
-                    await loadDashboard(userAddress);
+                    await loadDashboard(accounts[0]);
                 } else {
-                    // Not logged in
-                    document.getElementById('content').innerHTML = `<div class="level-card"><p>No has iniciado sesión.</p><a href="/" class="btn-back" style="margin-top:15px; display:inline-block;">Iniciar Sesión</a></div>`;
+                    showLoginPrompt();
                 }
             } catch (e) {
-                console.error("Dashboard Init Error:", e);
-                document.getElementById('content').innerHTML = `<div class="level-card"><p style="color:#ff5555;">Error: ${e.message}</p></div>`;
+                console.error("Init Error:", e);
+                showError(e.message);
             }
         }
 
+        function showLoginPrompt() {
+            document.getElementById('content').innerHTML = `
+                <div class="loading-screen">
+                    <div class="empty-icon">🔐</div>
+                    <p style="color: var(--text-secondary);">You're not logged in</p>
+                    <a href="/onboarding.html" class="btn btn-primary" style="margin-top: var(--space-md);">Enter GΛRO</a>
+                </div>
+            `;
+        }
+
+        function showError(msg) {
+            document.getElementById('content').innerHTML = `
+                <div class="loading-screen">
+                    <div class="empty-icon" style="color: var(--error);">⚠️</div>
+                    <p style="color: var(--error);">${msg}</p>
+                    <a href="/" class="btn btn-secondary" style="margin-top: var(--space-md);">Try Again</a>
+                </div>
+            `;
+        }
+
         async function loadDashboard(address) {
-            document.getElementById('content').innerHTML = `<div class="loader"><div class="spinner"></div><p>Loading your Anthology...</p></div>`;
+            currentUserAddress = address;
+            localStorage.setItem('garo_wallet', address);
 
             try {
-                // Fetch memories and XP in parallel
                 const [memoriesRes, xpRes] = await Promise.all([
                     fetch(`/api/memories?address=${address}`),
                     fetch(`/api/xp?address=${address}`)
@@ -643,166 +408,117 @@
             }
         }
 
-        function generateOrbits(count) {
-            let html = '';
-            // Max 5 visual orbits to keep it clean, multiply shards if needed
-            const orbits = Math.min(count, 5);
-            for (let i = 0; i < orbits; i++) {
-                const rotation = i * (360 / orbits);
-                const delay = i * -1;
-                html += `<div class="shard-orbit" style="animation-delay:${delay}s; width:${160 + (i * 20)}px; height:${160 + (i * 20)}px;">
-                            <div class="shard"></div>
-                         </div>`;
-            }
-            return html;
-        }
-
-        function toggleQR() {
-            const qr = document.querySelector('.qr-section');
-            if (qr.style.display === 'block') {
-                qr.style.display = 'none';
-            } else {
-                qr.style.display = 'block';
-                // Regen QR if empty
-                if (document.getElementById('qrcode').innerHTML === "") {
-                    const address = document.getElementById('qrcode').getAttribute('data-address');
-                    // Need address here, might need to store it globally or pass it.
-                    // Simpler: Just rely on the timeout from renderDashboard which calls QRCode lib.
-                    // But renderDashboard re-runs... let's fix renderDashboard to store address in a closure or global.
-                }
-            }
-        }
-
-        // Store current user address for sharing
-        let currentUserAddress = '';
-
-        function shareProfile() {
-            if (!currentUserAddress) {
-                alert('No profile to share yet');
-                return;
-            }
-            const profileUrl = `${window.location.origin}/profile.html?a=${currentUserAddress}`;
-            if (navigator.share) {
-                navigator.share({
-                    title: 'My GΛRO Collection',
-                    text: 'Check out my Memory collection on GΛRO VIBE!',
-                    url: profileUrl
-                });
-            } else {
-                navigator.clipboard.writeText(profileUrl);
-                alert('Profile link copied!');
-            }
-        }
-
         function renderDashboard(memories, address, xpData) {
-            currentUserAddress = address; // Store for sharing
-            const nftCount = memories.length;
-            const level = getLevel(nftCount);
-            const nextLevel = getNextLevel(nftCount);
-            const progressPercent = nextLevel ? Math.min(100, (nftCount / nextLevel.min) * 100) : 100;
+            const count = memories.length;
+            const level = getLevel(count);
 
-            let benefitsHtml = BENEFITS.map(b => {
-                const unlocked = nftCount >= b.required;
-                return `<div class="benefit-item ${unlocked ? 'benefit-unlocked' : 'benefit-locked'}">
-                    <span class="benefit-icon">${b.icon}</span>
-                    <span class="benefit-text">${b.text} ${unlocked ? '✓' : `(${b.required} Memories)`}</span>
+            const galleryHtml = memories.length > 0
+                ? `<div class="gallery">${memories.map(m => `
+                    <div class="memory-item">
+                        <img src="${m.image}" alt="${m.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/150/141423/a855f7?text=✨'">
+                        <div class="memory-date">${new Date(m.date).toLocaleDateString('en', { month: 'short', day: 'numeric' })}</div>
+                    </div>
+                `).join('')}</div>`
+                : `<div class="empty-state">
+                    <div class="empty-icon">📸</div>
+                    <p>Your collection is empty</p>
+                    <p style="font-size: 0.8rem; margin-top: var(--space-sm); opacity: 0.6;">Capture your first memory at an event!</p>
+                </div>`;
+
+            const benefitsHtml = BENEFITS.map(b => {
+                const unlocked = count >= b.required;
+                return `<div class="reward-item ${unlocked ? 'unlocked' : 'locked'}">
+                    <span class="reward-icon">${b.icon}</span>
+                    <span class="reward-text">${b.text}</span>
+                    <span class="reward-status">${unlocked ? '✓' : `${b.required} needed`}</span>
                 </div>`;
             }).join('');
 
-            // XP Bar HTML
-            const xpBarHtml = `
-                <div class="xp-container">
-                    <div class="xp-header">
-                        <div>
-                            <span class="xp-value">${xpData.xp || 0}</span>
-                            <span class="xp-label"> XP</span>
-                        </div>
-                        ${xpData.streak > 0 ? `<span class="streak-badge">🔥 ${xpData.streak} STREAK</span>` : ''}
-                    </div>
-                    <div class="xp-bar-bg">
-                        <div class="xp-bar-fill" style="width: ${xpData.progress || 0}%"></div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:5px; font-size:0.7rem; color:rgba(255,255,255,0.4);">
-                        <span>${xpData.level?.name || 'New Fan'}</span>
-                        <span>${xpData.nextLevel ? xpData.nextLevel.name + ' →' : 'MAX LEVEL'}</span>
-                    </div>
-                </div>
-            `;
-
-            // Memory Gallery HTML
-            let galleryHtml = '';
-            if (memories.length > 0) {
-                galleryHtml = `<div class="memory-gallery">
-                    ${memories.map(m => `
-                        <div class="memory-card" title="${m.name}">
-                            <img src="${m.image}" alt="${m.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/150/1a1a2e/bc13fe?text=VIBE'">
-                            <div class="memory-date">${new Date(m.date).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}</div>
-                        </div>
-                    `).join('')}
-                </div>`;
-            } else {
-                galleryHtml = `<div class="empty-gallery">
-                    <div class="empty-gallery-icon">📸</div>
-                    <p>Your Anthology is empty</p>
-                    <p style="font-size:0.8rem; margin-top:10px;">Capture your first Memory at an event!</p>
-                </div>`;
-            }
-
             document.getElementById('content').innerHTML = `
-                <div style="text-align:center; margin-bottom:20px;">
-                    <h2 class="level-badge" style="font-size:2rem; margin:0;">${level.name}</h2>
-                    <p style="color:var(--text-muted); letter-spacing:1px; margin-top:5px; font-family:'Outfit', sans-serif;">MY ANTHOLOGY: <span style="color:var(--neon-blue);">${nftCount} MEMORIES</span></p>
+                <div class="hero animate-fade-in">
+                    <div class="avatar">${level.emoji}</div>
+                    <h1 class="level-title text-gradient">${level.name}</h1>
+                    <p class="memory-count"><strong>${count}</strong> memories collected</p>
                 </div>
 
-                ${xpBarHtml}
-
-                <h3 style="font-size:0.9rem; color:#888; letter-spacing:2px; margin-bottom:10px; text-align:center;">MY MEMORIES</h3>
-                ${galleryHtml}
-
-                <button class="btn" onclick="toggleQR()" style="background:var(--neon-purple); border:none; color:white; font-weight:700; box-shadow:0 0 20px rgba(188,19,254,0.4);">SHOW ACCESS PASS</button>
-
-                <div class="benefits">
-                    <h3 style="font-size:1rem; margin-bottom:15px; color:var(--text-muted);">REWARDS</h3>
-                    ${benefitsHtml}
+                <div class="xp-card animate-slide-up">
+                    <div class="xp-header">
+                        <div class="xp-amount">${xpData.xp || 0}<span>XP</span></div>
+                        ${xpData.streak > 0 ? `<div class="streak-badge">🔥 ${xpData.streak}</div>` : ''}
+                    </div>
+                    <div class="xp-progress">
+                        <div class="progress">
+                            <div class="progress-fill" style="width: ${xpData.progress || 0}%"></div>
+                        </div>
+                    </div>
+                    <div class="xp-levels">
+                        <span>${xpData.level?.name || 'New Fan'}</span>
+                        <span>${xpData.nextLevel ? '→ ' + xpData.nextLevel.name : '✨ MAX'}</span>
+                    </div>
                 </div>
 
-                <div class="qr-section">
-                    <div class="scan-line"></div>
+                <div style="animation: slideUp 0.5s ease-out 0.2s both;">
+                    <h3 class="section-title">My Memories</h3>
+                    ${galleryHtml}
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%; margin-bottom: var(--space-lg);" onclick="toggleQR()">
+                    Show Access Pass
+                </button>
+
+                <div class="qr-section" id="qrSection">
                     <div class="qr-label">ACCESS PASS</div>
                     <div id="qrcode"></div>
-                    <p class="scan-hint">Show this code at the entrance</p>
+                    <p class="qr-hint">Show at entrance for verification</p>
                 </div>
 
-                <!-- NAVIGATION HUB -->
-                <div style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px;">
-                    <h3 style="font-size:0.8rem; color:#666; letter-spacing:2px; margin-bottom:15px;">EXPLORE</h3>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <button onclick="shareProfile()" class="btn" style="font-size:0.8rem;">📤 SHARE PROFILE</button>
-                        <button onclick="window.location.href='/leaderboard.html'" class="btn" style="font-size:0.8rem;">🏆 LEADERBOARD</button>
-                        <button onclick="window.location.href='/story.html?a='+currentUserAddress" class="btn" style="font-size:0.8rem;">📸 CREATE STORY</button>
-                        <button onclick="window.location.href='/downloads.html'" class="btn" style="font-size:0.8rem;">🎵 DOWNLOADS</button>
-                        <button onclick="window.location.href='/inject.html'" class="btn" style="font-size:0.8rem;">✨ CAPTURE</button>
-                        <button onclick="window.location.href='/godmode.html'" class="btn" style="font-size:0.8rem; border-color:var(--neon-purple); color:var(--neon-purple);">👁️ GOD MODE</button>
+                <div style="animation: slideUp 0.5s ease-out 0.3s both;">
+                    <h3 class="section-title">Rewards</h3>
+                    <div class="rewards-list">${benefitsHtml}</div>
+                </div>
+
+                <div style="animation: slideUp 0.5s ease-out 0.4s both;">
+                    <h3 class="section-title">Explore</h3>
+                    <div class="nav-grid">
+                        <button class="nav-btn" onclick="shareProfile()">📤 Share</button>
+                        <button class="nav-btn" onclick="location.href='/leaderboard.html'">🏆 Leaderboard</button>
+                        <button class="nav-btn" onclick="location.href='/story.html?a=${address}'">📸 Story</button>
+                        <button class="nav-btn" onclick="location.href='/downloads.html'">🎵 Downloads</button>
+                        <button class="nav-btn" onclick="location.href='/inject.html'">✨ Capture</button>
+                        <button class="nav-btn highlight" onclick="location.href='/godmode.html'">👁️ Admin</button>
                     </div>
                 </div>
             `;
 
             // Generate QR
             setTimeout(() => {
-                const qrContainer = document.getElementById("qrcode");
-                if (qrContainer) {
-                    qrContainer.innerHTML = "";
-                    qrContainer.setAttribute('data-address', address);
-                    new QRCode(qrContainer, {
+                const qr = document.getElementById("qrcode");
+                if (qr) {
+                    new QRCode(qr, {
                         text: address,
-                        width: 180,
-                        height: 180,
+                        width: 160,
+                        height: 160,
                         colorDark: "#000000",
                         colorLight: "#ffffff",
                         correctLevel: QRCode.CorrectLevel.H
                     });
                 }
             }, 100);
+        }
+
+        function toggleQR() {
+            const qr = document.getElementById('qrSection');
+            qr.style.display = qr.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function shareProfile() {
+            const url = `${location.origin}/profile.html?a=${currentUserAddress}`;
+            if (navigator.share) {
+                navigator.share({ title: 'My GΛRO Collection', text: 'Check out my memories!', url });
+            } else {
+                navigator.clipboard.writeText(url);
+                alert('Link copied!');
+            }
         }
 
         window.addEventListener('load', init);

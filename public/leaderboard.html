@@ -1,188 +1,207 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GΛRO VIBE | Leaderboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GΛRO | Leaderboard</title>
+    <link rel="stylesheet" href="/styles.css">
+    <meta name="theme-color" content="#08080f">
+
     <style>
-        :root {
-            --neon-purple: #bc13fe;
-            --neon-gold: #ffd700;
-            --deep-bg: #050510;
-            --glass-bg: rgba(255, 255, 255, 0.04);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --text-main: #fff;
-            --text-muted: #8a8a9a;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background: var(--deep-bg);
-            color: var(--text-main);
+        .page {
+            padding: var(--space-xl) var(--space-md);
             min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
         }
 
         .header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
         }
 
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 900;
-        }
-
-        .btn-back {
-            background: transparent;
-            border: 1px solid var(--glass-border);
+        .back-btn {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: var(--space-sm) var(--space-md);
             color: var(--text-muted);
-            padding: 8px 15px;
-            border-radius: 8px;
             cursor: pointer;
-            text-decoration: none;
-            font-size: 0.85rem;
+            transition: all var(--transition-fast);
         }
 
+        .back-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--border-glow);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Podium */
         .podium {
             display: flex;
-            justify-content: center;
             align-items: flex-end;
-            gap: 10px;
-            margin-bottom: 30px;
+            justify-content: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-xl);
+            padding: var(--space-lg) 0;
         }
 
         .podium-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
-            padding: 15px;
-            border-radius: 12px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
         }
 
-        .podium-1 {
-            order: 2;
-            background: linear-gradient(180deg, rgba(255, 215, 0, 0.15) 0%, transparent 100%);
-            border-color: var(--neon-gold);
-            min-height: 140px;
+        .podium-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: var(--space-sm);
         }
 
-        .podium-2 {
-            order: 1;
-            min-height: 100px;
-        }
-
-        .podium-3 {
-            order: 3;
-            min-height: 80px;
-        }
-
-        .podium-rank {
+        .podium-item.first .podium-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ffd700, #ff9500);
             font-size: 2rem;
-            margin-bottom: 5px;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
         }
 
-        .podium-addr {
+        .podium-item.second .podium-avatar {
+            background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+        }
+
+        .podium-item.third .podium-avatar {
+            background: linear-gradient(135deg, #cd7f32, #b5651d);
+        }
+
+        .podium-wallet {
             font-size: 0.7rem;
             color: var(--text-muted);
             font-family: monospace;
         }
 
         .podium-count {
-            font-size: 1.2rem;
+            font-size: 0.875rem;
             font-weight: 700;
-            color: var(--neon-gold);
+            color: var(--accent-secondary);
+            margin-top: var(--space-xs);
         }
 
-        .list {
-            margin-top: 20px;
+        .podium-bar {
+            width: 80px;
+            margin-top: var(--space-sm);
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        }
+
+        .podium-item.first .podium-bar {
+            height: 100px;
+            background: linear-gradient(to top, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.05));
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-bottom: none;
+        }
+
+        .podium-item.second .podium-bar {
+            height: 70px;
+            background: linear-gradient(to top, rgba(192, 192, 192, 0.2), rgba(192, 192, 192, 0.05));
+            border: 1px solid rgba(192, 192, 192, 0.3);
+            border-bottom: none;
+        }
+
+        .podium-item.third .podium-bar {
+            height: 50px;
+            background: linear-gradient(to top, rgba(205, 127, 50, 0.2), rgba(205, 127, 50, 0.05));
+            border: 1px solid rgba(205, 127, 50, 0.3);
+            border-bottom: none;
+        }
+
+        /* List */
+        .list-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: var(--space-md);
+        }
+
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
         }
 
         .list-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 15px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            margin-bottom: 10px;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-normal);
         }
 
-        .rank {
+        .list-item:hover {
+            border-color: var(--border-glow);
+        }
+
+        .list-rank {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
             font-weight: 700;
-            width: 30px;
             color: var(--text-muted);
         }
 
-        .address {
-            font-family: monospace;
-            font-size: 0.85rem;
+        .list-wallet {
             flex: 1;
-            margin-left: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
-        .count {
+        .list-count {
             font-weight: 700;
-            color: var(--neon-purple);
+            color: var(--accent-primary);
         }
 
-        .empty {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-muted);
-        }
-
-        .loader {
-            text-align: center;
-            padding: 50px;
-        }
-
-        .spinner {
-            width: 30px;
-            height: 30px;
-            border: 3px solid var(--glass-border);
-            border-radius: 50%;
-            border-top-color: var(--neon-purple);
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        /* Loading */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-2xl);
+            gap: var(--space-lg);
         }
     </style>
 </head>
 
-<body>
-
-    <div class="container">
+<body class="safe-area-top safe-area-bottom">
+    <div class="container page">
         <div class="header">
-            <h1>🏆 LEADERBOARD</h1>
-            <a href="/" class="btn-back">← Volver</a>
+            <button class="back-btn" onclick="history.back()">←</button>
+            <h1 class="page-title">🏆 Leaderboard</h1>
         </div>
 
         <div id="content">
-            <div class="loader">
-                <div class="spinner"></div>
-                <p>Cargando...</p>
+            <div class="loading">
+                <div class="loader"></div>
+                <p style="color: var(--text-muted);">Loading rankings...</p>
             </div>
         </div>
     </div>
@@ -192,37 +211,62 @@
             try {
                 const res = await fetch('/api/leaderboard');
                 const data = await res.json();
-                const lb = data.leaderboard || [];
-
-                if (lb.length === 0) {
-                    document.getElementById('content').innerHTML = `<div class="empty"><p>No collectors yet.</p><p style="margin-top:10px;">Be the first to capture a Memory!</p></div>`;
-                    return;
-                }
-
-                // Podium (top 3)
-                let podiumHtml = '';
-                if (lb[0]) podiumHtml += `<div class="podium-item podium-1"><div class="podium-rank">🥇</div><div class="podium-count">${lb[0].count}</div><div class="podium-addr">${lb[0].wallet.slice(0, 4)}...${lb[0].wallet.slice(-4)}</div></div>`;
-                if (lb[1]) podiumHtml += `<div class="podium-item podium-2"><div class="podium-rank">🥈</div><div class="podium-count">${lb[1].count}</div><div class="podium-addr">${lb[1].wallet.slice(0, 4)}...${lb[1].wallet.slice(-4)}</div></div>`;
-                if (lb[2]) podiumHtml += `<div class="podium-item podium-3"><div class="podium-rank">🥉</div><div class="podium-count">${lb[2].count}</div><div class="podium-addr">${lb[2].wallet.slice(0, 4)}...${lb[2].wallet.slice(-4)}</div></div>`;
-
-                // List (4-10)
-                let listHtml = '';
-                for (let i = 3; i < lb.length; i++) {
-                    listHtml += `<div class="list-item">
-                        <span class="rank">#${i + 1}</span>
-                        <span class="address">${lb[i].wallet.slice(0, 6)}...${lb[i].wallet.slice(-4)}</span>
-                        <span class="count">${lb[i].count} Memories</span>
-                    </div>`;
-                }
-
-                document.getElementById('content').innerHTML = `
-                    <div class="podium">${podiumHtml}</div>
-                    ${listHtml ? `<div class="list">${listHtml}</div>` : ''}
-                `;
-
+                const top = data.leaderboard || [];
+                render(top);
             } catch (e) {
-                document.getElementById('content').innerHTML = `<div class="empty" style="color:#ff5555;">Error: ${e.message}</div>`;
+                document.getElementById('content').innerHTML = `
+                    <div class="loading">
+                        <p style="color: var(--error);">Failed to load</p>
+                    </div>
+                `;
             }
+        }
+
+        function render(list) {
+            if (list.length < 3) {
+                document.getElementById('content').innerHTML = `
+                    <div class="loading">
+                        <p style="color: var(--text-muted);">Not enough data yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const podiumHtml = `
+                <div class="podium">
+                    <div class="podium-item second">
+                        <div class="podium-avatar">🥈</div>
+                        <div class="podium-wallet">${list[1]?.address?.slice(0, 6) || '???'}...</div>
+                        <div class="podium-count">${list[1]?.count || 0}</div>
+                        <div class="podium-bar"></div>
+                    </div>
+                    <div class="podium-item first">
+                        <div class="podium-avatar">👑</div>
+                        <div class="podium-wallet">${list[0]?.address?.slice(0, 6) || '???'}...</div>
+                        <div class="podium-count">${list[0]?.count || 0}</div>
+                        <div class="podium-bar"></div>
+                    </div>
+                    <div class="podium-item third">
+                        <div class="podium-avatar">🥉</div>
+                        <div class="podium-wallet">${list[2]?.address?.slice(0, 6) || '???'}...</div>
+                        <div class="podium-count">${list[2]?.count || 0}</div>
+                        <div class="podium-bar"></div>
+                    </div>
+                </div>
+            `;
+
+            const listHtml = list.slice(3).map((item, i) => `
+                <div class="list-item">
+                    <span class="list-rank">${i + 4}</span>
+                    <span class="list-wallet">${item.address?.slice(0, 8)}...</span>
+                    <span class="list-count">${item.count}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('content').innerHTML = `
+                ${podiumHtml}
+                ${listHtml ? `<h3 class="list-title">Rankings</h3><div class="leaderboard-list">${listHtml}</div>` : ''}
+            `;
         }
 
         window.addEventListener('load', loadLeaderboard);
