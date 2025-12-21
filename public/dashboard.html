@@ -200,42 +200,119 @@
             background: transparent;
         }
 
-        /* Holographic Card Effect */
-        .level-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 20px;
+        /* VIBE CORE VISUALIZATION */
+        .core-container {
             position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s;
+            width: 250px;
+            height: 250px;
+            margin: 40px auto;
+            perspective: 800px;
         }
 
-        .level-card::before {
-            content: '';
+        .core-sphere {
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg,
-                    transparent 45%,
-                    rgba(255, 255, 255, 0.1) 50%,
-                    transparent 55%);
-            animation: holo-sweep 4s infinite linear;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            height: 120px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(188, 19, 254, 0.8), #000);
+            box-shadow: 0 0 40px var(--neon-purple), inset 0 0 20px var(--neon-purple);
+            animation: pulse-core 4s infinite ease-in-out;
+            z-index: 10;
+        }
+
+        .core-wireframe {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 140px;
+            height: 140px;
+            transform: translate(-50%, -50%);
+            border: 1px dashed rgba(0, 240, 252, 0.3);
+            border-radius: 50%;
+            animation: spin-wire 10s infinite linear;
             pointer-events: none;
         }
 
-        @keyframes holo-sweep {
+        .shard-orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: spin-orbit 8s infinite linear;
+        }
+
+        .shard {
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        /* ENERGY LEVELS */
+        .core-level-0 .core-sphere {
+            opacity: 0.3;
+            box-shadow: none;
+            background: #222;
+        }
+
+        .core-level-max .core-sphere {
+            background: white;
+            box-shadow: 0 0 80px var(--neon-purple), 0 0 20px white;
+            animation: pulse-max 0.5s infinite alternate;
+        }
+
+        @keyframes pulse-core {
             0% {
-                transform: rotate(0deg) translateY(0);
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
             }
 
             100% {
-                transform: rotate(360deg) translateY(20px);
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @keyframes pulse-max {
+            0% {
+                box-shadow: 0 0 50px var(--neon-purple);
+            }
+
+            100% {
+                box-shadow: 0 0 100px var(--neon-purple), 0 0 40px white;
+            }
+        }
+
+        @keyframes spin-wire {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        @keyframes spin-orbit {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
             }
         }
 
@@ -250,6 +327,8 @@
             box-shadow: 0 0 30px rgba(188, 19, 254, 0.3);
             position: relative;
             overflow: hidden;
+            display: none;
+            /* Hidden by default until clicked */
         }
 
         .scan-line {
@@ -409,6 +488,36 @@
             }
         }
 
+        function generateOrbits(count) {
+            let html = '';
+            // Max 5 visual orbits to keep it clean, multiply shards if needed
+            const orbits = Math.min(count, 5);
+            for (let i = 0; i < orbits; i++) {
+                const rotation = i * (360 / orbits);
+                const delay = i * -1;
+                html += `<div class="shard-orbit" style="animation-delay:${delay}s; width:${160 + (i * 20)}px; height:${160 + (i * 20)}px;">
+                            <div class="shard"></div>
+                         </div>`;
+            }
+            return html;
+        }
+
+        function toggleQR() {
+            const qr = document.querySelector('.qr-section');
+            if (qr.style.display === 'block') {
+                qr.style.display = 'none';
+            } else {
+                qr.style.display = 'block';
+                // Regen QR if empty
+                if (document.getElementById('qrcode').innerHTML === "") {
+                    const address = document.getElementById('qrcode').getAttribute('data-address');
+                    // Need address here, might need to store it globally or pass it.
+                    // Simpler: Just rely on the timeout from renderDashboard which calls QRCode lib.
+                    // But renderDashboard re-runs... let's fix renderDashboard to store address in a closure or global.
+                }
+            }
+        }
+
         function renderDashboard(nftCount, address) {
             const level = getLevel(nftCount);
             const nextLevel = getNextLevel(nftCount);
@@ -423,18 +532,20 @@
             }).join('');
 
             document.getElementById('content').innerHTML = `
-                <div class="level-card">
-                    <div class="level-badge">${level.emoji}</div>
-                    <div class="level-name ${level.class}">${level.name}</div>
-                    <div class="nft-count">${nftCount} NFT${nftCount !== 1 ? 's' : ''} coleccionados</div>
-                    
-                    ${nextLevel ? `
-                    <div class="progress-section">
-                        <div class="progress-label">Siguiente: ${nextLevel.name} (${nextLevel.min} NFTs)</div>
-                        <div class="progress-bar"><div class="progress-fill" style="width: ${progressPercent}%"></div></div>
-                    </div>
-                    ` : '<p style="margin-top:15px; color:var(--neon-gold);">¡Nivel Máximo Alcanzado!</p>'}
+                <!-- VIBE CORE UI -->
+                <div class="core-container ${nftCount === 0 ? 'core-level-0' : (nftCount > 5 ? 'core-level-max' : '')}">
+                    <div class="core-sphere"></div>
+                    <div class="core-wireframe"></div>
+                    ${generateOrbits(nftCount)}
                 </div>
+
+                <div style="text-align:center; margin-bottom:30px;">
+                    <h2 class="level-badge" style="font-size:2rem; margin:0;">${level.name}</h2>
+                    <p style="color:var(--text-muted); letter-spacing:1px; margin-top:5px;">CORE ENERGY: <span style="color:var(--neon-blue);">${nftCount} SHARDS</span></p>
+                </div>
+
+                <button class="btn" onclick="toggleQR()" style="background:var(--neon-purple); border:none; color:white; font-weight:700; box-shadow:0 0 20px rgba(188,19,254,0.4);">SHOW ACCESS PASS</button>
+
 
                 <div class="benefits">
                     <h3 style="font-size:1rem; margin-bottom:15px; color:var(--text-muted);">BENEFICIOS</h3>
@@ -449,11 +560,14 @@
                 </div>
             `;
 
-            // Generate QR
+            // Generate QR (Hidden by default now)
             setTimeout(() => {
                 const qrContainer = document.getElementById("qrcode");
                 if (qrContainer) {
                     qrContainer.innerHTML = ""; // Clear
+                    // Store address for safety if we need to regen
+                    qrContainer.setAttribute('data-address', address);
+
                     new QRCode(qrContainer, {
                         text: address,
                         width: 180,
