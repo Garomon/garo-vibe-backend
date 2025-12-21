@@ -38,6 +38,24 @@ const supabase = createClient(
 // --- Serve Static Files ---
 app.use(express.static(path.join(__dirname, '../public')));
 
+// --- Rate Limiting (Security Hardening) ---
+const mintRateLimit: Record<string, { count: number, lastReset: number }> = {};
+const MINT_LIMIT = 5; // Max mints per window per IP
+const MINT_WINDOW_MS = 60 * 1000; // 1 minute
+
+function checkMintRateLimit(ip: string): boolean {
+    const now = Date.now();
+    if (!mintRateLimit[ip] || now - mintRateLimit[ip].lastReset > MINT_WINDOW_MS) {
+        mintRateLimit[ip] = { count: 1, lastReset: now };
+        return true;
+    }
+    if (mintRateLimit[ip].count >= MINT_LIMIT) {
+        return false;
+    }
+    mintRateLimit[ip].count++;
+    return true;
+}
+
 
 // --- Global Umi Setup ---
 function getUmi() {
@@ -84,6 +102,13 @@ app.get('/status', (req, res) => {
 // 2. Mint Endpoint
 app.post('/mint', async (req, res) => {
     console.log("📩 Petición de minteo recibida...");
+
+    // Rate limit check
+    const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+    if (!checkMintRateLimit(clientIp)) {
+        console.log(`⚠️ Rate limit hit for IP: ${clientIp}`);
+        return res.status(429).json({ success: false, error: "Too many requests. Please wait." });
+    }
 
     const { receiverAddress, eventId, referrer, signature, publicKey: signerPublicKey, message } = req.body;
 

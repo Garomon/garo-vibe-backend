@@ -9,6 +9,7 @@
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
@@ -257,10 +258,19 @@
                     <span>TOTAL MINTS:</span>
                     <span id="stat-mints" style="font-weight:bold;">0</span>
                 </div>
-                <div style="display:flex; justify-content:space-between;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <span>TOTAL SCANS:</span>
                     <span id="stat-scans" style="font-weight:bold;">0</span>
                 </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>UNIQUE USERS:</span>
+                    <span id="stat-users" style="font-weight:bold;">0</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>Activity (Last 24h)</h3>
+                <canvas id="activityChart" style="max-height:150px;"></canvas>
             </div>
         </div>
 
@@ -313,6 +323,8 @@
             generateStageQR();
         }
 
+        let activityChart = null;
+
         async function fetchStats() {
             try {
                 const res = await fetch('/api/stats');
@@ -321,8 +333,12 @@
                 if (data.success) {
                     document.getElementById('stat-mints').innerText = data.stats.mints;
                     document.getElementById('stat-scans').innerText = data.stats.scans;
+                    document.getElementById('stat-users').innerText = data.stats.uniqueUsers;
 
-                    // Log recent activity that's not already shown
+                    // Update chart with activity data
+                    updateChart(data.recentActivity || []);
+
+                    // Log recent activity
                     if (data.recentActivity && data.recentActivity.length > 0) {
                         const newest = data.recentActivity[0];
                         if (newest.type === 'mint') {
@@ -339,6 +355,66 @@
             } catch (e) {
                 log("❌ CONNECTION ERROR: " + e.message, "scan");
             }
+        }
+
+        function updateChart(activity) {
+            const ctx = document.getElementById('activityChart').getContext('2d');
+
+            // Group by hour
+            const hourBuckets = {};
+            for (let i = 23; i >= 0; i--) {
+                const h = new Date();
+                h.setHours(h.getHours() - i);
+                hourBuckets[h.getHours()] = { mints: 0, scans: 0 };
+            }
+
+            activity.forEach(a => {
+                const hour = new Date(a.time).getHours();
+                if (hourBuckets[hour]) {
+                    if (a.type === 'mint') hourBuckets[hour].mints++;
+                    else hourBuckets[hour].scans++;
+                }
+            });
+
+            const labels = Object.keys(hourBuckets).map(h => `${h}:00`);
+            const mintData = Object.values(hourBuckets).map(b => b.mints);
+            const scanData = Object.values(hourBuckets).map(b => b.scans);
+
+            if (activityChart) {
+                activityChart.destroy();
+            }
+
+            activityChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.slice(-8),
+                    datasets: [
+                        {
+                            label: 'Mints',
+                            data: mintData.slice(-8),
+                            backgroundColor: 'rgba(188, 19, 254, 0.7)',
+                            borderColor: '#bc13fe',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Scans',
+                            data: scanData.slice(-8),
+                            backgroundColor: 'rgba(15, 240, 252, 0.7)',
+                            borderColor: '#0ff0fc',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#0ff0fc', font: { size: 9 } }, grid: { color: 'rgba(0,255,255,0.1)' } },
+                        y: { ticks: { color: '#0ff0fc' }, grid: { color: 'rgba(0,255,255,0.1)' }, beginAtZero: true }
+                    }
+                }
+            });
         }
 
         function log(msg, type, time) {
