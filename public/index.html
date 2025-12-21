@@ -10,8 +10,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
 
     <link rel="stylesheet" href="/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@9.6.0/dist/modal.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@9.6.0/dist/solanaProvider.umd.min.js"></script>
+    <!-- Web3Auth SDK v8 (stable) -->
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/modal@8.12.4/dist/modal.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@web3auth/solana-provider@8.12.4/dist/solanaProvider.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js"></script>
     <script src="https://unpkg.com/@solana/web3.js@1.91.8/lib/index.iife.min.js"></script>
 
@@ -252,30 +253,66 @@
             try {
                 log('initializing_web3auth...');
 
-                const Web3AuthModal = window.Modal?.Web3Auth || window.Web3Auth;
-                const SolanaProvider = window.SolanaProvider?.SolanaPrivateKeyProvider || window.SolanaPrivateKeyProvider;
+                // v8 SDK access
+                const Web3Auth = window.Modal?.Web3Auth;
+                const SolanaPrivateKeyProvider = window.SolanaProvider?.SolanaPrivateKeyProvider;
+
+                if (!Web3Auth || !SolanaPrivateKeyProvider) {
+                    throw new Error('SDK not loaded. Check network connection.');
+                }
 
                 const chainConfig = {
                     chainNamespace: "solana",
                     chainId: "0x3",
                     rpcTarget: "https://api.devnet.solana.com",
                     displayName: "Solana Devnet",
-                    blockExplorer: "https://explorer.solana.com",
+                    blockExplorerUrl: "https://explorer.solana.com",
                     ticker: "SOL",
                     tickerName: "Solana",
                 };
 
-                const privateKeyProvider = new SolanaProvider({ config: { chainConfig } });
+                const privateKeyProvider = new SolanaPrivateKeyProvider({
+                    config: { chainConfig }
+                });
 
-                web3auth = new Web3AuthModal({
+                web3auth = new Web3Auth({
                     clientId: CLIENT_ID,
                     web3AuthNetwork: NETWORK,
                     chainConfig,
                     privateKeyProvider,
-                    uiConfig: { mode: "dark", uxMode: "redirect" }
+                    uiConfig: {
+                        appName: "GΛRO VIBE",
+                        mode: "dark",
+                        loginMethodsOrder: ["google"],
+                        defaultLanguage: "en"
+                    }
                 });
 
-                await web3auth.initModal();
+                await web3auth.initModal({
+                    modalConfig: {
+                        openlogin: {
+                            label: "openlogin",
+                            loginMethods: {
+                                google: { name: "google", showOnModal: true },
+                                facebook: { name: "facebook", showOnModal: false },
+                                twitter: { name: "twitter", showOnModal: false },
+                                reddit: { name: "reddit", showOnModal: false },
+                                discord: { name: "discord", showOnModal: false },
+                                twitch: { name: "twitch", showOnModal: false },
+                                apple: { name: "apple", showOnModal: false },
+                                line: { name: "line", showOnModal: false },
+                                github: { name: "github", showOnModal: false },
+                                kakao: { name: "kakao", showOnModal: false },
+                                linkedin: { name: "linkedin", showOnModal: false },
+                                weibo: { name: "weibo", showOnModal: false },
+                                wechat: { name: "wechat", showOnModal: false },
+                                email_passwordless: { name: "email_passwordless", showOnModal: false },
+                                sms_passwordless: { name: "sms_passwordless", showOnModal: false }
+                            }
+                        }
+                    }
+                });
+
                 log('ready', 'success');
 
                 if (web3auth.connected) {
@@ -285,6 +322,7 @@
 
             } catch (e) {
                 log('error: ' + e.message, 'error');
+                document.getElementById('loginBtn').disabled = false;
             }
         }
 
