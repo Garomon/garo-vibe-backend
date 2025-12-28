@@ -162,14 +162,14 @@ const AirdropPage: FC = () => {
                     onClick={handleAirdrop}
                     disabled={status === "loading" || events.length === 0}
                     className={`w-full py-6 rounded-xl text-2xl font-bold transition-all active:scale-[0.98] ${status === "loading"
-                            ? "bg-gray-600 cursor-wait"
-                            : status === "success"
-                                ? "bg-green-600"
-                                : status === "error"
-                                    ? "bg-red-500"
-                                    : events.length === 0
-                                        ? "bg-gray-700 cursor-not-allowed"
-                                        : "bg-garo-neon text-black hover:bg-garo-neon-dim"
+                        ? "bg-gray-600 cursor-wait"
+                        : status === "success"
+                            ? "bg-green-600"
+                            : status === "error"
+                                ? "bg-red-500"
+                                : events.length === 0
+                                    ? "bg-gray-700 cursor-not-allowed"
+                                    : "bg-garo-neon text-black hover:bg-garo-neon-dim"
                         }`}
                 >
                     {status === "loading" ? "⏳ Sending..." : status === "success" ? "✅ Sent!" : "🚀 SEND TICKET"}
@@ -186,6 +186,48 @@ const AirdropPage: FC = () => {
                         {message}
                     </motion.p>
                 )}
+
+                {/* Divider */}
+                <div className="border-t border-gray-700 my-6" />
+
+                {/* Bulk Airdrop Section */}
+                <div className="text-center">
+                    <p className="text-sm text-garo-muted mb-4">Or send tickets to all members at once:</p>
+                    <button
+                        onClick={async () => {
+                            if (!selectedEvent) {
+                                setStatus("error");
+                                setMessage("Select an event first!");
+                                return;
+                            }
+                            setStatus("loading");
+                            setMessage("Sending to all members...");
+                            try {
+                                const res = await fetch("/api/admin/airdrop/bulk", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ eventId: selectedEvent }),
+                                });
+                                const data = await res.json();
+                                if (res.ok) {
+                                    setStatus("success");
+                                    setMessage(data.message);
+                                } else {
+                                    setStatus("error");
+                                    setMessage(data.error || "Bulk airdrop failed");
+                                }
+                            } catch (e) {
+                                setStatus("error");
+                                setMessage("Network error");
+                            }
+                            setTimeout(() => { setStatus("idle"); setMessage(""); }, 5000);
+                        }}
+                        disabled={status === "loading" || !selectedEvent}
+                        className="w-full py-4 rounded-xl font-bold bg-purple-600 hover:bg-purple-500 text-white disabled:bg-gray-700 disabled:cursor-not-allowed"
+                    >
+                        📢 SEND TO ALL MEMBERS
+                    </button>
+                </div>
             </motion.div>
         </div>
     );
