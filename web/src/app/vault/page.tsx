@@ -266,12 +266,18 @@ const VaultPage: FC = () => {
                     },
                     (payload) => {
                         console.log('📡 Realtime: pending_invites change detected', payload);
-                        // Re-check ticket status
+                        // Re-check ticket status with full event data
                         fetch(`/api/user/ticket-status?email=${encodeURIComponent(userData.email)}`)
                             .then(res => res.json())
                             .then(data => {
                                 const hadTicket = hasPendingTicket;
-                                setHasPendingTicket(data.hasPendingTicket);
+                                setHasPendingTicket(data.hasPendingTicket && !data.isExpired);
+                                if (data.event) {
+                                    setTicketEvent({
+                                        ...data.event,
+                                        expiresAt: data.ticket?.expiresAt
+                                    });
+                                }
                                 // If we just got a ticket, show celebration
                                 if (!hadTicket && data.hasPendingTicket) {
                                     console.log('🎫 TICKET RECEIVED! Showing celebration...');
@@ -313,11 +319,39 @@ const VaultPage: FC = () => {
                 )
                 .subscribe();
 
+            // Channel for event_attendance changes (POAPs - after check-in)
+            const attendanceChannel = supabase
+                .channel('event-attendance-changes')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'INSERT',
+                        schema: 'public',
+                        table: 'event_attendance'
+                    },
+                    (payload) => {
+                        console.log('📡 Realtime: event_attendance INSERT detected', payload);
+                        // Re-fetch POAPs to get the new one
+                        if (userData?.email) {
+                            fetch(`/api/user/poaps?email=${encodeURIComponent(userData.email)}`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.poaps) {
+                                        setPoaps(data.poaps);
+                                        console.log('🏆 POAPs refreshed:', data.poaps.length);
+                                    }
+                                });
+                        }
+                    }
+                )
+                .subscribe();
+
             // Cleanup function
             return () => {
                 console.log("🔌 Cleaning up Realtime subscriptions");
                 supabase.removeChannel(invitesChannel);
                 supabase.removeChannel(usersChannel);
+                supabase.removeChannel(attendanceChannel);
             };
         };
 
