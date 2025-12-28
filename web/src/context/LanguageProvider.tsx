@@ -73,7 +73,7 @@ export function LanguageToggle() {
     // Prevent hydration mismatch
     if (!mounted) {
         return (
-            <button className="px-3 py-1 rounded-full text-sm font-bold border border-garo-muted/50 transition-colors opacity-50">
+            <button className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center text-xl transition-all opacity-50">
                 🌐
             </button>
         );
@@ -82,9 +82,10 @@ export function LanguageToggle() {
     return (
         <button
             onClick={() => setLanguage(language === "es" ? "en" : "es")}
-            className="px-3 py-1 rounded-full text-sm font-bold border border-garo-muted/50 hover:border-garo-neon/50 transition-colors"
+            className="w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 hover:border-garo-neon/50 hover:bg-black/70 flex items-center justify-center text-xl transition-all hover:scale-110"
+            title={language === "es" ? "Switch to English" : "Cambiar a Español"}
         >
-            {language === "es" ? "🇲🇽 ES" : "🇺🇸 EN"}
+            {language === "es" ? "🇲🇽" : "🇺🇸"}
         </button>
     );
 }
