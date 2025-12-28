@@ -703,29 +703,10 @@ const VaultPage: FC = () => {
                         );
                     })}
                 </section>
-
-                {/* Upgrade CTA */}
-                {userTier < 10 && (
-                    <motion.section
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 }}
-                        className="mt-16 text-center glass p-8"
-                    >
-                        <h2 className="text-2xl font-bold mb-2">
-                            {t.wantMore}
-                        </h2>
-                        <p className="text-garo-silver mb-6">
-                            {t.attendMore}
-                        </p>
-                        <a href="/#events" className="btn-primary">
-                            {t.seeEvents}
-                        </a>
-                    </motion.section>
-                )}
             </main>
         </div>
     );
 };
 
 export default VaultPage;
+
