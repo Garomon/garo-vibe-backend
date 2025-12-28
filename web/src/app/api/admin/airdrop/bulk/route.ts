@@ -47,37 +47,54 @@ export async function POST(request: Request) {
             expiresAt = eventDate.toISOString();
         }
 
-        // Create pending invites for each member (skip if already has one for this event)
-        const invites = members.map(member => ({
-            email: member.email?.toLowerCase(),
-            tier_to_mint: 1,
-            nft_type: 'ENTRY',
-            status: 'PENDING',
-            event_id: eventId,
-            invited_by: 'ADMIN_BULK',
-            expires_at: expiresAt
-        })).filter(inv => inv.email); // Filter out null emails
+        // Insert invites one by one to handle duplicates gracefully
+        let successCount = 0;
+        let skipCount = 0;
 
-        // Use upsert to avoid duplicates (email + event_id combo)
-        const { data: created, error: insertError } = await supabase
-            .from("pending_invites")
-            .upsert(invites, {
-                onConflict: 'email,event_id',
-                ignoreDuplicates: true
-            })
-            .select();
+        for (const member of members) {
+            if (!member.email) continue;
 
-        if (insertError) {
-            // If there's no unique constraint on email+event_id, just insert and handle errors
-            console.log("Upsert note:", insertError.message);
+            // Check if already has pending invite for this event
+            const { data: existing } = await supabase
+                .from("pending_invites")
+                .select("id")
+                .eq("email", member.email.toLowerCase())
+                .eq("event_id", eventId)
+                .eq("status", "PENDING")
+                .single();
+
+            if (existing) {
+                skipCount++;
+                continue;
+            }
+
+            // Create new invite
+            const { error: insertError } = await supabase
+                .from("pending_invites")
+                .insert({
+                    email: member.email.toLowerCase(),
+                    tier_to_mint: 1,
+                    nft_type: 'ENTRY',
+                    status: 'PENDING',
+                    event_id: eventId,
+                    invited_by: 'ADMIN_BULK',
+                    expires_at: expiresAt
+                });
+
+            if (insertError) {
+                console.error(`Failed for ${member.email}:`, insertError.message);
+            } else {
+                successCount++;
+            }
         }
 
-        console.log(`📢 Bulk Airdrop: Sent ${members.length} tickets for event ${event?.name || eventId}`);
+        console.log(`📢 Bulk Airdrop: ${successCount} tickets sent, ${skipCount} skipped for event ${event?.name || eventId}`);
 
         return NextResponse.json({
             success: true,
-            message: `🎫 Tickets sent to ${members.length} members for "${event?.name || 'Event'}"`,
-            count: members.length,
+            message: `🎫 ${successCount} tickets sent for "${event?.name || 'Event'}" (${skipCount} already had tickets)`,
+            count: successCount,
+            skipped: skipCount,
             eventName: event?.name
         });
 
