@@ -6,9 +6,11 @@ import { useWeb3Auth } from "../providers/Web3AuthProvider";
 import { useRouter } from "next/navigation";
 import { WalletButton } from "../components/WalletButton";
 import { QRCodeSVG } from "qrcode.react";
+import { useLanguage, LanguageToggle } from "../../context/LanguageProvider";
 
 const VaultPage: FC = () => {
     const { loggedIn, publicKey, isLoading } = useWeb3Auth();
+    const { t } = useLanguage();
     const router = useRouter();
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
@@ -70,47 +72,49 @@ const VaultPage: FC = () => {
     const userTier = userData?.tier || 1;
     const attendanceCount = userData?.attendance_count || 0;
 
-    const vaultItems = [
+    const getVaultItems = () => [
         {
             id: 1,
-            title: "VISUAL MEMORY",
-            subtitle: "Event Photos",
-            description: "Captured moments from the last session",
+            title: t.visualMemoryTitle,
+            subtitle: t.visualMemorySub,
+            description: t.visualMemoryDesc,
             icon: "📸",
             requiredTier: 1,
-            tierName: "INITIATE",
-            actionLabel: "VIEW GALLERY",
-            actionUrl: "https://photos.google.com", // Placeholder
+            tierName: t.tier1.toUpperCase(),
+            actionLabel: t.viewGallery,
+            actionUrl: "https://photos.google.com",
             borderColor: "border-gray-500",
             glowColor: "from-gray-500/20 to-transparent",
         },
         {
             id: 2,
-            title: "AUDIO SOURCE",
-            subtitle: "Live Sets (Lossless)",
-            description: "Direct recording from DJM-V10. WAV format.",
+            title: t.audioSourceTitle,
+            subtitle: t.audioSourceSub,
+            description: t.audioSourceDesc,
             icon: "🎧",
             requiredTier: 2,
-            tierName: "RESIDENT",
-            actionLabel: "DOWNLOAD .WAV",
-            actionUrl: "https://dropbox.com", // Placeholder
+            tierName: t.tier2.toUpperCase(),
+            actionLabel: t.downloadSet,
+            actionUrl: "https://dropbox.com",
             borderColor: "border-orange-500",
             glowColor: "from-orange-500/20 to-transparent",
         },
         {
             id: 3,
-            title: "THE SIGNAL",
-            subtitle: "Sanctuary Live Feed",
-            description: "Real-time connection to the underground.",
+            title: t.theSignalTitle,
+            subtitle: t.theSignalSub,
+            description: t.theSignalDesc,
             icon: "👁️",
             requiredTier: 3,
-            tierName: "FAMILY",
-            actionLabel: "GO LIVE",
-            actionUrl: "#", // Placeholder
+            tierName: t.tier3.toUpperCase(),
+            actionLabel: t.liveFeed,
+            actionUrl: "#",
             borderColor: "border-green-500",
             glowColor: "from-green-500/20 to-transparent",
         },
     ];
+
+    const vaultItems = getVaultItems();
 
 
     const isUnlocked = (requiredTier: number) => userTier >= requiredTier;

@@ -3,12 +3,19 @@
 import { motion } from "framer-motion";
 import { WalletButton } from "./components/WalletButton";
 import { useWeb3Auth } from "./providers/Web3AuthProvider";
+import { useLanguage, LanguageToggle } from "../context/LanguageProvider";
 
 export default function Home() {
   const { loggedIn } = useWeb3Auth();
+  const { t } = useLanguage();
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
+      {/* Language Toggle - Top Right */}
+      <div className="absolute top-6 right-6 z-20">
+        <LanguageToggle />
+      </div>
+
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-garo-void via-black to-garo-dark" />
 
@@ -36,7 +43,7 @@ export default function Home() {
           className="mb-8"
         >
           <span className="text-garo-silver text-sm tracking-[0.3em] uppercase font-mono">
-            Proof of Rave Protocol
+            {t.proofOfRave} Protocol
           </span>
         </motion.div>
 
@@ -70,8 +77,8 @@ export default function Home() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="text-lg md:text-xl text-garo-silver max-w-lg mb-12"
         >
-          Tu identidad en el underground. Acceso exclusivo.
-          <span className="text-garo-neon"> Evolucionas con cada rave.</span>
+          {t.tagline}
+          <span className="text-garo-neon"> {t.taglineHighlight}</span>
         </motion.p>
 
         {/* CTA Buttons */}
@@ -91,7 +98,7 @@ export default function Home() {
               transition={{ duration: 0.4 }}
               className="btn-secondary text-lg"
             >
-              Entrar a The Vault
+              {t.enterVault}
             </motion.a>
           )}
         </motion.div>
@@ -104,13 +111,13 @@ export default function Home() {
           className="mt-16 flex flex-wrap justify-center gap-4"
         >
           <div className="px-4 py-2 rounded-full bg-gray-600 text-gray-200 font-bold text-sm">
-            🌱 INITIATE
+            🌱 {t.tier1.toUpperCase()}
           </div>
           <div className="px-4 py-2 rounded-full bg-orange-600 text-white font-bold text-sm">
-            🏠 RESIDENT
+            🏠 {t.tier2.toUpperCase()}
           </div>
           <div className="px-4 py-2 rounded-full bg-green-600 text-white font-bold text-sm">
-            👑 FAMILY
+            👑 {t.tier3.toUpperCase()}
           </div>
         </motion.div>
 
@@ -119,7 +126,7 @@ export default function Home() {
       {/* Footer Hint */}
       <footer className="absolute bottom-8 left-0 right-0 text-center">
         <p className="text-garo-muted text-sm font-mono">
-          Powered by <span className="text-garo-neon">Solana</span>
+          {t.poweredBy} <span className="text-garo-neon">Solana</span>
         </p>
       </footer>
     </div>
