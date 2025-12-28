@@ -182,6 +182,7 @@ const VaultPage: FC = () => {
         date: string;
         time: string;
         location: string;
+        expiresAt?: string;
     } | null>(null);
 
     useEffect(() => {
@@ -190,9 +191,12 @@ const VaultPage: FC = () => {
             try {
                 const res = await fetch(`/api/user/ticket-status?email=${encodeURIComponent(userData.email)}`);
                 const data = await res.json();
-                setHasPendingTicket(data.hasPendingTicket);
+                setHasPendingTicket(data.hasPendingTicket && !data.isExpired);
                 if (data.event) {
-                    setTicketEvent(data.event);
+                    setTicketEvent({
+                        ...data.event,
+                        expiresAt: data.ticket?.expiresAt
+                    });
                 }
             } catch (e) {
                 console.error("Error checking ticket status:", e);
@@ -427,6 +431,26 @@ const VaultPage: FC = () => {
                                 <p>📅 {new Date(ticketEvent.date + 'T00:00:00').toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' })} {ticketEvent.time && `• ${ticketEvent.time.slice(0, 5)}`}</p>
                                 {ticketEvent.location && <p>📍 {ticketEvent.location}</p>}
                             </div>
+                            {/* Expiration Timer */}
+                            {ticketEvent.expiresAt && (
+                                <div className="mt-3 pt-3 border-t border-gray-700">
+                                    <p className="text-xs text-garo-muted flex items-center gap-2">
+                                        <span>⏳</span>
+                                        <span>
+                                            {(() => {
+                                                const now = new Date().getTime();
+                                                const expires = new Date(ticketEvent.expiresAt).getTime();
+                                                const diff = expires - now;
+                                                if (diff <= 0) return language === 'es' ? 'Ticket expirado' : 'Ticket expired';
+                                                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                                if (days > 0) return `${language === 'es' ? 'Expira en' : 'Expires in'} ${days}d ${hours}h`;
+                                                return `${language === 'es' ? 'Expira en' : 'Expires in'} ${hours}h`;
+                                            })()}
+                                        </span>
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -566,6 +590,21 @@ const VaultPage: FC = () => {
                                     {ticketEvent.time && ` • ${ticketEvent.time.slice(0, 5)}`}
                                     {ticketEvent.location && ` • 📍 ${ticketEvent.location}`}
                                 </p>
+                                {/* Expiration Timer */}
+                                {ticketEvent.expiresAt && (
+                                    <p className="text-xs text-garo-muted mt-1">
+                                        ⏳ {(() => {
+                                            const now = new Date().getTime();
+                                            const expires = new Date(ticketEvent.expiresAt).getTime();
+                                            const diff = expires - now;
+                                            if (diff <= 0) return language === 'es' ? 'Ticket expirado' : 'Ticket expired';
+                                            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                                            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                            if (days > 0) return `${language === 'es' ? 'Expira en' : 'Expires in'} ${days}d ${hours}h`;
+                                            return `${language === 'es' ? 'Expira en' : 'Expires in'} ${hours}h`;
+                                        })()}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </motion.div>
