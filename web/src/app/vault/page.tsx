@@ -10,7 +10,7 @@ import { useLanguage, LanguageToggle } from "../../context/LanguageProvider";
 
 const VaultPage: FC = () => {
     const { loggedIn, publicKey, isLoading } = useWeb3Auth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const router = useRouter();
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
@@ -503,7 +503,9 @@ const VaultPage: FC = () => {
                                 className="mb-4 bg-red-900/50 border border-red-500/50 text-red-200 px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur-md"
                             >
                                 <span className="animate-pulse">⚠️</span>
-                                <span className="text-sm font-bold">RISK OF DECAY: {timeUntilDecay}</span>
+                                <span className="text-sm font-bold">
+                                    {language === "es" ? "RIESGO DE DECAIMIENTO:" : "RISK OF DECAY:"} {timeUntilDecay}
+                                </span>
                             </motion.div>
                         )}
 
@@ -524,7 +526,9 @@ const VaultPage: FC = () => {
                     </div>
 
                     <p className="text-xl text-garo-silver max-w-2xl mx-auto">
-                        Contenido exclusivo para holders. Tu nivel de acceso depende de tu tier.
+                        {language === "es"
+                            ? "Contenido exclusivo para holders. Tu nivel de acceso depende de tu tier."
+                            : "Exclusive content for holders. Your access level depends on your tier."}
                     </p>
 
                     {/* Stats */}
