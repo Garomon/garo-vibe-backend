@@ -14,7 +14,7 @@ import { SolanaAdmin } from "../../../../lib/solanaAdmin";
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { walletAddress, location } = body;
+        const { walletAddress, location, eventId } = body;
 
         if (!walletAddress) {
             return NextResponse.json({ error: "Wallet address required" }, { status: 400 });
@@ -49,6 +49,28 @@ export async function POST(request: Request) {
                     error: "NO ACCESS",
                     message: "No Entry Ticket found. They need an invite to enter.",
                     status: "DENIED"
+                }, { status: 403 });
+            }
+
+            // 🛡️ EVENT VALIDATION: Check if ticket matches the selected event
+            if (eventId && entryTicket.event_id && entryTicket.event_id !== eventId) {
+                // Fetch event names for clear error message
+                const { data: ticketEvent } = await supabase
+                    .from("garo_events")
+                    .select("name")
+                    .eq("id", entryTicket.event_id)
+                    .single();
+                const { data: selectedEvent } = await supabase
+                    .from("garo_events")
+                    .select("name")
+                    .eq("id", eventId)
+                    .single();
+
+                return NextResponse.json({
+                    error: "WRONG EVENT",
+                    message: "Ticket is for a different event",
+                    status: "WRONG_EVENT",
+                    details: `Ticket: ${ticketEvent?.name || 'Unknown'} | Scanner: ${selectedEvent?.name || 'Unknown'}`
                 }, { status: 403 });
             }
 
@@ -165,6 +187,28 @@ export async function POST(request: Request) {
                 status: "NO_TICKET",
                 currentTier: user.tier,
                 attendanceCount: user.attendance_count
+            }, { status: 403 });
+        }
+
+        // 🛡️ EVENT VALIDATION: Check if ticket matches the selected event
+        if (eventId && memberTicket.event_id && memberTicket.event_id !== eventId) {
+            // Fetch event names for clear error message
+            const { data: ticketEvent } = await supabase
+                .from("garo_events")
+                .select("name")
+                .eq("id", memberTicket.event_id)
+                .single();
+            const { data: selectedEvent } = await supabase
+                .from("garo_events")
+                .select("name")
+                .eq("id", eventId)
+                .single();
+
+            return NextResponse.json({
+                error: "WRONG EVENT",
+                message: "Ticket is for a different event",
+                status: "WRONG_EVENT",
+                details: `Ticket: ${ticketEvent?.name || 'Unknown'} | Scanner: ${selectedEvent?.name || 'Unknown'}`
             }, { status: 403 });
         }
 
