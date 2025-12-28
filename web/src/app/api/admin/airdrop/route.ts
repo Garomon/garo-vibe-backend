@@ -29,7 +29,24 @@ export async function POST(request: Request) {
                     invite: { email: normalizedEmail, status: "PENDING" }
                 });
             }
-            // Different event - allow sending new ticket (will create new invite)
+            // Different event - allow sending new ticket
+        }
+
+        // Fetch event date to set expiration
+        let expiresAt = null;
+        if (eventId) {
+            const { data: event } = await supabase
+                .from("garo_events")
+                .select("date")
+                .eq("id", eventId)
+                .single();
+
+            if (event?.date) {
+                // Expire 1 day after event date
+                const eventDate = new Date(event.date);
+                eventDate.setDate(eventDate.getDate() + 1);
+                expiresAt = eventDate.toISOString();
+            }
         }
 
         // Create new pending invite (Entry Ticket) for this event
@@ -41,7 +58,8 @@ export async function POST(request: Request) {
                 nft_type: 'ENTRY',
                 status: 'PENDING',
                 event_id: eventId || null,
-                invited_by: 'ADMIN'
+                invited_by: 'ADMIN',
+                expires_at: expiresAt
             }])
             .select()
             .single();
@@ -62,12 +80,12 @@ export async function POST(request: Request) {
             ? `🎫 Event ticket sent to existing Tier ${existingUser.tier} member!`
             : "🎫 Entry Ticket sent! They'll become a member when scanned at the door.";
 
-        console.log(`Airdrop: Entry Ticket created for ${normalizedEmail} (Event: ${eventId || 'General'})`);
+        console.log(`Airdrop: Entry Ticket created for ${normalizedEmail} (Event: ${eventId || 'General'}, Expires: ${expiresAt || 'Never'})`);
 
         return NextResponse.json({
             success: true,
             message: statusMessage,
-            invite: { email: normalizedEmail, status: "PENDING" }
+            invite: { email: normalizedEmail, status: "PENDING", expiresAt }
         });
 
     } catch (error) {
@@ -75,3 +93,4 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
+

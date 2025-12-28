@@ -27,11 +27,19 @@ export async function GET(request: Request) {
             .eq("status", "PENDING")
             .single();
 
+        // Check if ticket is expired
+        let isExpired = false;
+        if (pendingInvite?.expires_at) {
+            isExpired = new Date(pendingInvite.expires_at) < new Date();
+        }
+
         return NextResponse.json({
-            hasPendingTicket: !!pendingInvite,
+            hasPendingTicket: !!pendingInvite && !isExpired,
+            isExpired,
             ticket: pendingInvite ? {
                 type: pendingInvite.nft_type,
-                createdAt: pendingInvite.created_at
+                createdAt: pendingInvite.created_at,
+                expiresAt: pendingInvite.expires_at
             } : null,
             event: pendingInvite?.garo_events ? {
                 id: pendingInvite.garo_events.id,
@@ -44,6 +52,7 @@ export async function GET(request: Request) {
 
     } catch (error) {
         console.error("Ticket Status Error:", error);
-        return NextResponse.json({ hasPendingTicket: false, event: null }, { status: 200 });
+        return NextResponse.json({ hasPendingTicket: false, isExpired: false, event: null }, { status: 200 });
     }
 }
+

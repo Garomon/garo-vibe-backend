@@ -201,6 +201,38 @@ const VaultPage: FC = () => {
         }
     }, [userData]);
 
+    // POAPs (Event Attendance Collection)
+    type POAP = {
+        id: string;
+        checkedInAt: string;
+        event: {
+            id: string;
+            name: string;
+            date: string;
+            time: string;
+            location: string;
+        } | null;
+    };
+    const [poaps, setPoaps] = useState<POAP[]>([]);
+
+    useEffect(() => {
+        const fetchPoaps = async () => {
+            if (!userData?.email) return;
+            try {
+                const res = await fetch(`/api/user/poaps?email=${encodeURIComponent(userData.email)}`);
+                const data = await res.json();
+                if (data.poaps) {
+                    setPoaps(data.poaps);
+                }
+            } catch (e) {
+                console.error("Error fetching POAPs:", e);
+            }
+        };
+        if (userData?.email && userData?.last_mint_address) {
+            fetchPoaps();
+        }
+    }, [userData]);
+
     // ============== REALTIME STATE SYNC ==============
     // Listen for changes to automatically update UI without refresh
     const [showConfetti, setShowConfetti] = useState(false);
@@ -729,6 +761,46 @@ const VaultPage: FC = () => {
                         );
                     })}
                 </section>
+
+                {/* 🏆 POAPs Gallery - Event Attendance Collection */}
+                {poaps.length > 0 && (
+                    <motion.section
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="mt-16"
+                    >
+                        <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                            <span>🏆</span>
+                            <span>{language === "es" ? "Mis POAPs" : "My POAPs"}</span>
+                            <span className="text-sm font-normal text-garo-muted">({poaps.length})</span>
+                        </h2>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {poaps.map((poap) => (
+                                <motion.div
+                                    key={poap.id}
+                                    whileHover={{ scale: 1.05 }}
+                                    className="glass p-4 rounded-xl text-center"
+                                >
+                                    <div className="text-4xl mb-2">🎫</div>
+                                    <h3 className="font-bold text-white text-sm truncate">
+                                        {poap.event?.name || "GΛRO Event"}
+                                    </h3>
+                                    <p className="text-xs text-garo-muted mt-1">
+                                        {poap.event?.date
+                                            ? new Date(poap.event.date + 'T00:00:00').toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                                            : new Date(poap.checkedInAt).toLocaleDateString()
+                                        }
+                                    </p>
+                                    {poap.event?.location && (
+                                        <p className="text-xs text-garo-silver mt-1">📍 {poap.event.location}</p>
+                                    )}
+                                </motion.div>
+                            ))}
+                        </div>
+                    </motion.section>
+                )}
             </main>
         </div>
     );

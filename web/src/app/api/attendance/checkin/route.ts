@@ -96,6 +96,19 @@ export async function POST(request: Request) {
                     event_date: new Date().toISOString()
                 }]);
 
+            // Record POAP (event attendance for collectible)
+            if (entryTicket.event_id) {
+                await supabase
+                    .from("event_attendance")
+                    .upsert([{
+                        user_id: user.id,
+                        event_id: entryTicket.event_id,
+                        checked_in_at: new Date().toISOString(),
+                        nft_mint_address: mintAddress
+                    }], { onConflict: 'user_id,event_id' });
+                console.log(`🏆 POAP recorded for event ${entryTicket.event_id}`);
+            }
+
             return NextResponse.json({
                 success: true,
                 status: "TRANSMUTATION",
@@ -151,6 +164,32 @@ export async function POST(request: Request) {
             upgradedTier = await checkAndUpgradeTier(user.id, user.tier, newCount, user.last_mint_address);
         } catch (tierError) {
             console.error("Tier Upgrade Error:", tierError);
+        }
+
+        // Record POAP for existing member (if they have a pending ticket for an event)
+        const { data: memberTicket } = await supabase
+            .from("pending_invites")
+            .select("id, event_id")
+            .eq("email", user.email?.toLowerCase())
+            .eq("status", "PENDING")
+            .single();
+
+        if (memberTicket?.event_id) {
+            // Mark ticket as used
+            await supabase
+                .from("pending_invites")
+                .update({ status: "USED", claimed_at: new Date().toISOString() })
+                .eq("id", memberTicket.id);
+
+            // Record POAP
+            await supabase
+                .from("event_attendance")
+                .upsert([{
+                    user_id: user.id,
+                    event_id: memberTicket.event_id,
+                    checked_in_at: new Date().toISOString()
+                }], { onConflict: 'user_id,event_id' });
+            console.log(`🏆 POAP recorded for member at event ${memberTicket.event_id}`);
         }
 
         const finalTier = upgradedTier || user.tier;
