@@ -838,7 +838,7 @@ const VaultPage: FC = () => {
                     })}
                 </section>
 
-                {/* 🏆 POAPs Gallery - Event Attendance Collection */}
+                {/* � Events Gallery - Events You've Attended */}
                 {poaps.length > 0 && (
                     <motion.section
                         initial={{ opacity: 0, y: 20 }}
@@ -847,8 +847,8 @@ const VaultPage: FC = () => {
                         className="mt-16"
                     >
                         <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                            <span>🏆</span>
-                            <span>{language === "es" ? "Mis POAPs" : "My POAPs"}</span>
+                            <span>�</span>
+                            <span>{language === "es" ? "Mis Eventos" : "My Events"}</span>
                             <span className="text-sm font-normal text-garo-muted">({poaps.length})</span>
                         </h2>
 
