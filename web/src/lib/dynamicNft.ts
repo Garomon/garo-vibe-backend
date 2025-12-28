@@ -65,10 +65,8 @@ export async function checkOxidation(userId: string, currentTier: number, lastAt
     const now = new Date().getTime();
     const lastTime = new Date(lastAttendance).getTime();
 
-    // DEV/SIMULATION SETTING: 10 Minutes Cycle (more reasonable for testing)
-    // PRODUCTION SETTING: 7 Days (7 * 24 * 60 * 60 * 1000)
-    const IS_DEV = true;
-    const DECAY_CYCLE_MS = IS_DEV ? 10 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+    // PRODUCTION: 30 Days decay cycle (matches Vault UI)
+    const DECAY_CYCLE_MS = 30 * 24 * 60 * 60 * 1000;
 
     if (now - lastTime > DECAY_CYCLE_MS) {
         console.log(`[Oxidation] User ${userId} is inactive. Decaying tier...`);
