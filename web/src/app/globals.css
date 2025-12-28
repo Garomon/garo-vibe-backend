@@ -1,0 +1,303 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GΛRO VIBE - Design System
+   Underground pero Tecnológica
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Core Palette */
+  --garo-black: #000000;
+  --garo-void: #0a0a0a;
+  --garo-dark: #111111;
+  --garo-carbon: #1a1a1a;
+
+  /* Accent - Neon Roof Green */
+  --garo-neon: #00ff88;
+  --garo-neon-dim: #00cc6a;
+  --garo-neon-glow: rgba(0, 255, 136, 0.4);
+
+  /* Text */
+  --garo-white: #ffffff;
+  --garo-silver: #a0a0a0;
+  --garo-muted: #666666;
+
+  /* Effects */
+  --garo-glass: rgba(255, 255, 255, 0.05);
+  --garo-border: rgba(255, 255, 255, 0.1);
+
+  /* Theme variables */
+  --background: var(--garo-black);
+  --foreground: var(--garo-white);
+}
+
+/* stylelint-disable at-rule-no-unknown */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-garo-neon: var(--garo-neon);
+  --color-garo-dark: var(--garo-dark);
+  --color-garo-carbon: var(--garo-carbon);
+  --color-garo-void: var(--garo-void);
+  --color-garo-silver: var(--garo-silver);
+  --color-garo-muted: var(--garo-muted);
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+/* stylelint-enable at-rule-no-unknown */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--garo-black);
+  color: var(--garo-white);
+  font-family: "Outfit", system-ui, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Selection */
+::selection {
+  background: var(--garo-neon);
+  color: var(--garo-black);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LAMBDA (Λ) GLOW EFFECT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.lambda-glow {
+  text-shadow:
+    0 0 10px var(--garo-neon),
+    0 0 20px var(--garo-neon),
+    0 0 40px var(--garo-neon-glow);
+  color: var(--garo-neon);
+}
+
+.lambda-subtle {
+  text-shadow: 0 0 20px var(--garo-neon-glow);
+  color: var(--garo-neon);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLASSMORPHISM
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.glass {
+  background: var(--garo-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--garo-border);
+  border-radius: 16px;
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid var(--garo-border);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.btn-primary {
+  background: var(--garo-neon);
+  color: var(--garo-black);
+  font-weight: 600;
+  padding: 12px 32px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 20px var(--garo-neon-glow);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 30px var(--garo-neon-glow),
+    0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--garo-white);
+  font-weight: 500;
+  padding: 12px 32px;
+  border-radius: 9999px;
+  border: 1px solid var(--garo-border);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-secondary:hover {
+  border-color: var(--garo-neon);
+  background: rgba(0, 255, 136, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TIER BADGES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.tier-1 {
+  background: var(--garo-carbon);
+  color: var(--garo-silver);
+  border: 1px solid var(--garo-muted);
+}
+
+.tier-5 {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #00d4ff;
+  border: 1px solid #00d4ff33;
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+.tier-10 {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  color: var(--garo-neon);
+  border: 1px solid var(--garo-neon);
+  box-shadow: 0 0 20px var(--garo-neon-glow);
+  animation: tier10-pulse 2s ease-in-out infinite;
+}
+
+@keyframes tier10-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px var(--garo-neon-glow);
+  }
+
+  50% {
+    box-shadow: 0 0 30px var(--garo-neon-glow), 0 0 50px var(--garo-neon-glow);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Staggered delays */
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.delay-400 {
+  animation-delay: 0.4s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NOISE TEXTURE OVERLAY
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.noise-overlay::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  z-index: 9999;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--garo-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--garo-carbon);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--garo-neon-dim);
+}
