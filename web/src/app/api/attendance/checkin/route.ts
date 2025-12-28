@@ -148,8 +148,27 @@ export async function POST(request: Request) {
         }
 
         // EXISTING MEMBER: Check-in flow
+        // Members MUST have a pending ticket to check in (validates they were invited to this event)
 
-        // Rate Limiting Check (1 hour cooldown unless simulating)
+        const { data: memberTicket } = await supabase
+            .from("pending_invites")
+            .select("id, event_id")
+            .eq("email", user.email?.toLowerCase())
+            .eq("status", "PENDING")
+            .single();
+
+        // NO TICKET = Can't check in (they need an invite for each event)
+        if (!memberTicket) {
+            return NextResponse.json({
+                error: "NO TICKET",
+                message: "You need an event ticket to check in. Ask for an invite!",
+                status: "NO_TICKET",
+                currentTier: user.tier,
+                attendanceCount: user.attendance_count
+            }, { status: 403 });
+        }
+
+        // Rate Limiting Check (1 hour cooldown for same ticket)
         if (user.last_attendance) {
             const lastTime = new Date(user.last_attendance).getTime();
             const now = new Date().getTime();
@@ -164,6 +183,12 @@ export async function POST(request: Request) {
                 }, { status: 429 });
             }
         }
+
+        // Mark ticket as USED
+        await supabase
+            .from("pending_invites")
+            .update({ status: "USED", claimed_at: new Date().toISOString() })
+            .eq("id", memberTicket.id);
 
         // Increment Attendance
         const newCount = (user.attendance_count || 0) + 1;
@@ -193,30 +218,15 @@ export async function POST(request: Request) {
             console.error("Tier Upgrade Error:", tierError);
         }
 
-        // Record POAP for existing member (if they have a pending ticket for an event)
-        const { data: memberTicket } = await supabase
-            .from("pending_invites")
-            .select("id, event_id")
-            .eq("email", user.email?.toLowerCase())
-            .eq("status", "PENDING")
-            .single();
-
-        if (memberTicket?.event_id) {
-            // Mark ticket as used
-            await supabase
-                .from("pending_invites")
-                .update({ status: "USED", claimed_at: new Date().toISOString() })
-                .eq("id", memberTicket.id);
-
-            // Fetch event details for POAP
+        // Mint POAP NFT for this event
+        let poapMintAddress = null;
+        if (memberTicket.event_id) {
             const { data: eventData } = await supabase
                 .from("garo_events")
                 .select("name, date")
                 .eq("id", memberTicket.event_id)
                 .single();
 
-            // Mint POAP NFT
-            let poapMintAddress = null;
             if (eventData) {
                 try {
                     const admin = new SolanaAdmin();
