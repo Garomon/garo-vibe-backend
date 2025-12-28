@@ -10,8 +10,8 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: "Email required" }, { status: 400 });
         }
 
-        // Check for pending invite with event details
-        const { data: pendingInvite } = await supabase
+        // Check for pending invites (support multiple tickets per user)
+        const { data: pendingInvites } = await supabase
             .from("pending_invites")
             .select(`
                 *,
@@ -25,17 +25,29 @@ export async function GET(request: Request) {
             `)
             .eq("email", email.toLowerCase().trim())
             .eq("status", "PENDING")
-            .single();
+            .order("created_at", { ascending: false });
 
-        // Check if ticket is expired
-        let isExpired = false;
-        if (pendingInvite?.expires_at) {
-            isExpired = new Date(pendingInvite.expires_at) < new Date();
-        }
+        // Filter out expired tickets and get the first valid one
+        const now = new Date();
+        const validTickets = (pendingInvites || []).filter(ticket => {
+            if (!ticket.expires_at) return true;
+            return new Date(ticket.expires_at) > now;
+        });
+
+        // Get the most recent valid ticket (or the one with earliest event date)
+        const pendingInvite = validTickets.length > 0
+            ? validTickets.sort((a, b) => {
+                // Sort by event date if available
+                const dateA = a.garo_events?.date || '9999-12-31';
+                const dateB = b.garo_events?.date || '9999-12-31';
+                return dateA.localeCompare(dateB);
+            })[0]
+            : null;
 
         return NextResponse.json({
-            hasPendingTicket: !!pendingInvite && !isExpired,
-            isExpired,
+            hasPendingTicket: !!pendingInvite,
+            isExpired: false,
+            totalPendingTickets: validTickets.length,
             ticket: pendingInvite ? {
                 type: pendingInvite.nft_type,
                 createdAt: pendingInvite.created_at,
@@ -55,4 +67,3 @@ export async function GET(request: Request) {
         return NextResponse.json({ hasPendingTicket: false, isExpired: false, event: null }, { status: 200 });
     }
 }
-
