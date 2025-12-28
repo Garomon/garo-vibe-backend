@@ -130,17 +130,24 @@ const VaultPage: FC = () => {
             const lastTime = new Date(userData.last_attendance).getTime();
             const now = new Date().getTime();
 
-            // DEV: 2 Minutes | PROD: 7 Days
-            const CYCLE_MS = 2 * 60 * 1000;
+            // PROD: 30 Days decay cycle
+            const CYCLE_MS = 30 * 24 * 60 * 60 * 1000;
 
             const elapsed = now - lastTime;
             const progress = Math.min(elapsed / CYCLE_MS, 1);
             setRiskLevel(progress);
 
             const remaining = Math.max(0, CYCLE_MS - elapsed);
-            const seconds = Math.floor((remaining / 1000) % 60);
-            const minutes = Math.floor((remaining / 1000 / 60));
-            setTimeUntilDecay(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+            const days = Math.floor(remaining / (24 * 60 * 60 * 1000));
+            const hours = Math.floor((remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+
+            if (days > 0) {
+                setTimeUntilDecay(`${days}d ${hours}h`);
+            } else {
+                const minutes = Math.floor((remaining / 1000 / 60));
+                const seconds = Math.floor((remaining / 1000) % 60);
+                setTimeUntilDecay(`${minutes}:${seconds < 10 ? '0' : ''}${seconds}`);
+            }
 
         }, 1000);
 
