@@ -517,7 +517,7 @@ const VaultPage: FC = () => {
                             <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
                                 <span className="font-mono text-xs text-white/50">{publicKey?.toBase58().slice(0, 6)}...</span>
                                 <span className="tier-badge text-xs bg-black/50 backdrop-blur-md border border-white/10">
-                                    {userTier >= 3 ? "FAMILY" : userTier === 2 ? "RESIDENT" : "INITIATE"}
+                                    {userTier >= 3 ? t.tier3.toUpperCase() : userTier === 2 ? t.tier2.toUpperCase() : t.tier1.toUpperCase()}
                                 </span>
                             </div>
                         </div>
@@ -547,7 +547,7 @@ const VaultPage: FC = () => {
 
                     <div className="mt-8">
                         <button onClick={handleSimulateCheckin} className="text-xs border border-garo-muted text-garo-muted px-4 py-2 rounded hover:bg-white/10 transition">
-                            [DEV] SIMULATE EVENT (+1 XP)
+                            {t.simulateEvent}
                         </button>
                     </div>
 
@@ -681,13 +681,13 @@ const VaultPage: FC = () => {
                         className="mt-16 text-center glass p-8"
                     >
                         <h2 className="text-2xl font-bold mb-2">
-                            ¿Quieres desbloquear más?
+                            {t.wantMore}
                         </h2>
                         <p className="text-garo-silver mb-6">
-                            Asiste a más eventos para subir de tier y acceder a contenido exclusivo.
+                            {t.attendMore}
                         </p>
                         <a href="/#events" className="btn-primary">
-                            Ver Próximos Eventos
+                            {t.seeEvents}
                         </a>
                     </motion.section>
                 )}
