@@ -173,6 +173,13 @@ const VaultPage: FC = () => {
 
     // Check for pending ticket
     const [hasPendingTicket, setHasPendingTicket] = useState(false);
+    const [ticketEvent, setTicketEvent] = useState<{
+        id: string;
+        name: string;
+        date: string;
+        time: string;
+        location: string;
+    } | null>(null);
 
     useEffect(() => {
         const checkPendingTicket = async () => {
@@ -181,6 +188,9 @@ const VaultPage: FC = () => {
                 const res = await fetch(`/api/user/ticket-status?email=${encodeURIComponent(userData.email)}`);
                 const data = await res.json();
                 setHasPendingTicket(data.hasPendingTicket);
+                if (data.event) {
+                    setTicketEvent(data.event);
+                }
             } catch (e) {
                 console.error("Error checking ticket status:", e);
             }
@@ -372,6 +382,17 @@ const VaultPage: FC = () => {
                     <h1 className="text-3xl font-bold mb-4 text-garo-neon">
                         {t.ticketReceived}
                     </h1>
+
+                    {/* Event Details */}
+                    {ticketEvent && (
+                        <div className="glass p-4 rounded-xl mb-6 text-left">
+                            <h2 className="text-2xl font-bold text-white mb-2">{ticketEvent.name}</h2>
+                            <div className="text-garo-silver text-sm space-y-1">
+                                <p>📅 {new Date(ticketEvent.date + 'T00:00:00').toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' })} {ticketEvent.time && `• ${ticketEvent.time.slice(0, 5)}`}</p>
+                                {ticketEvent.location && <p>📍 {ticketEvent.location}</p>}
+                            </div>
+                        </div>
+                    )}
 
                     <p className="text-garo-silver mb-8 text-lg">
                         {t.ticketReceivedSub}<br />
