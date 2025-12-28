@@ -314,7 +314,23 @@ const VaultPage: FC = () => {
 
                         // Update user data with new values
                         setUserData((prev: any) => ({ ...prev, ...newData }));
-                        setHasPendingTicket(false); // Ticket was burned
+
+                        // Clear pending ticket and ticketEvent (it was used)
+                        setHasPendingTicket(false);
+                        setTicketEvent(null);
+
+                        // Refresh POAPs since user was just scanned
+                        if (userData?.email) {
+                            console.log('🔄 Refreshing POAPs after scan...');
+                            fetch(`/api/user/poaps?email=${encodeURIComponent(userData.email)}`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.poaps) {
+                                        setPoaps(data.poaps);
+                                        console.log('🏆 POAPs refreshed:', data.poaps.length);
+                                    }
+                                });
+                        }
                     }
                 )
                 .subscribe();
