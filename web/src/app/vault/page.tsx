@@ -542,17 +542,17 @@ const VaultPage: FC = () => {
                     <div className="flex justify-center gap-8 mt-8">
                         <div className="text-center">
                             <div className="text-3xl font-bold text-garo-neon">{attendanceCount}</div>
-                            <div className="text-sm text-garo-muted">Eventos</div>
+                            <div className="text-sm text-garo-muted">{language === "es" ? "Eventos" : "Events"}</div>
                         </div>
                         <div className="text-center">
                             <div className="text-3xl font-bold text-white">Tier {userTier}</div>
-                            <div className="text-sm text-garo-muted">Tu Nivel</div>
+                            <div className="text-sm text-garo-muted">{language === "es" ? "Tu Nivel" : "Your Level"}</div>
                         </div>
                         <div className="text-center">
                             <div className="text-3xl font-bold text-garo-silver">
                                 {vaultItems.filter(i => isUnlocked(i.requiredTier)).length}/{vaultItems.length}
                             </div>
-                            <div className="text-sm text-garo-muted">Desbloqueados</div>
+                            <div className="text-sm text-garo-muted">{language === "es" ? "Desbloqueados" : "Unlocked"}</div>
                         </div>
                     </div>
 
