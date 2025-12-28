@@ -195,7 +195,8 @@ const VaultPage: FC = () => {
                 console.error("Error checking ticket status:", e);
             }
         };
-        if (userData?.email && !userData?.last_mint_address) {
+        // Check for ALL users (members and ghosts alike)
+        if (userData?.email) {
             checkPendingTicket();
         }
     }, [userData]);
@@ -510,6 +511,31 @@ const VaultPage: FC = () => {
 
             {/* Main Content */}
             <main className="pt-24 pb-16 px-6 max-w-6xl mx-auto">
+
+                {/* 🎫 PENDING EVENT TICKET BANNER (for members with upcoming events) */}
+                {ticketEvent && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-garo-neon/20 to-cyan-500/20 border border-garo-neon/50"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="text-5xl">🎫</div>
+                            <div className="flex-1">
+                                <div className="text-xs text-garo-neon font-bold mb-1">
+                                    {language === "es" ? "PRÓXIMO EVENTO" : "UPCOMING EVENT"}
+                                </div>
+                                <h2 className="text-2xl font-bold text-white">{ticketEvent.name}</h2>
+                                <p className="text-garo-silver text-sm">
+                                    📅 {new Date(ticketEvent.date + 'T00:00:00').toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                                    {ticketEvent.time && ` • ${ticketEvent.time.slice(0, 5)}`}
+                                    {ticketEvent.location && ` • 📍 ${ticketEvent.location}`}
+                                </p>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
                 {/* Hero */}
                 <motion.section
                     initial={{ opacity: 0, y: 20 }}
