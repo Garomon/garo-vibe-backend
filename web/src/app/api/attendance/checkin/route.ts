@@ -172,43 +172,52 @@ export async function POST(request: Request) {
         // EXISTING MEMBER: Check-in flow
         // Members MUST have a pending ticket to check in (validates they were invited to this event)
 
-        const { data: memberTicket } = await supabase
+        // Get all pending tickets for this member
+        const { data: pendingTickets } = await supabase
             .from("pending_invites")
             .select("id, event_id")
             .eq("email", user.email?.toLowerCase())
-            .eq("status", "PENDING")
-            .single();
+            .eq("status", "PENDING");
+
+        // Find the ticket that matches the selected event (if eventId provided)
+        let memberTicket = null;
+        if (eventId && pendingTickets) {
+            memberTicket = pendingTickets.find(t => t.event_id === eventId);
+        } else if (pendingTickets && pendingTickets.length > 0) {
+            // No specific event selected, use the first ticket
+            memberTicket = pendingTickets[0];
+        }
 
         // NO TICKET = Can't check in (they need an invite for each event)
         if (!memberTicket) {
+            // Check if they have tickets for other events
+            if (pendingTickets && pendingTickets.length > 0 && eventId) {
+                // They have tickets, but not for THIS event
+                const { data: ticketEvent } = await supabase
+                    .from("garo_events")
+                    .select("name")
+                    .eq("id", pendingTickets[0].event_id)
+                    .single();
+                const { data: selectedEvent } = await supabase
+                    .from("garo_events")
+                    .select("name")
+                    .eq("id", eventId)
+                    .single();
+
+                return NextResponse.json({
+                    error: "WRONG EVENT",
+                    message: "Ticket is for a different event",
+                    status: "WRONG_EVENT",
+                    details: `Ticket: ${ticketEvent?.name || 'Unknown'} | Scanner: ${selectedEvent?.name || 'Unknown'}`
+                }, { status: 403 });
+            }
+
             return NextResponse.json({
                 error: "NO TICKET",
                 message: "You need an event ticket to check in. Ask for an invite!",
                 status: "NO_TICKET",
                 currentTier: user.tier,
                 attendanceCount: user.attendance_count
-            }, { status: 403 });
-        }
-
-        // 🛡️ EVENT VALIDATION: Check if ticket matches the selected event
-        if (eventId && memberTicket.event_id && memberTicket.event_id !== eventId) {
-            // Fetch event names for clear error message
-            const { data: ticketEvent } = await supabase
-                .from("garo_events")
-                .select("name")
-                .eq("id", memberTicket.event_id)
-                .single();
-            const { data: selectedEvent } = await supabase
-                .from("garo_events")
-                .select("name")
-                .eq("id", eventId)
-                .single();
-
-            return NextResponse.json({
-                error: "WRONG EVENT",
-                message: "Ticket is for a different event",
-                status: "WRONG_EVENT",
-                details: `Ticket: ${ticketEvent?.name || 'Unknown'} | Scanner: ${selectedEvent?.name || 'Unknown'}`
             }, { status: 403 });
         }
 
