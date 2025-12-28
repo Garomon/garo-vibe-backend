@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { WalletButton } from "./components/WalletButton";
 import { useWeb3Auth } from "./providers/Web3AuthProvider";
-import { useLanguage, LanguageToggle } from "../context/LanguageProvider";
+import { useLanguage } from "../context/LanguageProvider";
 
 export default function Home() {
   const { loggedIn } = useWeb3Auth();
@@ -11,11 +11,6 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-      {/* Language Toggle - Top Right */}
-      <div className="absolute top-6 right-6 z-20">
-        <LanguageToggle />
-      </div>
-
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-garo-void via-black to-garo-dark" />
 

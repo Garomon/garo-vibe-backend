@@ -3,6 +3,7 @@ import { Outfit, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Web3AuthProvider } from "./providers/Web3AuthProvider";
 import { LanguageProvider } from "../context/LanguageProvider";
+import { GlobalLanguageToggle } from "./components/GlobalLanguageToggle";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -40,6 +41,7 @@ export default function RootLayout({
       >
         <LanguageProvider>
           <Web3AuthProvider>
+            <GlobalLanguageToggle />
             {children}
           </Web3AuthProvider>
         </LanguageProvider>
