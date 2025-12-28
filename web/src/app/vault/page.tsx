@@ -179,6 +179,94 @@ const VaultPage: FC = () => {
         }
     }, [userData]);
 
+    // ============== REALTIME STATE SYNC ==============
+    // Listen for changes to automatically update UI without refresh
+    const [showConfetti, setShowConfetti] = useState(false);
+
+    useEffect(() => {
+        if (!userData?.email) return;
+
+        // Dynamic import of Supabase client
+        const setupRealtimeSubscription = async () => {
+            const { supabase } = await import("../../lib/supabaseClient");
+
+            console.log("🔌 Setting up Realtime subscriptions for:", userData.email);
+
+            // Channel for pending_invites changes (Ghost → Ticket)
+            const invitesChannel = supabase
+                .channel('pending-invites-changes')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'pending_invites',
+                        filter: `email=eq.${userData.email.toLowerCase()}`
+                    },
+                    (payload) => {
+                        console.log('📡 Realtime: pending_invites change detected', payload);
+                        // Re-check ticket status
+                        fetch(`/api/user/ticket-status?email=${encodeURIComponent(userData.email)}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                const hadTicket = hasPendingTicket;
+                                setHasPendingTicket(data.hasPendingTicket);
+                                // If we just got a ticket, show celebration
+                                if (!hadTicket && data.hasPendingTicket) {
+                                    console.log('🎫 TICKET RECEIVED! Showing celebration...');
+                                }
+                            });
+                    }
+                )
+                .subscribe();
+
+            // Channel for garo_users changes (Ticket → Member via tier change)
+            const usersChannel = supabase
+                .channel('garo-users-changes')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'garo_users',
+                        filter: `email=eq.${userData.email.toLowerCase()}`
+                    },
+                    (payload) => {
+                        console.log('📡 Realtime: garo_users UPDATE detected', payload);
+                        const newData = payload.new as any;
+
+                        // Check if user just became a member (last_mint_address set)
+                        const wasGhost = !userData.last_mint_address;
+                        const isNowMember = newData.last_mint_address;
+
+                        if (wasGhost && isNowMember) {
+                            console.log('🎉 TRANSMUTATION COMPLETE! User is now a member!');
+                            setShowConfetti(true);
+                            setTimeout(() => setShowConfetti(false), 5000);
+                        }
+
+                        // Update user data with new values
+                        setUserData((prev: any) => ({ ...prev, ...newData }));
+                        setHasPendingTicket(false); // Ticket was burned
+                    }
+                )
+                .subscribe();
+
+            // Cleanup function
+            return () => {
+                console.log("🔌 Cleaning up Realtime subscriptions");
+                supabase.removeChannel(invitesChannel);
+                supabase.removeChannel(usersChannel);
+            };
+        };
+
+        const cleanup = setupRealtimeSubscription();
+
+        return () => {
+            cleanup.then(fn => fn && fn());
+        };
+    }, [userData?.email]);
+
     // ============== NOT LOGGED IN ==============
     if (!loggedIn) {
         return (
@@ -309,6 +397,62 @@ const VaultPage: FC = () => {
 
     return (
         <div className="min-h-screen bg-black">
+            {/* Confetti Celebration Overlay */}
+            {showConfetti && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center"
+                >
+                    {/* Confetti particles */}
+                    {[...Array(50)].map((_, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{
+                                opacity: 1,
+                                y: -100,
+                                x: Math.random() * window.innerWidth - window.innerWidth / 2,
+                                rotate: 0,
+                                scale: 1
+                            }}
+                            animate={{
+                                opacity: 0,
+                                y: window.innerHeight + 100,
+                                x: Math.random() * 400 - 200,
+                                rotate: Math.random() * 720,
+                                scale: 0.5
+                            }}
+                            transition={{
+                                duration: 3 + Math.random() * 2,
+                                delay: Math.random() * 0.5,
+                                ease: "easeOut"
+                            }}
+                            className="absolute text-2xl"
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                top: 0
+                            }}
+                        >
+                            {['🎉', '✨', '🔥', '💎', '⭐', '🎊'][Math.floor(Math.random() * 6)]}
+                        </motion.div>
+                    ))}
+
+                    {/* Central celebration text */}
+                    <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: "spring", delay: 0.3 }}
+                        className="text-center z-10"
+                    >
+                        <h2 className="text-4xl md:text-6xl font-bold text-garo-neon mb-4">
+                            🔥 TRANSMUTATION COMPLETE 🔥
+                        </h2>
+                        <p className="text-xl text-white">Welcome to the Family</p>
+                    </motion.div>
+                </motion.div>
+            )}
+
             {/* Header */}
             <header className="fixed top-0 left-0 right-0 z-50 glass-dark">
                 <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -318,9 +462,9 @@ const VaultPage: FC = () => {
 
                     <div className="flex items-center gap-6">
                         <div className={`px-4 py-2 rounded-full font-bold text-sm ${userTier >= 3 ? "bg-green-600 text-white" :
-                                userTier >= 2 ? "bg-orange-600 text-white" :
-                                    userTier >= 1 ? "bg-gray-600 text-gray-200" :
-                                        "bg-red-600 text-white"
+                            userTier >= 2 ? "bg-orange-600 text-white" :
+                                userTier >= 1 ? "bg-gray-600 text-gray-200" :
+                                    "bg-red-600 text-white"
                             }`}>
                             {userTier >= 3 ? "👑 FAMILY" :
                                 userTier >= 2 ? "🏠 RESIDENT" :
