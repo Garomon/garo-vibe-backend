@@ -65,10 +65,12 @@ export async function POST(request: Request) {
                 })
                 .eq("id", entryTicket.id);
 
+            // Create Solana Admin for minting
+            const admin = new SolanaAdmin();
+
             // Mint PROOF_OF_RAVE NFT (Tier 1)
             let mintAddress = null;
             try {
-                const admin = new SolanaAdmin();
                 mintAddress = await admin.mintProofOfRave(walletAddress, 1);
                 console.log(`✨ PROOF_OF_RAVE minted: ${mintAddress}`);
             } catch (mintError) {
@@ -96,15 +98,40 @@ export async function POST(request: Request) {
                     event_date: new Date().toISOString()
                 }]);
 
-            // Record POAP (event attendance for collectible)
+            // Record POAP (event attendance for collectible) + MINT NFT
+            let poapMintAddress = null;
             if (entryTicket.event_id) {
+                // Fetch event details for POAP
+                const { data: eventData } = await supabase
+                    .from("garo_events")
+                    .select("name, date")
+                    .eq("id", entryTicket.event_id)
+                    .single();
+
+                // Mint POAP NFT
+                if (eventData) {
+                    try {
+                        poapMintAddress = await admin.mintEventPOAP(
+                            walletAddress,
+                            entryTicket.event_id,
+                            eventData.name,
+                            eventData.date
+                        );
+                        console.log(`🏆 POAP NFT minted: ${poapMintAddress}`);
+                    } catch (poapError) {
+                        console.error("POAP mint failed:", poapError);
+                        // Continue anyway - record in DB
+                    }
+                }
+
+                // Record in database
                 await supabase
                     .from("event_attendance")
                     .upsert([{
                         user_id: user.id,
                         event_id: entryTicket.event_id,
                         checked_in_at: new Date().toISOString(),
-                        nft_mint_address: mintAddress
+                        nft_mint_address: poapMintAddress
                     }], { onConflict: 'user_id,event_id' });
                 console.log(`🏆 POAP recorded for event ${entryTicket.event_id}`);
             }
@@ -181,13 +208,38 @@ export async function POST(request: Request) {
                 .update({ status: "USED", claimed_at: new Date().toISOString() })
                 .eq("id", memberTicket.id);
 
-            // Record POAP
+            // Fetch event details for POAP
+            const { data: eventData } = await supabase
+                .from("garo_events")
+                .select("name, date")
+                .eq("id", memberTicket.event_id)
+                .single();
+
+            // Mint POAP NFT
+            let poapMintAddress = null;
+            if (eventData) {
+                try {
+                    const admin = new SolanaAdmin();
+                    poapMintAddress = await admin.mintEventPOAP(
+                        user.wallet_address,
+                        memberTicket.event_id,
+                        eventData.name,
+                        eventData.date
+                    );
+                    console.log(`🏆 POAP NFT minted for member: ${poapMintAddress}`);
+                } catch (poapError) {
+                    console.error("Member POAP mint failed:", poapError);
+                }
+            }
+
+            // Record in database
             await supabase
                 .from("event_attendance")
                 .upsert([{
                     user_id: user.id,
                     event_id: memberTicket.event_id,
-                    checked_in_at: new Date().toISOString()
+                    checked_in_at: new Date().toISOString(),
+                    nft_mint_address: poapMintAddress
                 }], { onConflict: 'user_id,event_id' });
             console.log(`🏆 POAP recorded for member at event ${memberTicket.event_id}`);
         }

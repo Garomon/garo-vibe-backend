@@ -100,4 +100,39 @@ export class SolanaAdmin {
             throw error;
         }
     }
+
+    /**
+     * Mints a unique POAP NFT for event attendance.
+     * Each event the user attends = unique collectible NFT.
+     */
+    async mintEventPOAP(userWallet: string, eventId: string, eventName: string, eventDate: string) {
+        try {
+            const userPublicKey = new PublicKey(userWallet);
+
+            // Create a unique metadata URI for this event POAP
+            const metadataUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/metadata/poap/${eventId}`;
+
+            // Format event name for NFT
+            const nftName = `GΛRO POAP: ${eventName}`.slice(0, 32); // Max 32 chars
+            const formattedDate = new Date(eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+            console.log(`🏆 Minting POAP for ${userWallet} - Event: ${eventName}`);
+
+            const { nft } = await this.metaplex.nfts().create({
+                uri: metadataUri,
+                name: nftName,
+                sellerFeeBasisPoints: 0,
+                tokenOwner: userPublicKey,
+                symbol: "GΛRO",
+            });
+
+            console.log(`🏆 POAP Minted: ${nft.address.toBase58()} for event ${eventName}`);
+            return nft.address.toBase58();
+
+        } catch (error) {
+            console.error("POAP Minting Error:", error);
+            throw error;
+        }
+    }
 }
+
