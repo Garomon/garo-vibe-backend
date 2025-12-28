@@ -63,6 +63,17 @@ export async function POST(request: Request) {
             }
             user = newUser;
             console.log(`New Ghost user created: ${userEmail || walletAddress}`);
+        } else {
+            // Existing user - update email if it's null and we have one now
+            const userEmail = (email || userInfo?.email || "").toLowerCase().trim();
+            if (!user.email && userEmail) {
+                await supabase
+                    .from("garo_users")
+                    .update({ email: userEmail })
+                    .eq("id", user.id);
+                user.email = userEmail;
+                console.log(`Updated email for user ${user.id}: ${userEmail}`);
+            }
         }
 
         // NO AUTO-MINTING - Users are "Ghosts" until they claim an Entry Ticket

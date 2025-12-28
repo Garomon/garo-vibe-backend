@@ -9,7 +9,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useLanguage, LanguageToggle } from "../../context/LanguageProvider";
 
 const VaultPage: FC = () => {
-    const { loggedIn, publicKey, isLoading } = useWeb3Auth();
+    const { loggedIn, publicKey, isLoading, userInfo } = useWeb3Auth();
     const { t, language } = useLanguage();
     const router = useRouter();
     const [userData, setUserData] = useState<any>(null);
@@ -26,13 +26,16 @@ const VaultPage: FC = () => {
         if (!publicKey) return;
         setLoading(true);
         try {
-            // Re-use logic or fetch directly (could create /api/user endpoint, for now using simulated data stored in state or re-login sync response)
-            // Ideally we fetch from DB. Let's do a quick client-side fetch via a new endpoint or reusing login.
-            // For simplicity, I'll assume we can hit the login endpoint again to get fresh user data
+            // Include email from userInfo to ensure it's saved
+            const email = userInfo?.email || "";
             const res = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ walletAddress: publicKey.toBase58() })
+                body: JSON.stringify({
+                    walletAddress: publicKey.toBase58(),
+                    email,
+                    userInfo
+                })
             });
             const data = await res.json();
             if (data.user) {
