@@ -281,9 +281,9 @@ const VaultPage: FC = () => {
                     className="text-center"
                 >
                     <h1 className="text-4xl font-bold mb-4">
-                        <span className="lambda-glow">Λ</span> The Vault
+                        <span className="lambda-glow">Λ</span> {t.vaultTitle}
                     </h1>
-                    <p className="text-garo-silver mb-8">Conecta tu wallet para acceder</p>
+                    <p className="text-garo-silver mb-8">{t.connectToAccess}</p>
                     <WalletButton />
                 </motion.div>
             </div>
@@ -300,7 +300,7 @@ const VaultPage: FC = () => {
                     className="text-center"
                 >
                     <div className="text-6xl mb-4 animate-pulse">Λ</div>
-                    <p className="text-garo-silver">Loading...</p>
+                    <p className="text-garo-silver">{t.loading}</p>
                 </motion.div>
             </div>
         );
@@ -324,12 +324,12 @@ const VaultPage: FC = () => {
                     </div>
 
                     <h1 className="text-3xl font-bold mb-4 text-red-500">
-                        SIGNAL LOST
+                        {t.signalLost}
                     </h1>
 
                     <p className="text-garo-silver mb-8 text-lg">
-                        NO ACTIVE ACCESS DETECTED.<br />
-                        <span className="text-garo-muted">WAIT FOR THE DROP.</span>
+                        {t.signalLostSub}<br />
+                        <span className="text-garo-muted">{t.signalLostAction}</span>
                     </p>
 
                     <div className="glass p-4 rounded-xl mb-8 text-left text-sm">
@@ -363,12 +363,12 @@ const VaultPage: FC = () => {
                     </motion.div>
 
                     <h1 className="text-3xl font-bold mb-4 text-garo-neon">
-                        TICKET RECEIVED
+                        {t.ticketReceived}
                     </h1>
 
                     <p className="text-garo-silver mb-8 text-lg">
-                        You have access to the next event.<br />
-                        <span className="text-garo-muted">Show your QR at the door.</span>
+                        {t.ticketReceivedSub}<br />
+                        <span className="text-garo-muted">{t.ticketReceivedAction}</span>
                     </p>
 
                     {/* QR Code for scanning */}
@@ -383,12 +383,12 @@ const VaultPage: FC = () => {
                             />
                         </div>
                         <p className="text-garo-muted text-sm">
-                            Scan this at the door to enter
+                            {t.scanAtDoor}
                         </p>
                     </div>
 
                     <p className="text-yellow-400 text-sm mb-6">
-                        ⚡ Once scanned, your ticket becomes a <strong>Proof of Rave</strong>
+                        ⚡ {t.ticketBurnsTo} <strong>{t.proofOfRave}</strong>
                     </p>
 
                     <WalletButton />
@@ -450,9 +450,9 @@ const VaultPage: FC = () => {
                         className="text-center z-10"
                     >
                         <h2 className="text-4xl md:text-6xl font-bold text-garo-neon mb-4">
-                            🔥 TRANSMUTATION COMPLETE 🔥
+                            🔥 {t.transmutationComplete} 🔥
                         </h2>
-                        <p className="text-xl text-white">Welcome to the Family</p>
+                        <p className="text-xl text-white">{t.welcomeFamily}</p>
                     </motion.div>
                 </motion.div>
             )}
@@ -470,10 +470,10 @@ const VaultPage: FC = () => {
                                 userTier >= 1 ? "bg-gray-600 text-gray-200" :
                                     "bg-red-600 text-white"
                             }`}>
-                            {userTier >= 3 ? "👑 FAMILY" :
-                                userTier >= 2 ? "🏠 RESIDENT" :
-                                    userTier >= 1 ? "🌱 INITIATE" :
-                                        "👻 GHOST"}
+                            {userTier >= 3 ? `👑 ${t.tier3.toUpperCase()}` :
+                                userTier >= 2 ? `🏠 ${t.tier2.toUpperCase()}` :
+                                    userTier >= 1 ? `🌱 ${t.tier1.toUpperCase()}` :
+                                        `👻 ${t.ghost.toUpperCase()}`}
                         </div>
                         <WalletButton />
                     </div>
@@ -558,7 +558,7 @@ const VaultPage: FC = () => {
                         transition={{ delay: 0.3 }}
                         className="mt-12 flex flex-col items-center"
                     >
-                        <h3 className="text-lg font-bold text-garo-silver mb-4">ACCESS PASS</h3>
+                        <h3 className="text-lg font-bold text-garo-silver mb-4">{t.accessPass}</h3>
                         <div className="relative group">
                             {/* Holographic Glow */}
                             <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 rounded-2xl blur-lg opacity-50 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
@@ -573,19 +573,19 @@ const VaultPage: FC = () => {
                                 />
                             </div>
                         </div>
-                        <p className="mt-4 text-xs text-garo-muted font-mono">Muestra esto al Bouncer</p>
+                        <p className="mt-4 text-xs text-garo-muted font-mono">{t.showToBouncer}</p>
 
                         {/* Copy Address Button */}
                         <button
                             onClick={() => {
                                 if (publicKey) {
                                     navigator.clipboard.writeText(publicKey.toBase58());
-                                    alert("Address copied!");
+                                    alert(t.addressCopied);
                                 }
                             }}
                             className="mt-3 px-4 py-2 text-xs border border-garo-neon/50 text-garo-neon rounded-full hover:bg-garo-neon/10 transition flex items-center gap-2"
                         >
-                            📋 Copy Full Address
+                            📋 {t.copyAddress}
                         </button>
                     </motion.div>
                 </motion.section>
@@ -656,8 +656,8 @@ const VaultPage: FC = () => {
                                         <div className="flex items-center gap-3">
                                             <span className="text-3xl">🔒</span>
                                             <div>
-                                                <p className="text-red-400 font-bold text-sm">LOCKED</p>
-                                                <p className="text-garo-muted text-xs">Requires {item.tierName} status</p>
+                                                <p className="text-red-400 font-bold text-sm">{t.locked}</p>
+                                                <p className="text-garo-muted text-xs">{t.requires} {item.tierName} {t.status}</p>
                                             </div>
                                         </div>
                                     )}
