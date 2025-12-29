@@ -14,56 +14,54 @@ interface VaultCardProps {
  * 
  * TIER 1 (INITIATE): "Heavy Concrete" - Minimal tilt, low glare, matte finish
  * TIER 2 (RESIDENT): "Neon Industrial" - Medium tilt, orange glare, pulsing border
- * TIER 3 (FAMILY): "Holographic Future" - High tilt, rainbow glare, floating + gyroscope
+ * TIER 3 (FAMILY): "Holographic Future" - High tilt, rainbow glare, floating animation
  */
 const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "" }) => {
-    // Tier-specific tilt configurations - Enhanced for mobile visibility
+    // Tier-specific tilt configurations
     const tiltConfig = {
         1: {
-            tiltMaxAngleX: 8,
-            tiltMaxAngleY: 8,
-            glareMaxOpacity: 0.35,
+            tiltMaxAngleX: 10,
+            tiltMaxAngleY: 10,
+            glareMaxOpacity: 0.3,
             glareColor: "rgba(180, 180, 180, 0.8)",
             scale: 1.02,
         },
         2: {
             tiltMaxAngleX: 15,
             tiltMaxAngleY: 15,
-            glareMaxOpacity: 0.55,
+            glareMaxOpacity: 0.5,
             glareColor: "rgba(255, 165, 0, 0.9)",
-            scale: 1.04,
+            scale: 1.03,
         },
         3: {
             tiltMaxAngleX: 20,
             tiltMaxAngleY: 20,
-            glareMaxOpacity: 0.75,
+            glareMaxOpacity: 0.7,
             glareColor: "rgba(0, 255, 255, 0.9)",
-            scale: 1.06,
+            scale: 1.05,
         },
     };
 
     const config = tiltConfig[tier as keyof typeof tiltConfig] || tiltConfig[1];
 
-    // Tier-specific wrapper classes (animate-float removed from tier3 - applied to wrapper)
+    // Tier-specific wrapper classes
     const tierStyles: Record<number, string> = {
         1: "vault-card-tier1",
         2: "vault-card-tier2 animate-pulse-slow",
-        3: "vault-card-tier3",  // Float animation on wrapper div, not here
+        3: "vault-card-tier3",
     };
 
     const tierClass = tierStyles[tier] || "";
 
-    // The Tilt card with gyroscope
+    // Simple Tilt card - no experimental settings
     const cardContent = (
         <Tilt
             tiltMaxAngleX={config.tiltMaxAngleX}
             tiltMaxAngleY={config.tiltMaxAngleY}
-            tiltAngleXInitial={-30}
             perspective={1000}
             scale={config.scale}
-            transitionSpeed={400}
+            transitionSpeed={300}
             gyroscope={true}
-            reset={false}
             glareEnable={true}
             glareMaxOpacity={config.glareMaxOpacity}
             glareColor={config.glareColor}
@@ -83,7 +81,7 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "" }) => {
         </Tilt>
     );
 
-    // Tier 3: Wrap in floating container so both float AND gyroscope work
+    // Tier 3: Wrap in floating container
     if (tier === 3) {
         return (
             <div className="animate-float">
