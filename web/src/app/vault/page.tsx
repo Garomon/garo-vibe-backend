@@ -826,8 +826,9 @@ const VaultPage: FC = () => {
                                 >
                                     <VaultCard
                                         tier={item.min_tier}
-                                        mediaType={item.type as 'image' | 'video' | 'audio'}
+                                        mediaType={item.type as 'image' | 'video' | 'audio' | 'gallery'}
                                         mediaUrl={unlocked ? item.url : undefined}
+                                        galleryUrls={unlocked && item.gallery_urls ? item.gallery_urls : undefined}
                                     >
                                         <div className={`relative p-6 h-full flex flex-col justify-between min-h-[220px] ${!unlocked ? 'blur-sm select-none grayscale' : ''}`}>
 
@@ -835,7 +836,7 @@ const VaultPage: FC = () => {
                                             <div className="flex justify-between items-start mb-4">
                                                 <div className="p-2 rounded-lg bg-black/40 backdrop-blur-md border border-white/10">
                                                     <span className="text-2xl">
-                                                        {item.type === 'audio' ? '🎧' : item.type === 'video' ? '📺' : '📸'}
+                                                        {item.type === 'audio' ? '🎧' : item.type === 'video' ? '📺' : item.type === 'gallery' ? '🖼️' : '📸'}
                                                     </span>
                                                 </div>
                                                 <span className={`text-xs font-bold uppercase px-2 py-1 rounded border ${item.min_tier >= 3 ? 'border-green-500 text-green-400' :

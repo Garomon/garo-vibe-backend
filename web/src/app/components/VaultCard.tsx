@@ -2,13 +2,21 @@
 
 import { FC, ReactNode } from "react";
 import Tilt from "react-parallax-tilt";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination, A11y } from 'swiper/modules';
+
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/pagination';
 
 interface VaultCardProps {
     tier: number;
     children?: ReactNode;
     className?: string;
-    mediaType?: 'image' | 'video' | 'audio';
+    mediaType?: 'image' | 'video' | 'audio' | 'gallery';
     mediaUrl?: string;
+    galleryUrls?: string[];
+    isViewed?: boolean;
 }
 
 // Helper to extract YouTube video ID from various URL formats
@@ -23,7 +31,15 @@ const isSoundCloud = (url: string): boolean => {
     return url.includes('soundcloud.com');
 };
 
-const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "", mediaType, mediaUrl }) => {
+const VaultCard: FC<VaultCardProps> = ({
+    tier,
+    children,
+    className = "",
+    mediaType,
+    mediaUrl,
+    galleryUrls,
+    isViewed = false
+}) => {
     const tiltConfig = {
         1: { tiltMaxAngleX: 10, tiltMaxAngleY: 10, glareMaxOpacity: 0.3, glareColor: "rgba(180, 180, 180, 0.8)", scale: 1.02 },
         2: { tiltMaxAngleX: 15, tiltMaxAngleY: 15, glareMaxOpacity: 0.5, glareColor: "rgba(255, 165, 0, 0.9)", scale: 1.03 },
@@ -42,6 +58,40 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "", mediaTy
 
     // Render media based on type
     const renderMedia = () => {
+        // GALLERY: Swiper Carousel
+        if (mediaType === 'gallery' && galleryUrls && galleryUrls.length > 0) {
+            return (
+                <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 relative">
+                    <Swiper
+                        modules={[Pagination, A11y]}
+                        spaceBetween={0}
+                        slidesPerView={1}
+                        pagination={{
+                            clickable: true,
+                            bulletClass: 'swiper-pagination-bullet !bg-white/30 !w-3 !h-1 !rounded-sm',
+                            bulletActiveClass: '!bg-garo-neon !shadow-[0_0_8px_rgba(0,255,255,0.8)]'
+                        }}
+                        className="w-full h-full gallery-swiper"
+                    >
+                        {galleryUrls.map((url, index) => (
+                            <SwiperSlide key={index}>
+                                <img
+                                    src={url}
+                                    alt={`Gallery image ${index + 1}`}
+                                    loading="lazy"
+                                    className="w-full h-full object-cover"
+                                />
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                    {/* Photo count indicator */}
+                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full text-xs text-white/80 z-10">
+                        📸 {galleryUrls.length}
+                    </div>
+                </div>
+            );
+        }
+
         if (!mediaUrl) return null;
 
         // VIDEO: YouTube embed
@@ -128,6 +178,14 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "", mediaTy
             glareBorderRadius="1.5rem"
             className={`vault-card ${tierClass} ${className}`}
         >
+            {/* Viewed Badge */}
+            {isViewed && (
+                <div className="absolute top-3 left-3 z-30 bg-garo-neon/20 backdrop-blur-sm px-2 py-1 rounded-full border border-garo-neon/50 flex items-center gap-1">
+                    <span className="text-garo-neon text-xs">✓</span>
+                    <span className="text-garo-neon text-xs font-bold">VIEWED</span>
+                </div>
+            )}
+
             {tier === 3 && (
                 <div className="absolute inset-0 rounded-3xl pointer-events-none holo-overlay z-10" />
             )}

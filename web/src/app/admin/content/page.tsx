@@ -8,8 +8,9 @@ import { useRouter } from "next/navigation";
 interface VaultContent {
     id: string;
     title: string;
-    type: "audio" | "video" | "image";
+    type: "audio" | "video" | "image" | "gallery";
     url: string;
+    gallery_urls?: string[];
     min_tier: number;
     active: boolean;
     created_at: string;
@@ -29,6 +30,7 @@ export default function VaultContentManager() {
         title: "",
         type: "audio",
         url: "",
+        gallery_urls: "", // Comma-separated URLs for galleries
         min_tier: 1
     });
 
@@ -66,10 +68,28 @@ export default function VaultContentManager() {
         setSubmitting(true);
 
         try {
+            // Prepare body based on type
+            const submitBody: any = {
+                title: formData.title,
+                type: formData.type,
+                min_tier: formData.min_tier
+            };
+
+            if (formData.type === 'gallery') {
+                // Parse comma-separated URLs into array
+                submitBody.gallery_urls = formData.gallery_urls
+                    .split(',')
+                    .map(url => url.trim())
+                    .filter(url => url.length > 0);
+                submitBody.url = submitBody.gallery_urls[0] || ''; // First image as thumbnail
+            } else {
+                submitBody.url = formData.url;
+            }
+
             const res = await fetch("/api/admin/content", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(submitBody)
             });
 
             if (res.ok) {
@@ -78,6 +98,7 @@ export default function VaultContentManager() {
                     title: "",
                     type: "audio",
                     url: "",
+                    gallery_urls: "",
                     min_tier: 1
                 });
                 // Refresh list
@@ -164,20 +185,38 @@ export default function VaultContentManager() {
                                         <option value="audio">Audio (Set)</option>
                                         <option value="video">Video</option>
                                         <option value="image">Image/Asset</option>
+                                        <option value="gallery">📸 Gallery (Event Photos)</option>
                                     </select>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Asset URL</label>
-                                    <input
-                                        type="url"
-                                        value={formData.url}
-                                        onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                                        className="w-full bg-black/40 border border-white/10 rounded p-3 text-white focus:border-purple-500 outline-none transition"
-                                        placeholder="https://soundcloud.com/..."
-                                        required
-                                    />
-                                </div>
+                                {/* Show different input based on type */}
+                                {formData.type === 'gallery' ? (
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Gallery URLs (comma-separated)</label>
+                                        <textarea
+                                            value={formData.gallery_urls}
+                                            onChange={(e) => setFormData({ ...formData, gallery_urls: e.target.value })}
+                                            className="w-full bg-black/40 border border-white/10 rounded p-3 text-white focus:border-purple-500 outline-none transition min-h-[120px] font-mono text-sm"
+                                            placeholder="https://example.com/photo1.jpg,
+https://example.com/photo2.jpg,
+https://example.com/photo3.jpg"
+                                            required
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">Paste multiple image URLs, one per line or comma-separated.</p>
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Asset URL</label>
+                                        <input
+                                            type="url"
+                                            value={formData.url}
+                                            onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                                            className="w-full bg-black/40 border border-white/10 rounded p-3 text-white focus:border-purple-500 outline-none transition"
+                                            placeholder="https://soundcloud.com/..."
+                                            required
+                                        />
+                                    </div>
+                                )}
 
                                 <div>
                                     <label className="block text-sm text-gray-400 mb-1">Minimum Tier</label>
@@ -230,14 +269,14 @@ export default function VaultContentManager() {
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-3 mb-1">
                                                     <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${item.type === 'audio' ? 'bg-orange-500/20 text-orange-400' :
-                                                            item.type === 'video' ? 'bg-blue-500/20 text-blue-400' :
-                                                                'bg-green-500/20 text-green-400'
+                                                        item.type === 'video' ? 'bg-blue-500/20 text-blue-400' :
+                                                            'bg-green-500/20 text-green-400'
                                                         }`}>
                                                         {item.type}
                                                     </span>
                                                     <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded border ${item.min_tier === 1 ? 'border-gray-500 text-gray-400' :
-                                                            item.min_tier === 2 ? 'border-orange-500 text-orange-400' :
-                                                                'border-cyan-500 text-cyan-400'
+                                                        item.min_tier === 2 ? 'border-orange-500 text-orange-400' :
+                                                            'border-cyan-500 text-cyan-400'
                                                         }`}>
                                                         Tier {item.min_tier}+
                                                     </span>
@@ -263,7 +302,7 @@ export default function VaultContentManager() {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

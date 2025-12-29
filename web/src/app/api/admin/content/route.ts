@@ -25,11 +25,21 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { title, type, url, min_tier } = body;
+        const { title, type, url, min_tier, gallery_urls } = body;
 
         // Validation
-        if (!title || !type || !url) {
-            return NextResponse.json({ error: "Title, Type, and URL are required" }, { status: 400 });
+        if (!title || !type) {
+            return NextResponse.json({ error: "Title and Type are required" }, { status: 400 });
+        }
+
+        // For gallery type, require gallery_urls
+        if (type === 'gallery' && (!gallery_urls || gallery_urls.length === 0)) {
+            return NextResponse.json({ error: "Gallery type requires at least one URL" }, { status: 400 });
+        }
+
+        // For other types, require url
+        if (type !== 'gallery' && !url) {
+            return NextResponse.json({ error: "URL is required" }, { status: 400 });
         }
 
         const { data: newContent, error } = await supabase
@@ -37,7 +47,8 @@ export async function POST(request: Request) {
             .insert([{
                 title,
                 type,
-                url,
+                url: url || (gallery_urls && gallery_urls[0]) || '',
+                gallery_urls: gallery_urls || null,
                 min_tier: min_tier || 1,
                 active: true
             }])
