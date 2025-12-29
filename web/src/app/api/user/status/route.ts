@@ -5,10 +5,19 @@ import { createClient } from "@supabase/supabase-js";
 export async function GET(req: NextRequest) {
     // Initialize Supabase Admin Client inside handler to avoid build-time errors
     // if environment variables are not available during build
-    const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    // Initialize Supabase Admin Client inside handler
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+        console.error("Missing Supabase credentials in /api/user/status");
+        return NextResponse.json(
+            { error: "Server Configuration Error: Missing Supabase Keys" },
+            { status: 500 }
+        );
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
     const { searchParams } = new URL(req.url);
     const email = searchParams.get("email");

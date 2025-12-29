@@ -79,7 +79,7 @@ const RecoveryModal: FC<RecoveryModalProps> = ({ isOpen, onClose }) => {
                                     : "Enter your email address to check if you have an active account in the GΛRO system."}
                             </p>
 
-                            <div className="flex gap-2 mb-6">
+                            <div className="flex flex-col md:flex-row gap-2 mb-6">
                                 <input
                                     type="email"
                                     value={email}
@@ -91,7 +91,7 @@ const RecoveryModal: FC<RecoveryModalProps> = ({ isOpen, onClose }) => {
                                 <button
                                     onClick={handleCheck}
                                     disabled={status === "loading" || !email}
-                                    className="bg-garo-neon/20 hover:bg-garo-neon/30 border border-garo-neon/50 text-garo-neon px-6 py-3 rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    className="bg-garo-neon/20 hover:bg-garo-neon/30 border border-garo-neon/50 text-garo-neon px-6 py-3 rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     {status === "loading" ? (
                                         <div className="w-5 h-5 border-2 border-garo-neon/50 border-t-garo-neon rounded-full animate-spin" />
