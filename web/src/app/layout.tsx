@@ -4,6 +4,7 @@ import "./globals.css";
 import { Web3AuthProvider } from "./providers/Web3AuthProvider";
 import { LanguageProvider } from "../context/LanguageProvider";
 import { GlobalLanguageToggle } from "./components/GlobalLanguageToggle";
+import AmbientBackground from "./components/ui/AmbientBackground";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -36,9 +37,10 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark" suppressHydrationWarning>
       <body
-        className={`${outfit.variable} ${jetbrainsMono.variable} antialiased noise-overlay`}
+        className={`${outfit.variable} ${jetbrainsMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <AmbientBackground />
         <LanguageProvider>
           <Web3AuthProvider>
             <GlobalLanguageToggle />
