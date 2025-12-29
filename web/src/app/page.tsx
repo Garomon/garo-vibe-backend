@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { WalletButton } from "./components/WalletButton";
+import { VibeBalance } from "./components/ui/VibeBalance";
 import { useWeb3Auth } from "./providers/Web3AuthProvider";
 import { useLanguage } from "../context/LanguageProvider";
 
@@ -77,6 +78,7 @@ export default function Home() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="flex flex-col sm:flex-row gap-4 items-center"
         >
+          {loggedIn && <VibeBalance />}
           <WalletButton />
 
           {loggedIn && (

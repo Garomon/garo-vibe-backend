@@ -6,10 +6,22 @@ import { useWeb3Auth } from "../providers/Web3AuthProvider";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AmbientBackground from "../components/ui/AmbientBackground";
+import { useVibe } from "../../context/VibeContext";
+import { VibeBalance } from "../components/ui/VibeBalance";
 
 export default function RavePage() {
     const { loggedIn, publicKey } = useWeb3Auth();
+    const { refreshBalance } = useVibe();
     const router = useRouter();
+
+    // State definitions
+    const [raveMode, setRaveMode] = useState<'TRAINING' | 'LIVE'>('TRAINING');
+    const [activeEvent, setActiveEvent] = useState<any>(null);
+    const [gameState, setGameState] = useState<'idle' | 'active' | 'claiming' | 'success' | 'fail'>('idle');
+    const [timeLeft, setTimeLeft] = useState(60);
+    const [energy, setEnergy] = useState(0);
+    const [avgEnergy, setAvgEnergy] = useState(0);
+    const [hasPermission, setHasPermission] = useState(false);
 
     // Claim Result State
     const [claimResult, setClaimResult] = useState<{ success: boolean; message: string; reward: number } | null>(null);
@@ -88,6 +100,10 @@ export default function RavePage() {
                 message: data.message || (data.success ? "Vibe Captured!" : "Claim Failed"),
                 reward: data.reward || 0
             });
+
+            if (data.success) {
+                refreshBalance();
+            }
 
             setGameState('success'); // Now show success screen with data
 
@@ -201,9 +217,12 @@ export default function RavePage() {
                 <Link href="/vault" className="text-garo-neon hover:text-white transition">
                     ← EXIT
                 </Link>
-                <div className={`text-xs font-mono border border-white/20 px-3 py-1 rounded-full bg-black/50 flex items-center gap-2 ${raveMode === 'LIVE' ? 'border-red-500 text-red-500' : 'border-yellow-500/50 text-gray-400'}`}>
-                    <span className={`w-2 h-2 rounded-full ${raveMode === 'LIVE' ? 'bg-red-500 animate-pulse' : 'bg-yellow-500'}`}></span>
-                    {raveMode === 'LIVE' ? 'LIVE EVENT' : 'TRAINING MODE (DAILY CAP)'}
+                <div className="flex items-center gap-4">
+                    <VibeBalance />
+                    <div className={`text-xs font-mono border border-white/20 px-3 py-1 rounded-full bg-black/50 flex items-center gap-2 ${raveMode === 'LIVE' ? 'border-red-500 text-red-500' : 'border-yellow-500/50 text-gray-400'}`}>
+                        <span className={`w-2 h-2 rounded-full ${raveMode === 'LIVE' ? 'bg-red-500 animate-pulse' : 'bg-yellow-500'}`}></span>
+                        {raveMode === 'LIVE' ? 'LIVE EVENT' : 'TRAINING MODE (DAILY CAP)'}
+                    </div>
                 </div>
             </header>
 
@@ -319,11 +338,11 @@ export default function RavePage() {
                         >
                             <div className="text-8xl mb-6">💃</div>
                             <h2 className="text-4xl font-bold text-garo-neon mb-2">
-                                {claimResult?.reward > 0 ? "VIBE CAPTURED" : "TRAINING COMPLETE"}
+                                {(claimResult?.reward ?? 0) > 0 ? "VIBE CAPTURED" : "TRAINING COMPLETE"}
                             </h2>
                             <div className="text-xl text-white mb-8">
-                                {claimResult?.reward > 0 ? (
-                                    <>+{claimResult.reward} <span className={`font-bold text-transparent bg-clip-text bg-gradient-to-r ${raveMode === 'LIVE' ? 'from-purple-400 to-pink-600' : 'from-yellow-400 to-orange-500'}`}>$VIBE</span></>
+                                {(claimResult?.reward ?? 0) > 0 ? (
+                                    <>+{claimResult?.reward} <span className={`font-bold text-transparent bg-clip-text bg-gradient-to-r ${raveMode === 'LIVE' ? 'from-purple-400 to-pink-600' : 'from-yellow-400 to-orange-500'}`}>$VIBE</span></>
                                 ) : (
                                     <span className="text-gray-400">Daily Cap Reached (0 $VIBE)</span>
                                 )}

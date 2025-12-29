@@ -104,4 +104,7 @@ export async function GET() {
         } catch (error) {
             return NextResponse.json({ mode: 'OFFLINE', error: "Internal Error" });
         }
+    } catch (error) {
+        return NextResponse.json({ mode: 'OFFLINE', error: "Internal Error" });
     }
+}

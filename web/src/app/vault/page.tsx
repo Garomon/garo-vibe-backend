@@ -11,6 +11,7 @@ import VaultCard from "../components/VaultCard";
 import InfoModal from "../components/ui/InfoModal";
 import RecoveryModal from "../components/ui/RecoveryModal";
 import PassportCard from "../components/PassportCard";
+import { VibeBalance } from "../components/ui/VibeBalance";
 
 const VaultPage: FC = () => {
     const { loggedIn, publicKey, isLoading, userInfo } = useWeb3Auth();
@@ -644,6 +645,7 @@ const VaultPage: FC = () => {
                                     userTier >= 1 ? `🌱 ${t.tier1.toUpperCase()}` :
                                         `👻 ${t.ghost.toUpperCase()}`}
                         </div>
+                        <VibeBalance />
                         <WalletButton />
                     </div>
                 </div>

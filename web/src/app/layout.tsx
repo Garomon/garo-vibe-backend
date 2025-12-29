@@ -6,6 +6,7 @@ import { LanguageProvider } from "../context/LanguageProvider";
 import { GlobalLanguageToggle } from "./components/GlobalLanguageToggle";
 import AmbientBackground from "./components/ui/AmbientBackground";
 import Footer from "./components/Footer";
+import { VibeProvider } from "../context/VibeContext";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -44,8 +45,10 @@ export default function RootLayout({
         <AmbientBackground />
         <LanguageProvider>
           <Web3AuthProvider>
-            <GlobalLanguageToggle />
-            {children}
+            <VibeProvider>
+              <GlobalLanguageToggle />
+              {children}
+            </VibeProvider>
             <Footer />
           </Web3AuthProvider>
         </LanguageProvider>
