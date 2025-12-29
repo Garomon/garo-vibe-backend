@@ -434,15 +434,16 @@ const VaultPage: FC = () => {
                     <WalletButton />
 
                     {/* Help Trigger */}
-                    <div className="mt-8 flex justify-center">
-                        <button
-                            onClick={() => setShowHelpModal(true)}
-                            className="flex items-center justify-center w-12 h-12 rounded-full bg-garo-dark border border-garo-neon/30 text-garo-neon hover:bg-garo-neon/10 hover:border-garo-neon hover:scale-110 transition-all shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-                            aria-label="How it works"
-                        >
-                            <span className="text-xl font-bold animate-pulse">?</span>
-                        </button>
-                    </div>
+                    <motion.button
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1 }}
+                        onClick={() => setShowHelpModal(true)}
+                        className="mt-8 mx-auto flex items-center gap-2 px-6 py-2 rounded-full border border-garo-neon/30 text-garo-neon text-sm tracking-widest hover:bg-garo-neon/10 hover:border-garo-neon transition-all group"
+                    >
+                        <span className="group-hover:animate-pulse">ℹ️</span>
+                        <span>{t.howItWorksTitle}</span>
+                    </motion.button>
                 </motion.div>
             </div>
         );
