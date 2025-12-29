@@ -810,7 +810,11 @@ const VaultPage: FC = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
                             >
-                                <VaultCard tier={item.min_tier}>
+                                <VaultCard
+                                    tier={item.min_tier}
+                                    mediaType={item.type as 'image' | 'video' | 'audio'}
+                                    mediaUrl={unlocked ? item.url : undefined}
+                                >
                                     <div className={`relative p-6 h-full flex flex-col justify-between min-h-[220px] ${!unlocked ? 'blur-sm select-none grayscale' : ''}`}>
 
                                         {/* Header */}
