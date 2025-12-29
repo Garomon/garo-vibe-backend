@@ -8,6 +8,7 @@ import { WalletButton } from "../components/WalletButton";
 import { QRCodeSVG } from "qrcode.react";
 import { useLanguage, LanguageToggle } from "../../context/LanguageProvider";
 import VaultCard from "../components/VaultCard";
+import InfoModal from "../components/ui/InfoModal";
 
 const VaultPage: FC = () => {
     const { loggedIn, publicKey, isLoading, userInfo } = useWeb3Auth();
@@ -78,6 +79,8 @@ const VaultPage: FC = () => {
 
     // DYNAMIC VAULT CONTENT
     const [vaultItems, setVaultItems] = useState<any[]>([]);
+    // Help Modal State
+    const [showHelpModal, setShowHelpModal] = useState(false);
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -392,11 +395,17 @@ const VaultPage: FC = () => {
     // ============== GHOST STATE (No NFT) ==============
     if (currentState === "GHOST" && !hasPendingTicket) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-black p-6">
+            <div className="min-h-screen flex flex-col items-center justify-center bg-black p-6 relative overflow-hidden">
+                <InfoModal
+                    isOpen={showHelpModal}
+                    onClose={() => setShowHelpModal(false)}
+                    t={t}
+                />
+
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="text-center max-w-md"
+                    className="text-center max-w-md z-10"
                 >
                     {/* Glitch Lock Effect */}
                     <div className="relative mb-8">
@@ -423,6 +432,17 @@ const VaultPage: FC = () => {
                     </div>
 
                     <WalletButton />
+
+                    {/* Help Trigger */}
+                    <div className="mt-8 flex justify-center">
+                        <button
+                            onClick={() => setShowHelpModal(true)}
+                            className="flex items-center justify-center w-12 h-12 rounded-full bg-garo-dark border border-garo-neon/30 text-garo-neon hover:bg-garo-neon/10 hover:border-garo-neon hover:scale-110 transition-all shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+                            aria-label="How it works"
+                        >
+                            <span className="text-xl font-bold animate-pulse">?</span>
+                        </button>
+                    </div>
                 </motion.div>
             </div>
         );
@@ -777,8 +797,8 @@ const VaultPage: FC = () => {
                                                 </span>
                                             </div>
                                             <span className={`text-xs font-bold uppercase px-2 py-1 rounded border ${item.min_tier >= 3 ? 'border-green-500 text-green-400' :
-                                                    item.min_tier === 2 ? 'border-orange-500 text-orange-400' :
-                                                        'border-gray-500 text-gray-400'
+                                                item.min_tier === 2 ? 'border-orange-500 text-orange-400' :
+                                                    'border-gray-500 text-gray-400'
                                                 }`}>
                                                 {tierName.toUpperCase()}
                                             </span>

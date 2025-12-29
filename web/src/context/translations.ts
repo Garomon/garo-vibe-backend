@@ -128,6 +128,16 @@ export const content = {
         attendMore: "Asiste a más eventos para subir de nivel y acceder a contenido exclusivo.",
         seeEvents: "Ver Próximos Eventos",
         simulateEvent: "[DEV] SIMULAR EVENTO (+1 XP)",
+
+        // ===== ONBOARDING / HELP =====
+        howItWorksTitle: "PROTOCOLO DE ACCESO",
+        step1Title: "1. Solicita Acceso",
+        step1Desc: "Contacta a un Operador (GΛRO) para ser añadido a la lista.",
+        step2Title: "2. Espera el Airdrop",
+        step2Desc: "Tu boleto aparecerá aquí automáticamente. No recargues.",
+        step3Title: "3. Transmutación",
+        step3Desc: "Presenta tu código QR en la entrada para evolucionar tu nivel.",
+        close: "CERRAR",
     },
 
     en: {
@@ -250,6 +260,16 @@ export const content = {
         attendMore: "Attend more events to level up and access exclusive content.",
         seeEvents: "See Upcoming Events",
         simulateEvent: "[DEV] SIMULATE EVENT (+1 XP)",
+
+        // ===== ONBOARDING / HELP =====
+        howItWorksTitle: "ACCESS PROTOCOL",
+        step1Title: "1. Request Access",
+        step1Desc: "Contact an Operator (GΛRO) to be added to the list.",
+        step2Title: "2. Wait for Airdrop",
+        step2Desc: "Your ticket will appear here automatically. Do not refresh.",
+        step3Title: "3. Transmutation",
+        step3Desc: "Present your QR code at the door to evolve your tier.",
+        close: "CLOSE",
     }
 };
 
