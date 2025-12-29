@@ -58,12 +58,12 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "" }) => {
         <Tilt
             tiltMaxAngleX={config.tiltMaxAngleX}
             tiltMaxAngleY={config.tiltMaxAngleY}
+            tiltAngleXInitial={-30}
             perspective={1000}
             scale={config.scale}
             transitionSpeed={400}
             gyroscope={true}
-            tiltReverse={true}
-            reset={true}
+            reset={false}
             glareEnable={true}
             glareMaxOpacity={config.glareMaxOpacity}
             glareColor={config.glareColor}
