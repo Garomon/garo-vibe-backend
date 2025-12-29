@@ -86,15 +86,25 @@ const VaultPage: FC = () => {
 
     useEffect(() => {
         const fetchContent = async () => {
-            const { supabase } = await import("../../lib/supabaseClient");
-            const { data, error } = await supabase
-                .from("vault_content")
-                .select("*")
-                .eq('active', true)
-                .order("created_at", { ascending: false });
+            try {
+                const { supabase } = await import("../../lib/supabaseClient");
+                const { data, error } = await supabase
+                    .from("vault_content")
+                    .select("*")
+                    .eq('active', true)
+                    .order("created_at", { ascending: false });
 
-            if (data) {
-                setVaultItems(data);
+                if (error) {
+                    console.error("Vault content fetch error:", error);
+                    return;
+                }
+
+                console.log("Vault content fetched:", data);
+                if (data) {
+                    setVaultItems(data);
+                }
+            } catch (e) {
+                console.error("Vault content fetch exception:", e);
             }
         };
         fetchContent();
