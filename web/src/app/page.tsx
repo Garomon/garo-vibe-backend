@@ -11,10 +11,7 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-garo-void via-black to-garo-dark" />
-
-      {/* Subtle Grid Pattern */}
+      {/* Subtle Grid Pattern (over ambient background) */}
       <div
         className="absolute inset-0 opacity-[0.02]"
         style={{
@@ -23,9 +20,6 @@ export default function Home() {
           backgroundSize: '60px 60px'
         }}
       />
-
-      {/* Neon Glow Orb */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-garo-neon/10 rounded-full blur-[150px] pointer-events-none" />
 
       {/* Main Content */}
       <main className="relative z-10 flex flex-col items-center text-center px-6 max-w-4xl mx-auto">
