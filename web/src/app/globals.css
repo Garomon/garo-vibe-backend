@@ -315,14 +315,14 @@ body {
 
 /* Tier 1: Heavy Concrete - Matte, solid */
 .vault-card-tier1 {
-  box-shadow: 
+  box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.8),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* Tier 2: Neon Industrial - Pulsing orange glow */
 .vault-card-tier2 {
-  box-shadow: 
+  box-shadow:
     0 0 20px rgba(255, 165, 0, 0.3),
     0 0 40px rgba(255, 165, 0, 0.1),
     0 4px 30px rgba(0, 0, 0, 0.5);
@@ -331,7 +331,7 @@ body {
 
 /* Tier 3: Holographic Future - Rainbow glow */
 .vault-card-tier3 {
-  box-shadow: 
+  box-shadow:
     0 0 30px rgba(0, 255, 255, 0.3),
     0 0 60px rgba(255, 0, 255, 0.2),
     0 0 90px rgba(0, 255, 136, 0.1),
@@ -341,13 +341,16 @@ body {
 
 /* Slow Pulse Animation for Tier 2 */
 @keyframes pulse-slow {
-  0%, 100% {
-    box-shadow: 
+
+  0%,
+  100% {
+    box-shadow:
       0 0 20px rgba(255, 165, 0, 0.3),
       0 0 40px rgba(255, 165, 0, 0.1);
   }
+
   50% {
-    box-shadow: 
+    box-shadow:
       0 0 30px rgba(255, 165, 0, 0.5),
       0 0 60px rgba(255, 165, 0, 0.2);
   }
@@ -359,15 +362,20 @@ body {
 
 /* Floating Animation for Tier 3 */
 @keyframes card-float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) rotateX(0) rotateY(0);
   }
+
   25% {
     transform: translateY(-6px) rotateX(1deg) rotateY(-1deg);
   }
+
   50% {
     transform: translateY(-12px) rotateX(0) rotateY(1deg);
   }
+
   75% {
     transform: translateY(-6px) rotateX(-1deg) rotateY(0);
   }
@@ -377,22 +385,71 @@ body {
   animation: card-float 6s ease-in-out infinite;
 }
 
-/* Holographic Rainbow Overlay for Tier 3 */
+/* Holographic Rainbow Overlay for Tier 3 - Always visible, animated */
 .holo-overlay {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 0, 128, 0.1) 0%,
-    rgba(0, 255, 255, 0.15) 25%,
-    rgba(255, 255, 0, 0.1) 50%,
-    rgba(0, 255, 128, 0.15) 75%,
-    rgba(128, 0, 255, 0.1) 100%
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  background: linear-gradient(135deg,
+      rgba(255, 0, 128, 0.25) 0%,
+      rgba(0, 255, 255, 0.3) 25%,
+      rgba(255, 255, 0, 0.25) 50%,
+      rgba(0, 255, 128, 0.3) 75%,
+      rgba(128, 0, 255, 0.25) 100%);
+  background-size: 200% 200%;
+  animation: holo-shift 4s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+@keyframes holo-shift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+    opacity: 0.4;
+  }
+
+  50% {
+    background-position: 100% 50%;
+    opacity: 0.7;
+  }
 }
 
 .vault-card-tier3:hover .holo-overlay {
-  opacity: 1;
+  opacity: 0.9;
+}
+
+/* Tier 3 Rainbow Border Glow */
+.vault-card-tier3 {
+  box-shadow:
+    0 0 30px rgba(255, 0, 128, 0.3),
+    0 0 60px rgba(0, 255, 255, 0.2),
+    0 0 90px rgba(255, 255, 0, 0.1),
+    0 8px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: rainbow-border 3s ease-in-out infinite;
+}
+
+@keyframes rainbow-border {
+
+  0%,
+  100% {
+    border-color: rgba(255, 0, 128, 0.5);
+    box-shadow:
+      0 0 30px rgba(255, 0, 128, 0.4),
+      0 0 60px rgba(0, 255, 255, 0.2);
+  }
+
+  33% {
+    border-color: rgba(0, 255, 255, 0.5);
+    box-shadow:
+      0 0 30px rgba(0, 255, 255, 0.4),
+      0 0 60px rgba(255, 255, 0, 0.2);
+  }
+
+  66% {
+    border-color: rgba(128, 0, 255, 0.5);
+    box-shadow:
+      0 0 30px rgba(128, 0, 255, 0.4),
+      0 0 60px rgba(255, 0, 128, 0.2);
+  }
 }
 
 /* Shimmer effect on all cards during tilt */
@@ -401,16 +458,14 @@ body {
   position: absolute;
   inset: 0;
   border-radius: 1.5rem;
-  background: linear-gradient(
-    105deg,
-    transparent 0%,
-    transparent 40%,
-    rgba(255, 255, 255, 0.03) 45%,
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(255, 255, 255, 0.03) 55%,
-    transparent 60%,
-    transparent 100%
-  );
+  background: linear-gradient(105deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(255, 255, 255, 0.05) 45%,
+      rgba(255, 255, 255, 0.15) 50%,
+      rgba(255, 255, 255, 0.05) 55%,
+      transparent 60%,
+      transparent 100%);
   pointer-events: none;
   z-index: 5;
 }
