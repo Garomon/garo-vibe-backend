@@ -76,6 +76,16 @@ const AdminDashboard: FC = () => {
             >
                 <h2 className="text-lg font-bold text-garo-silver mb-4">Quick Actions</h2>
 
+                <a href="/admin/content" className="block">
+                    <div className="glass p-6 flex items-center gap-4 hover:border-garo-neon/50 transition-all active:scale-[0.98]">
+                        <span className="text-4xl">🗄️</span>
+                        <div>
+                            <div className="font-bold text-lg">Vault CMS</div>
+                            <div className="text-sm text-garo-muted">Manage videos, music, and content</div>
+                        </div>
+                    </div>
+                </a>
+
                 <a href="/admin/airdrop" className="block">
                     <div className="glass p-6 flex items-center gap-4 hover:border-garo-neon/50 transition-all active:scale-[0.98]">
                         <span className="text-4xl">🎁</span>
