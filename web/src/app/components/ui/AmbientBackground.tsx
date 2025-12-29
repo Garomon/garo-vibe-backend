@@ -10,48 +10,52 @@ import { FC } from "react";
  */
 const AmbientBackground: FC = () => {
     return (
-        <div className="fixed inset-0 pointer-events-none overflow-hidden z-[-1]">
+        <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: -1 }}>
             {/* Base Layer */}
             <div className="absolute inset-0 bg-black" />
 
-            {/* Orb 1: Dark Violet / Deep Indigo */}
+            {/* Orb 1: Dark Violet / Deep Indigo - MORE VISIBLE */}
             <div
-                className="absolute w-[600px] h-[600px] rounded-full animate-drift-1"
+                className="absolute w-[800px] h-[800px] rounded-full animate-drift-1"
                 style={{
-                    background: "radial-gradient(circle, rgba(88, 28, 135, 0.35) 0%, rgba(88, 28, 135, 0) 70%)",
-                    filter: "blur(100px)",
-                    top: "-10%",
-                    left: "-10%",
-                }}
-            />
-
-            {/* Orb 2: Teal / Emerald - subtle */}
-            <div
-                className="absolute w-[500px] h-[500px] rounded-full animate-drift-2"
-                style={{
-                    background: "radial-gradient(circle, rgba(0, 128, 128, 0.2) 0%, rgba(0, 128, 128, 0) 70%)",
-                    filter: "blur(120px)",
-                    bottom: "-15%",
-                    right: "-10%",
-                }}
-            />
-
-            {/* Orb 3: GΛRO Neon Green - very subtle accent */}
-            <div
-                className="absolute w-[400px] h-[400px] rounded-full animate-drift-3"
-                style={{
-                    background: "radial-gradient(circle, rgba(0, 255, 136, 0.08) 0%, rgba(0, 255, 136, 0) 70%)",
+                    background: "radial-gradient(circle, rgba(139, 92, 246, 0.5) 0%, rgba(139, 92, 246, 0) 60%)",
                     filter: "blur(80px)",
-                    top: "40%",
-                    right: "20%",
+                    top: "-20%",
+                    left: "-20%",
                 }}
             />
 
-            {/* Subtle noise overlay for texture */}
+            {/* Orb 2: Teal / Emerald - MORE VISIBLE */}
             <div
-                className="absolute inset-0 opacity-[0.02]"
+                className="absolute w-[700px] h-[700px] rounded-full animate-drift-2"
                 style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+                    background: "radial-gradient(circle, rgba(20, 184, 166, 0.4) 0%, rgba(20, 184, 166, 0) 60%)",
+                    filter: "blur(80px)",
+                    bottom: "-20%",
+                    right: "-20%",
+                }}
+            />
+
+            {/* Orb 3: GΛRO Neon Green - accent */}
+            <div
+                className="absolute w-[500px] h-[500px] rounded-full animate-drift-3"
+                style={{
+                    background: "radial-gradient(circle, rgba(0, 255, 136, 0.25) 0%, rgba(0, 255, 136, 0) 60%)",
+                    filter: "blur(60px)",
+                    top: "30%",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                }}
+            />
+
+            {/* Orb 4: Hot Pink accent */}
+            <div
+                className="absolute w-[400px] h-[400px] rounded-full animate-drift-2"
+                style={{
+                    background: "radial-gradient(circle, rgba(236, 72, 153, 0.3) 0%, rgba(236, 72, 153, 0) 60%)",
+                    filter: "blur(70px)",
+                    top: "60%",
+                    left: "10%",
                 }}
             />
         </div>
