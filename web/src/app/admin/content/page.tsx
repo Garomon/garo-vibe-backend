@@ -342,7 +342,7 @@ https://example.com/photo3.jpg"
                                             animate={{ opacity: 1, y: 0 }}
                                             className="bg-black/30 border border-white/10 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-white/20 transition group"
                                         >
-                                            <div className="flex-1 min-w-0 overflow-hidden">
+                                            <div className="flex-1 min-w-0" style={{ maxWidth: 'calc(100% - 140px)' }}>
                                                 <div className="flex items-center gap-3 mb-1 flex-wrap">
                                                     <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${item.type === 'audio' ? 'bg-orange-500/20 text-orange-400' :
                                                         item.type === 'video' ? 'bg-blue-500/20 text-blue-400' :
@@ -359,15 +359,12 @@ https://example.com/photo3.jpg"
                                                     </span>
                                                 </div>
                                                 <h3 className="font-bold text-lg text-white truncate">{item.title}</h3>
-                                                <a
-                                                    href={item.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-xs text-gray-500 hover:text-white truncate block w-full overflow-hidden text-ellipsis transition"
+                                                <p
+                                                    className="text-xs text-gray-500 truncate"
                                                     title={item.url}
                                                 >
-                                                    {item.url}
-                                                </a>
+                                                    {item.url?.substring(0, 50)}{item.url?.length > 50 ? '...' : ''}
+                                                </p>
                                             </div>
 
                                             <div className="flex items-center gap-2 self-end sm:self-center">
