@@ -10,8 +10,8 @@ export default function Footer() {
     if (pathname.startsWith("/admin")) return null;
 
     return (
-        <footer className="fixed bottom-0 left-0 w-full p-4 z-40 pointer-events-none">
-            <div className="flex justify-center items-center gap-6 text-[10px] tracking-[0.2em] text-white/30 font-mono pointer-events-auto">
+        <footer className="w-full py-6 mt-12 z-40 relative">
+            <div className="flex justify-center items-center gap-6 text-[10px] tracking-[0.2em] text-white/20 font-mono">
                 <Link href="/legal" className="hover:text-garo-neon hover:opacity-100 transition-all uppercase">
                     [ LEGAL ]
                 </Link>
