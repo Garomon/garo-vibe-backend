@@ -5,6 +5,7 @@ import { Web3AuthProvider } from "./providers/Web3AuthProvider";
 import { LanguageProvider } from "../context/LanguageProvider";
 import { GlobalLanguageToggle } from "./components/GlobalLanguageToggle";
 import AmbientBackground from "./components/ui/AmbientBackground";
+import Footer from "./components/Footer";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -45,6 +46,7 @@ export default function RootLayout({
           <Web3AuthProvider>
             <GlobalLanguageToggle />
             {children}
+            <Footer />
           </Web3AuthProvider>
         </LanguageProvider>
       </body>
