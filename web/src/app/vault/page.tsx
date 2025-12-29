@@ -754,9 +754,12 @@ const VaultPage: FC = () => {
                         </div>
                     </div>
 
-                    <div className="mt-8">
+                    <div className="mt-8 flex justify-center gap-4">
                         <button onClick={handleSimulateCheckin} className="text-xs border border-garo-muted text-garo-muted px-4 py-2 rounded hover:bg-white/10 transition">
                             {t.simulateEvent}
+                        </button>
+                        <button onClick={() => router.push('/rave')} className="text-xs bg-garo-neon text-black font-bold px-6 py-2 rounded hover:scale-105 transition flex items-center gap-2">
+                            ⚡ RAVE
                         </button>
                     </div>
                 </motion.section>
