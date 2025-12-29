@@ -41,8 +41,20 @@ export async function POST(req: NextRequest) {
         }
 
         // 4. Award $VIBE (XP)
-        // ECONOMY CONTROL: Default to "Training Mode" (10 XP).
-        const REWARD_AMOUNT = 10;
+        // ECONOMY CONTROL: Check for Active Event
+        let REWARD_AMOUNT = 10; // Default: Training Mode
+
+        const { data: activeEvents } = await supabase
+            .from("garo_events")
+            .select("id")
+            .eq("status", "ACTIVE")
+            .limit(1);
+
+        let isLive = false;
+        if (activeEvents && activeEvents.length > 0) {
+            REWARD_AMOUNT = 100; // Live Event Mode
+            isLive = true;
+        }
 
         // Using direct update for simplicity if RPC not deployed
         const { error: updateError } = await supabase.rpc('increment_xp', {

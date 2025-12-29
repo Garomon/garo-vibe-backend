@@ -16,7 +16,22 @@ export default function RavePage() {
     const [energy, setEnergy] = useState(0); // 0-100
     const [timeLeft, setTimeLeft] = useState(60);
     const [hasPermission, setHasPermission] = useState(false);
+
     const [avgEnergy, setAvgEnergy] = useState(0);
+
+    // Mode State
+    const [raveMode, setRaveMode] = useState<'TRAINING' | 'LIVE'>('TRAINING');
+    const [activeEvent, setActiveEvent] = useState<any>(null);
+
+    useEffect(() => {
+        // Check Status
+        fetch('/api/rave/status')
+            .then(res => res.json())
+            .then(data => {
+                setRaveMode(data.mode);
+                if (data.event) setActiveEvent(data.event);
+            });
+    }, []);
 
     // Refs for animation loop
     const energyRef = useRef(0);
@@ -180,9 +195,9 @@ export default function RavePage() {
                 <Link href="/vault" className="text-garo-neon hover:text-white transition">
                     ← EXIT
                 </Link>
-                <div className="text-xs font-mono border border-white/20 px-3 py-1 rounded-full bg-black/50 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
-                    TRAINING MODE
+                <div className={`text-xs font-mono border border-white/20 px-3 py-1 rounded-full bg-black/50 flex items-center gap-2 ${raveMode === 'LIVE' ? 'border-red-500 text-red-500' : ''}`}>
+                    <span className={`w-2 h-2 rounded-full animate-pulse ${raveMode === 'LIVE' ? 'bg-red-500' : 'bg-yellow-500'}`}></span>
+                    {raveMode === 'LIVE' ? 'LIVE EVENT' : 'TRAINING MODE'}
                 </div>
             </header>
 
@@ -207,8 +222,17 @@ export default function RavePage() {
                                 </span>
                             </h1>
                             <p className="text-gray-400 mb-12 text-lg max-w-md mx-auto">
-                                Training Mode Active. <br />
-                                Earn <span className="text-yellow-400 font-bold">10 $VIBE</span> per session.
+                                {raveMode === 'LIVE' ? (
+                                    <>
+                                        <span className="text-red-500 font-bold animate-pulse">LIVE SIGNAL DETECTED: {activeEvent?.name}</span><br />
+                                        Earn <span className="text-garo-neon font-bold">100 $VIBE</span> per session.
+                                    </>
+                                ) : (
+                                    <>
+                                        Training Mode Active. <br />
+                                        Earn <span className="text-yellow-400 font-bold">10 $VIBE</span> per session.
+                                    </>
+                                )}
                             </p>
 
                             <button
@@ -277,9 +301,9 @@ export default function RavePage() {
                             <div className="text-8xl mb-6">💃</div>
                             <h2 className="text-4xl font-bold text-garo-neon mb-2">VIBE CHECK PASSED</h2>
                             <p className="text-xl text-white mb-8">
-                                +10 <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">$VIBE</span>
+                                +{raveMode === 'LIVE' ? 100 : 10} <span className={`font-bold text-transparent bg-clip-text bg-gradient-to-r ${raveMode === 'LIVE' ? 'from-purple-400 to-pink-600' : 'from-yellow-400 to-orange-500'}`}>$VIBE</span>
                             </p>
-                            <p className="text-xs text-gray-500 mb-8 uppercase tracking-widest">Training Session Complete</p>
+                            <p className="text-xs text-gray-500 mb-8 uppercase tracking-widest">{raveMode === 'LIVE' ? 'Live Session Verified' : 'Training Session Complete'}</p>
 
                             <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 mb-8 max-w-xs mx-auto">
                                 <div className="text-sm text-gray-400">Avg Energy</div>
