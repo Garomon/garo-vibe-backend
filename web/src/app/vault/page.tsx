@@ -805,93 +805,98 @@ const VaultPage: FC = () => {
                 </motion.section>
 
                 {/* Vault Items Grid */}
-                <section className="grid md:grid-cols-2 gap-8">
-                    {vaultItems.map((item, index) => {
-                        const unlocked = isUnlocked(item.min_tier);
-                        // Translate tier names if possible, fallback to strings
-                        const tierName = item.min_tier === 3 ? (t.tier3 || "Family") :
-                            item.min_tier === 2 ? (t.tier2 || "Resident") :
-                                (t.tier1 || "Initiate");
+                <section className="mt-16">
+                    <h2 className="text-2xl font-bold text-white mb-8 text-center">
+                        🎵 Exclusive Content ({vaultItems.length} items)
+                    </h2>
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {vaultItems.map((item, index) => {
+                            const unlocked = isUnlocked(item.min_tier);
+                            // Translate tier names if possible, fallback to strings
+                            const tierName = item.min_tier === 3 ? (t.tier3 || "Family") :
+                                item.min_tier === 2 ? (t.tier2 || "Resident") :
+                                    (t.tier1 || "Initiate");
 
-                        return (
-                            <motion.div
-                                key={item.id}
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                            >
-                                <VaultCard
-                                    tier={item.min_tier}
-                                    mediaType={item.type as 'image' | 'video' | 'audio'}
-                                    mediaUrl={unlocked ? item.url : undefined}
+                            return (
+                                <motion.div
+                                    key={item.id}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
                                 >
-                                    <div className={`relative p-6 h-full flex flex-col justify-between min-h-[220px] ${!unlocked ? 'blur-sm select-none grayscale' : ''}`}>
+                                    <VaultCard
+                                        tier={item.min_tier}
+                                        mediaType={item.type as 'image' | 'video' | 'audio'}
+                                        mediaUrl={unlocked ? item.url : undefined}
+                                    >
+                                        <div className={`relative p-6 h-full flex flex-col justify-between min-h-[220px] ${!unlocked ? 'blur-sm select-none grayscale' : ''}`}>
 
-                                        {/* Header */}
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="p-2 rounded-lg bg-black/40 backdrop-blur-md border border-white/10">
-                                                <span className="text-2xl">
-                                                    {item.type === 'audio' ? '🎧' : item.type === 'video' ? '📺' : '📸'}
-                                                </span>
-                                            </div>
-                                            <span className={`text-xs font-bold uppercase px-2 py-1 rounded border ${item.min_tier >= 3 ? 'border-green-500 text-green-400' :
-                                                item.min_tier === 2 ? 'border-orange-500 text-orange-400' :
-                                                    'border-gray-500 text-gray-400'
-                                                }`}>
-                                                {tierName.toUpperCase()}
-                                            </span>
-                                        </div>
-
-                                        {/* Content Info */}
-                                        <div>
-                                            <h3 className="text-2xl font-bold text-white mb-1 leading-tight">{item.title}</h3>
-                                            <p className="text-sm text-garo-silver uppercase tracking-wider mb-4 opacity-80">
-                                                {item.type} • {new Date(item.created_at).toLocaleDateString()}
-                                            </p>
-                                        </div>
-
-                                        {/* Actions / Locked State */}
-                                        <div className="mt-auto">
-                                            {unlocked ? (
-                                                <a
-                                                    href={item.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-2 text-sm font-bold text-white hover:text-garo-neon transition group-hover:translate-x-1 duration-300"
-                                                >
-                                                    <span>ACCESS ASSET</span>
-                                                    <span>→</span>
-                                                </a>
-                                            ) : (
-                                                <div className="flex items-center gap-2 text-red-500 font-bold">
-                                                    <span>🔒</span>
-                                                    <span>LOCKED</span>
+                                            {/* Header */}
+                                            <div className="flex justify-between items-start mb-4">
+                                                <div className="p-2 rounded-lg bg-black/40 backdrop-blur-md border border-white/10">
+                                                    <span className="text-2xl">
+                                                        {item.type === 'audio' ? '🎧' : item.type === 'video' ? '📺' : '📸'}
+                                                    </span>
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Lock Overlay for Locked Items (on top of blur) */}
-                                    {!unlocked && (
-                                        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center pointer-events-none">
-                                            <span className="text-6xl mb-2 drop-shadow-lg">🔒</span>
-                                            <div className="bg-black/80 px-4 py-2 rounded-full border border-red-500/50 backdrop-blur-xl">
-                                                <span className="text-red-500 font-bold text-sm tracking-widest">
-                                                    REQUIRES TIER {item.min_tier}
+                                                <span className={`text-xs font-bold uppercase px-2 py-1 rounded border ${item.min_tier >= 3 ? 'border-green-500 text-green-400' :
+                                                    item.min_tier === 2 ? 'border-orange-500 text-orange-400' :
+                                                        'border-gray-500 text-gray-400'
+                                                    }`}>
+                                                    {tierName.toUpperCase()}
                                                 </span>
                                             </div>
-                                        </div>
-                                    )}
-                                </VaultCard>
-                            </motion.div>
-                        );
-                    })}
 
-                    {vaultItems.length === 0 && (
-                        <div className="col-span-full text-center py-20 text-gray-500 bg-white/5 rounded-2xl border border-white/10">
-                            <p>Loading Vault content...</p>
-                        </div>
-                    )}
+                                            {/* Content Info */}
+                                            <div>
+                                                <h3 className="text-2xl font-bold text-white mb-1 leading-tight">{item.title}</h3>
+                                                <p className="text-sm text-garo-silver uppercase tracking-wider mb-4 opacity-80">
+                                                    {item.type} • {new Date(item.created_at).toLocaleDateString()}
+                                                </p>
+                                            </div>
+
+                                            {/* Actions / Locked State */}
+                                            <div className="mt-auto">
+                                                {unlocked ? (
+                                                    <a
+                                                        href={item.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-2 text-sm font-bold text-white hover:text-garo-neon transition group-hover:translate-x-1 duration-300"
+                                                    >
+                                                        <span>ACCESS ASSET</span>
+                                                        <span>→</span>
+                                                    </a>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 text-red-500 font-bold">
+                                                        <span>🔒</span>
+                                                        <span>LOCKED</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Lock Overlay for Locked Items (on top of blur) */}
+                                        {!unlocked && (
+                                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center pointer-events-none">
+                                                <span className="text-6xl mb-2 drop-shadow-lg">🔒</span>
+                                                <div className="bg-black/80 px-4 py-2 rounded-full border border-red-500/50 backdrop-blur-xl">
+                                                    <span className="text-red-500 font-bold text-sm tracking-widest">
+                                                        REQUIRES TIER {item.min_tier}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </VaultCard>
+                                </motion.div>
+                            );
+                        })}
+
+                        {vaultItems.length === 0 && (
+                            <div className="col-span-full text-center py-20 text-gray-500 bg-white/5 rounded-2xl border border-white/10">
+                                <p>Loading Vault content...</p>
+                            </div>
+                        )}
+                    </div>
                 </section>
 
                 {/* � Events Gallery - Events You've Attended */}
