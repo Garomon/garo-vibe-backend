@@ -27,8 +27,8 @@ export async function GET() {
             });
         }
 
-        // Default to OFFLINE (Standby)
-        return NextResponse.json({ mode: 'OFFLINE' });
+        // Default to TRAINING (Daily Cap enforced in claim API)
+        return NextResponse.json({ mode: 'TRAINING' });
 
     } catch (error) {
         return NextResponse.json({ mode: 'OFFLINE', error: "Internal Error" });

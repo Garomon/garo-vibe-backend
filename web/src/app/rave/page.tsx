@@ -20,7 +20,7 @@ export default function RavePage() {
     const [avgEnergy, setAvgEnergy] = useState(0);
 
     // Mode State
-    const [raveMode, setRaveMode] = useState<'OFFLINE' | 'LIVE'>('OFFLINE');
+    const [raveMode, setRaveMode] = useState<'TRAINING' | 'LIVE'>('TRAINING');
     const [activeEvent, setActiveEvent] = useState<any>(null);
 
     useEffect(() => {
@@ -195,9 +195,9 @@ export default function RavePage() {
                 <Link href="/vault" className="text-garo-neon hover:text-white transition">
                     ← EXIT
                 </Link>
-                <div className={`text-xs font-mono border border-white/20 px-3 py-1 rounded-full bg-black/50 flex items-center gap-2 ${raveMode === 'LIVE' ? 'border-red-500 text-red-500' : 'border-gray-500 text-gray-500'}`}>
-                    <span className={`w-2 h-2 rounded-full ${raveMode === 'LIVE' ? 'bg-red-500 animate-pulse' : 'bg-gray-500'}`}></span>
-                    {raveMode === 'LIVE' ? 'LIVE EVENT' : 'SYSTEM OFFLINE'}
+                <div className={`text-xs font-mono border border-white/20 px-3 py-1 rounded-full bg-black/50 flex items-center gap-2 ${raveMode === 'LIVE' ? 'border-red-500 text-red-500' : 'border-yellow-500/50 text-gray-400'}`}>
+                    <span className={`w-2 h-2 rounded-full ${raveMode === 'LIVE' ? 'bg-red-500 animate-pulse' : 'bg-yellow-500'}`}></span>
+                    {raveMode === 'LIVE' ? 'LIVE EVENT' : 'TRAINING MODE (DAILY CAP)'}
                 </div>
             </header>
 
@@ -237,11 +237,11 @@ export default function RavePage() {
 
                             <button
                                 onClick={requestPermission}
-                                className={`group relative px-8 py-4 ${raveMode === 'LIVE' ? 'bg-white text-black' : 'bg-gray-800 text-gray-400 border border-gray-700'} font-bold text-xl rounded-full hover:scale-105 transition-all active:scale-95`}
+                                className={`group relative px-8 py-4 bg-white text-black font-bold text-xl rounded-full hover:scale-105 transition-all active:scale-95`}
                             >
-                                <span className={`absolute inset-0 rounded-full ${raveMode === 'LIVE' ? 'bg-garo-neon opacity-50' : 'hidden'} blur-md group-hover:opacity-100 transition duration-500`}></span>
+                                <span className={`absolute inset-0 rounded-full bg-garo-neon opacity-50 blur-md group-hover:opacity-100 transition duration-500`}></span>
                                 <span className="relative flex items-center gap-3">
-                                    {raveMode === 'LIVE' ? '⚡ INITIATE PROTOCOL' : '🔧 TEST SENSORS'}
+                                    ⚡ INITIATE PROTOCOL
                                 </span>
                             </button>
                             <p className="mt-4 text-xs text-gray-600">Requires accelerometer access</p>
@@ -301,9 +301,9 @@ export default function RavePage() {
                             <div className="text-8xl mb-6">💃</div>
                             <h2 className="text-4xl font-bold text-garo-neon mb-2">VIBE CHECK PASSED</h2>
                             <div className="text-xl text-white mb-8">
-                                +{raveMode === 'LIVE' ? 100 : 0} <span className={`font-bold text-transparent bg-clip-text bg-gradient-to-r ${raveMode === 'LIVE' ? 'from-purple-400 to-pink-600' : 'from-gray-500 to-gray-700'}`}>$VIBE</span>
+                                +{raveMode === 'LIVE' ? 100 : 10} <span className={`font-bold text-transparent bg-clip-text bg-gradient-to-r ${raveMode === 'LIVE' ? 'from-purple-400 to-pink-600' : 'from-yellow-400 to-orange-500'}`}>$VIBE</span>
                             </div>
-                            <p className="text-xs text-gray-500 mb-8 uppercase tracking-widest">{raveMode === 'LIVE' ? 'Live Session Verified' : 'Sensor Test Complete'}</p>
+                            <p className="text-xs text-gray-500 mb-8 uppercase tracking-widest">{raveMode === 'LIVE' ? 'Live Session Verified' : 'Daily Training Complete'}</p>
 
                             <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 mb-8 max-w-xs mx-auto">
                                 <div className="text-sm text-gray-400">Avg Energy</div>
