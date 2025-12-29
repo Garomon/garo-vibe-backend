@@ -41,8 +41,8 @@ export async function POST(req: NextRequest) {
         }
 
         // 4. Award $VIBE (XP)
-        // Using the RPC function if it exists, or direct update
-        const REWARD_AMOUNT = 100;
+        // ECONOMY CONTROL: Default to "Training Mode" (10 XP).
+        const REWARD_AMOUNT = 10;
 
         // Using direct update for simplicity if RPC not deployed
         const { error: updateError } = await supabase.rpc('increment_xp', {

@@ -180,8 +180,9 @@ export default function RavePage() {
                 <Link href="/vault" className="text-garo-neon hover:text-white transition">
                     ← EXIT
                 </Link>
-                <div className="text-xs font-mono border border-white/20 px-3 py-1 rounded-full bg-black/50">
-                    VIBE METER v1.0
+                <div className="text-xs font-mono border border-white/20 px-3 py-1 rounded-full bg-black/50 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                    TRAINING MODE
                 </div>
             </header>
 
@@ -206,8 +207,8 @@ export default function RavePage() {
                                 </span>
                             </h1>
                             <p className="text-gray-400 mb-12 text-lg max-w-md mx-auto">
-                                Move your body to earn $VIBE. <br />
-                                Keep the energy above 70% for 60s.
+                                Training Mode Active. <br />
+                                Earn <span className="text-yellow-400 font-bold">10 $VIBE</span> per session.
                             </p>
 
                             <button
@@ -276,8 +277,9 @@ export default function RavePage() {
                             <div className="text-8xl mb-6">💃</div>
                             <h2 className="text-4xl font-bold text-garo-neon mb-2">VIBE CHECK PASSED</h2>
                             <p className="text-xl text-white mb-8">
-                                +100 <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">$VIBE</span>
+                                +10 <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">$VIBE</span>
                             </p>
+                            <p className="text-xs text-gray-500 mb-8 uppercase tracking-widest">Training Session Complete</p>
 
                             <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 mb-8 max-w-xs mx-auto">
                                 <div className="text-sm text-gray-400">Avg Energy</div>
