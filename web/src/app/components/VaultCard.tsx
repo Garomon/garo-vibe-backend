@@ -80,33 +80,28 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "", mediaTy
                 <div className="absolute inset-0 rounded-3xl pointer-events-none holo-overlay z-10" />
             )}
 
-            {/* Card Content or Media Player */}
+            {/* Card Content - Always render children for layout */}
             <div className="relative z-20 w-full h-full flex flex-col">
-                {(mediaType === 'video' || mediaType === 'audio') && mediaUrl ? (
-                    <div className="w-full h-full rounded-xl overflow-hidden relative bg-black">
+                {/* Optional Media Player for video/audio */}
+                {(mediaType === 'video' || mediaType === 'audio') && mediaUrl && (
+                    <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 bg-black">
                         <ReactPlayer
                             // @ts-ignore - Dynamic import typing issue
                             url={mediaUrl}
                             width="100%"
                             height="100%"
                             controls={true}
-                            light={true} // Show thumbnail first
+                            light={true}
                             playIcon={
-                                <div className="w-16 h-16 bg-garo-neon/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-garo-neon/50 group-hover:scale-110 transition-transform">
+                                <div className="w-16 h-16 bg-garo-neon/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-garo-neon/50">
                                     <span className="text-3xl ml-1">▶️</span>
                                 </div>
                             }
                         />
-                        {/* Content Overlay (Title/Details) still rendered via children if provided */}
-                        {children && (
-                            <div className="absolute inset-0 pointer-events-none">
-                                {children}
-                            </div>
-                        )}
                     </div>
-                ) : (
-                    children
                 )}
+                {/* Always render children (title, tier badge, etc.) */}
+                {children}
             </div>
         </Tilt>
     );
