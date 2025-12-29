@@ -24,6 +24,7 @@ export default function VaultContentManager() {
     const [contentList, setContentList] = useState<VaultContent[]>([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -116,6 +117,72 @@ export default function VaultContentManager() {
         }
     };
 
+    // Handle Edit (Pre-fill form)
+    const handleEdit = (item: VaultContent) => {
+        setEditingId(item.id);
+        setFormData({
+            title: item.title,
+            type: item.type,
+            url: item.url || '',
+            gallery_urls: item.gallery_urls ? item.gallery_urls.join(',') : '',
+            min_tier: item.min_tier
+        });
+        // Scroll to form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Handle Update (PUT)
+    const handleUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingId) return;
+        setSubmitting(true);
+
+        try {
+            const submitBody: any = {
+                title: formData.title,
+                type: formData.type,
+                min_tier: formData.min_tier
+            };
+
+            if (formData.type === 'gallery') {
+                submitBody.gallery_urls = formData.gallery_urls
+                    .split(',')
+                    .map(url => url.trim())
+                    .filter(url => url.length > 0);
+                submitBody.url = submitBody.gallery_urls[0] || '';
+            } else {
+                submitBody.url = formData.url;
+            }
+
+            const res = await fetch(`/api/admin/content/${editingId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(submitBody)
+            });
+
+            if (res.ok) {
+                setEditingId(null);
+                setFormData({ title: '', type: 'audio', url: '', gallery_urls: '', min_tier: 1 });
+                fetchContent();
+                alert('Asset updated successfully!');
+            } else {
+                const err = await res.json();
+                alert(`Error: ${err.error}`);
+            }
+        } catch (error) {
+            console.error('Error updating content:', error);
+            alert('Failed to update content');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // Cancel Edit
+    const cancelEdit = () => {
+        setEditingId(null);
+        setFormData({ title: '', type: 'audio', url: '', gallery_urls: '', min_tier: 1 });
+    };
+
     // Handle Delete
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this asset?")) return;
@@ -159,10 +226,19 @@ export default function VaultContentManager() {
                         <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 sticky top-6">
                             <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                                Add New Asset
+                                {editingId ? 'Edit Asset' : 'Add New Asset'}
                             </h2>
 
-                            <form onSubmit={handleSubmit} className="space-y-4">
+                            {editingId && (
+                                <button
+                                    onClick={cancelEdit}
+                                    className="mb-4 text-sm text-gray-400 hover:text-white transition"
+                                >
+                                    ← Cancel Edit
+                                </button>
+                            )}
+
+                            <form onSubmit={editingId ? handleUpdate : handleSubmit} className="space-y-4">
                                 <div>
                                     <label className="block text-sm text-gray-400 mb-1">Title</label>
                                     <input
@@ -237,7 +313,7 @@ https://example.com/photo3.jpg"
                                     disabled={submitting}
                                     className="w-full mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3 rounded transition transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {submitting ? "Creating..." : "Create Asset"}
+                                    {submitting ? (editingId ? 'Updating...' : 'Creating...') : (editingId ? 'Update Asset' : 'Create Asset')}
                                 </button>
                             </form>
                         </div>
@@ -294,7 +370,13 @@ https://example.com/photo3.jpg"
                                                 </a>
                                             </div>
 
-                                            <div className="flex items-center gap-3 self-end sm:self-center">
+                                            <div className="flex items-center gap-2 self-end sm:self-center">
+                                                <button
+                                                    onClick={() => handleEdit(item)}
+                                                    className="px-3 py-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded hover:bg-blue-500/20 transition text-sm"
+                                                >
+                                                    Edit
+                                                </button>
                                                 <button
                                                     onClick={() => handleDelete(item.id)}
                                                     className="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded hover:bg-red-500/20 transition text-sm"
