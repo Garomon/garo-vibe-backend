@@ -557,3 +557,23 @@ body {
   box-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
   width: 20px;
 }
+
+/* Gallery Swiper Mobile Fixes */
+.gallery-swiper {
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.gallery-swiper .swiper-wrapper {
+  touch-action: pan-y;
+}
+
+.gallery-swiper .swiper-slide {
+  touch-action: pan-y;
+}
+
+.gallery-swiper img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+}

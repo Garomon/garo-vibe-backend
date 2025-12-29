@@ -71,6 +71,7 @@ const VaultCard: FC<VaultCardProps> = ({
                             bulletClass: 'gallery-bullet',
                             bulletActiveClass: 'gallery-bullet-active'
                         }}
+                        grabCursor={true}
                         className="w-full h-full gallery-swiper"
                     >
                         {galleryUrls.map((url, index) => (
