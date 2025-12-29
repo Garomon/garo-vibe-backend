@@ -1,13 +1,14 @@
 "use client";
 
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useState, useEffect } from "react";
 import Tilt from "react-parallax-tilt";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, A11y } from 'swiper/modules';
+import dynamic from 'next/dynamic';
 
-// Import Swiper styles
-import 'swiper/css';
-import 'swiper/css/pagination';
+// Dynamic import for Swiper to avoid SSR issues
+const SwiperComponent = dynamic(
+    () => import('./GallerySwiper'),
+    { ssr: false, loading: () => <div className="w-full aspect-video bg-black/50 rounded-xl animate-pulse" /> }
+);
 
 interface VaultCardProps {
     tier: number;
@@ -40,6 +41,12 @@ const VaultCard: FC<VaultCardProps> = ({
     galleryUrls,
     isViewed = false
 }) => {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const tiltConfig = {
         1: { tiltMaxAngleX: 10, tiltMaxAngleY: 10, glareMaxOpacity: 0.3, glareColor: "rgba(180, 180, 180, 0.8)", scale: 1.02 },
         2: { tiltMaxAngleX: 15, tiltMaxAngleY: 15, glareMaxOpacity: 0.5, glareColor: "rgba(255, 165, 0, 0.9)", scale: 1.03 },
@@ -58,39 +65,12 @@ const VaultCard: FC<VaultCardProps> = ({
 
     // Render media based on type
     const renderMedia = () => {
-        // GALLERY: Swiper Carousel
+        // GALLERY: Swiper Carousel (only render on client)
         if (mediaType === 'gallery' && galleryUrls && galleryUrls.length > 0) {
-            return (
-                <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 relative">
-                    <Swiper
-                        modules={[Pagination, A11y]}
-                        spaceBetween={0}
-                        slidesPerView={1}
-                        pagination={{
-                            clickable: true,
-                            bulletClass: 'gallery-bullet',
-                            bulletActiveClass: 'gallery-bullet-active'
-                        }}
-                        grabCursor={true}
-                        className="w-full h-full gallery-swiper"
-                    >
-                        {galleryUrls.map((url, index) => (
-                            <SwiperSlide key={index}>
-                                <img
-                                    src={url}
-                                    alt={`Gallery image ${index + 1}`}
-                                    loading="lazy"
-                                    className="w-full h-full object-cover"
-                                />
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
-                    {/* Photo count indicator */}
-                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full text-xs text-white/80 z-10">
-                        📸 {galleryUrls.length}
-                    </div>
-                </div>
-            );
+            if (!mounted) {
+                return <div className="w-full aspect-video bg-black/50 rounded-xl animate-pulse" />;
+            }
+            return <SwiperComponent galleryUrls={galleryUrls} />;
         }
 
         if (!mediaUrl) return null;
