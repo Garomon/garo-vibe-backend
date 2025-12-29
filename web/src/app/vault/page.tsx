@@ -360,7 +360,7 @@ const VaultPage: FC = () => {
     // ============== NOT LOGGED IN ==============
     if (!loggedIn) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-black">
+            <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -379,7 +379,7 @@ const VaultPage: FC = () => {
     // ============== LOADING ==============
     if (currentState === "LOADING") {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-black">
+            <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -395,7 +395,7 @@ const VaultPage: FC = () => {
     // ============== GHOST STATE (No NFT) ==============
     if (currentState === "GHOST" && !hasPendingTicket) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-black p-6 relative overflow-hidden">
+            <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
                 <InfoModal
                     isOpen={showHelpModal}
                     onClose={() => setShowHelpModal(false)}
@@ -457,7 +457,7 @@ const VaultPage: FC = () => {
     // ============== TICKET PENDING STATE ==============
     if (currentState === "GHOST" && hasPendingTicket) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-black p-6">
+            <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -540,7 +540,7 @@ const VaultPage: FC = () => {
     // ============== MEMBER STATE (Has Proof of Rave) ==============
 
     return (
-        <div className="min-h-screen bg-black">
+        <div className="min-h-screen relative">
             {/* Confetti Celebration Overlay */}
             {showConfetti && (
                 <motion.div
