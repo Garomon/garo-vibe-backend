@@ -62,6 +62,8 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "" }) => {
             scale={config.scale}
             transitionSpeed={400}
             gyroscope={true}
+            tiltReverse={true}
+            reset={true}
             glareEnable={true}
             glareMaxOpacity={config.glareMaxOpacity}
             glareColor={config.glareColor}
