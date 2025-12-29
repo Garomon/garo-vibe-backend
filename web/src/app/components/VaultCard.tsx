@@ -2,17 +2,13 @@
 
 import { FC, ReactNode } from "react";
 import Tilt from "react-parallax-tilt";
-import dynamic from 'next/dynamic';
-
-// Lazy load ReactPlayer
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 interface VaultCardProps {
     tier: number;
     children?: ReactNode;
     className?: string;
     mediaType?: 'image' | 'video' | 'audio';
-    mediaUrl?: string; // URL for image or media stream
+    mediaUrl?: string;
 }
 
 /**
@@ -22,7 +18,7 @@ interface VaultCardProps {
  * TIER 2 (RESIDENT): "Neon Industrial" - Medium tilt, orange glare, pulsing border
  * TIER 3 (FAMILY): "Holographic Future" - High tilt, rainbow glare, floating animation
  */
-const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "", mediaType, mediaUrl }) => {
+const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "" }) => {
     // Tier-specific tilt configurations
     const tiltConfig = {
         1: {
@@ -59,7 +55,6 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "", mediaTy
 
     const tierClass = tierStyles[tier] || "";
 
-    // Simple Tilt card - no experimental settings
     const cardContent = (
         <Tilt
             tiltMaxAngleX={config.tiltMaxAngleX}
@@ -80,27 +75,8 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "", mediaTy
                 <div className="absolute inset-0 rounded-3xl pointer-events-none holo-overlay z-10" />
             )}
 
-            {/* Card Content - Always render children for layout */}
+            {/* Card Content */}
             <div className="relative z-20 w-full h-full flex flex-col">
-                {/* Optional Media Player for video/audio */}
-                {(mediaType === 'video' || mediaType === 'audio') && mediaUrl && (
-                    <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 bg-black">
-                        <ReactPlayer
-                            // @ts-ignore - Dynamic import typing issue
-                            url={mediaUrl}
-                            width="100%"
-                            height="100%"
-                            controls={true}
-                            light={true}
-                            playIcon={
-                                <div className="w-16 h-16 bg-garo-neon/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-garo-neon/50">
-                                    <span className="text-3xl ml-1">▶️</span>
-                                </div>
-                            }
-                        />
-                    </div>
-                )}
-                {/* Always render children (title, tier badge, etc.) */}
                 {children}
             </div>
         </Tilt>
@@ -119,3 +95,4 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "", mediaTy
 };
 
 export default VaultCard;
+
