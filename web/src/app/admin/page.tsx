@@ -106,12 +106,12 @@ const AdminDashboard: FC = () => {
                     </div>
                 </a>
 
-                <a href="/admin/events/create" className="block">
+                <a href="/admin/events" className="block">
                     <div className="glass p-6 flex items-center gap-4 hover:border-garo-neon/50 transition-all active:scale-[0.98]">
                         <span className="text-4xl">📅</span>
                         <div>
-                            <div className="font-bold text-lg">Create Event</div>
-                            <div className="text-sm text-garo-muted">Set up the next rave</div>
+                            <div className="font-bold text-lg">Events</div>
+                            <div className="text-sm text-garo-muted">Manage events & Go Live</div>
                         </div>
                     </div>
                 </a>
