@@ -759,44 +759,6 @@ const VaultPage: FC = () => {
                             {t.simulateEvent}
                         </button>
                     </div>
-
-                    {/* ACCESS PASS - QR CODE */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.3 }}
-                        className="mt-12 flex flex-col items-center"
-                    >
-                        <h3 className="text-lg font-bold text-garo-silver mb-4">{t.accessPass}</h3>
-                        <div className="relative group">
-                            {/* Holographic Glow */}
-                            <div className="absolute -inset-2 bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 rounded-2xl blur-lg opacity-50 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
-                            <div className="relative p-4 bg-black rounded-xl border border-white/20">
-                                <QRCodeSVG
-                                    value={publicKey?.toBase58() || ""}
-                                    size={180}
-                                    bgColor="#000000"
-                                    fgColor="#FFFFFF"
-                                    level="H"
-                                    includeMargin={false}
-                                />
-                            </div>
-                        </div>
-                        <p className="mt-4 text-xs text-garo-muted font-mono">{t.showToBouncer}</p>
-
-                        {/* Copy Address Button */}
-                        <button
-                            onClick={() => {
-                                if (publicKey) {
-                                    navigator.clipboard.writeText(publicKey.toBase58());
-                                    alert(t.addressCopied);
-                                }
-                            }}
-                            className="mt-3 px-4 py-2 text-xs border border-garo-neon/50 text-garo-neon rounded-full hover:bg-garo-neon/10 transition flex items-center gap-2"
-                        >
-                            📋 {t.copyAddress}
-                        </button>
-                    </motion.div>
                 </motion.section>
 
                 {/* Vault Items Grid */}
