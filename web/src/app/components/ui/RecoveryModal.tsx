@@ -13,7 +13,7 @@ interface RecoveryModalProps {
 const RecoveryModal: FC<RecoveryModalProps> = ({ isOpen, onClose }) => {
     const { language } = useLanguage();
     const [email, setEmail] = useState("");
-    const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "not_found">("idle");
+    const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "not_found" | "server_error">("idle");
     const [result, setResult] = useState<{ tier?: number; status?: string } | null>(null);
 
     const handleCheck = async () => {
@@ -21,6 +21,12 @@ const RecoveryModal: FC<RecoveryModalProps> = ({ isOpen, onClose }) => {
         setStatus("loading");
         try {
             const res = await fetch(`/api/user/status?email=${encodeURIComponent(email)}`);
+
+            if (res.status === 500) {
+                setStatus("server_error");
+                return;
+            }
+
             const data = await res.json();
 
             if (data.exists) {
@@ -141,6 +147,30 @@ const RecoveryModal: FC<RecoveryModalProps> = ({ isOpen, onClose }) => {
                                                     ? "Este correo no está registrado en nuestra base de datos."
                                                     : "This email is not registered in our database."}
                                             </p>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {status === "server_error" && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4 flex items-start gap-3"
+                                    >
+                                        <AlertCircle className="text-orange-400 shrink-0 mt-0.5" />
+                                        <div>
+                                            <h4 className="font-bold text-orange-400 mb-1">
+                                                {language === "es" ? "Error de Configuración" : "Configuration Error"}
+                                            </h4>
+                                            <p className="text-sm text-orange-200/80 mb-2">
+                                                {language === "es"
+                                                    ? "El servidor no tiene configuradas las credenciales de Supabase."
+                                                    : "Server is missing Supabase credentials."}
+                                            </p>
+                                            <div className="bg-black/40 p-2 rounded text-xs font-mono text-orange-200/60 break-all">
+                                                SUPABASE_SERVICE_ROLE_KEY missing
+                                            </div>
                                         </div>
                                     </motion.div>
                                 )}
