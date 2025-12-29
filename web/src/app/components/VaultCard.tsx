@@ -17,27 +17,27 @@ interface VaultCardProps {
  * TIER 3 (FAMILY): "Holographic Future" - High tilt, rainbow glare, floating animation
  */
 const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "" }) => {
-    // Tier-specific tilt configurations
+    // Tier-specific tilt configurations - Enhanced for mobile visibility
     const tiltConfig = {
         1: {
-            tiltMaxAngleX: 5,
-            tiltMaxAngleY: 5,
-            glareMaxOpacity: 0.15,
-            glareColor: "rgba(120, 120, 120, 0.5)",
+            tiltMaxAngleX: 8,
+            tiltMaxAngleY: 8,
+            glareMaxOpacity: 0.35,
+            glareColor: "rgba(180, 180, 180, 0.8)",
             scale: 1.02,
         },
         2: {
-            tiltMaxAngleX: 12,
-            tiltMaxAngleY: 12,
-            glareMaxOpacity: 0.35,
-            glareColor: "rgba(255, 165, 0, 0.6)",
+            tiltMaxAngleX: 15,
+            tiltMaxAngleY: 15,
+            glareMaxOpacity: 0.55,
+            glareColor: "rgba(255, 165, 0, 0.9)",
             scale: 1.04,
         },
         3: {
-            tiltMaxAngleX: 18,
-            tiltMaxAngleY: 18,
-            glareMaxOpacity: 0.55,
-            glareColor: "rgba(0, 255, 255, 0.6)",
+            tiltMaxAngleX: 20,
+            tiltMaxAngleY: 20,
+            glareMaxOpacity: 0.75,
+            glareColor: "rgba(0, 255, 255, 0.9)",
             scale: 1.06,
         },
     };
