@@ -14,7 +14,7 @@ interface VaultCardProps {
  * 
  * TIER 1 (INITIATE): "Heavy Concrete" - Minimal tilt, low glare, matte finish
  * TIER 2 (RESIDENT): "Neon Industrial" - Medium tilt, orange glare, pulsing border
- * TIER 3 (FAMILY): "Holographic Future" - High tilt, rainbow glare, floating animation
+ * TIER 3 (FAMILY): "Holographic Future" - High tilt, rainbow glare, floating + gyroscope
  */
 const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "" }) => {
     // Tier-specific tilt configurations - Enhanced for mobile visibility
@@ -44,16 +44,17 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "" }) => {
 
     const config = tiltConfig[tier as keyof typeof tiltConfig] || tiltConfig[1];
 
-    // Tier-specific wrapper classes
+    // Tier-specific wrapper classes (animate-float removed from tier3 - applied to wrapper)
     const tierStyles: Record<number, string> = {
         1: "vault-card-tier1",
         2: "vault-card-tier2 animate-pulse-slow",
-        3: "vault-card-tier3 animate-float",
+        3: "vault-card-tier3",  // Float animation on wrapper div, not here
     };
 
     const tierClass = tierStyles[tier] || "";
 
-    return (
+    // The Tilt card with gyroscope
+    const cardContent = (
         <Tilt
             tiltMaxAngleX={config.tiltMaxAngleX}
             tiltMaxAngleY={config.tiltMaxAngleY}
@@ -79,6 +80,17 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "" }) => {
             </div>
         </Tilt>
     );
+
+    // Tier 3: Wrap in floating container so both float AND gyroscope work
+    if (tier === 3) {
+        return (
+            <div className="animate-float">
+                {cardContent}
+            </div>
+        );
+    }
+
+    return cardContent;
 };
 
 export default VaultCard;
