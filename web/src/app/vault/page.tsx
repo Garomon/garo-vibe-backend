@@ -763,6 +763,9 @@ const VaultPage: FC = () => {
                         <button onClick={() => router.push('/rave')} className="text-xs bg-garo-neon text-black font-bold px-6 py-2 rounded hover:scale-105 transition flex items-center gap-2">
                             ⚡ RAVE
                         </button>
+                        <button onClick={() => router.push('/shop')} className="text-xs bg-purple-600 text-white font-bold px-6 py-2 rounded hover:scale-105 transition flex items-center gap-2">
+                            🛒 SHOP
+                        </button>
                     </div>
                 </motion.section>
 
