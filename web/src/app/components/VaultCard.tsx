@@ -2,11 +2,17 @@
 
 import { FC, ReactNode } from "react";
 import Tilt from "react-parallax-tilt";
+import dynamic from 'next/dynamic';
+
+// Lazy load ReactPlayer
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 
 interface VaultCardProps {
     tier: number;
-    children: ReactNode;
+    children?: ReactNode;
     className?: string;
+    mediaType?: 'image' | 'video' | 'audio';
+    mediaUrl?: string; // URL for image or media stream
 }
 
 /**
@@ -16,7 +22,7 @@ interface VaultCardProps {
  * TIER 2 (RESIDENT): "Neon Industrial" - Medium tilt, orange glare, pulsing border
  * TIER 3 (FAMILY): "Holographic Future" - High tilt, rainbow glare, floating animation
  */
-const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "" }) => {
+const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "", mediaType, mediaUrl }) => {
     // Tier-specific tilt configurations
     const tiltConfig = {
         1: {
@@ -74,9 +80,33 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "" }) => {
                 <div className="absolute inset-0 rounded-3xl pointer-events-none holo-overlay z-10" />
             )}
 
-            {/* Card Content */}
-            <div className="relative z-20">
-                {children}
+            {/* Card Content or Media Player */}
+            <div className="relative z-20 w-full h-full flex flex-col">
+                {(mediaType === 'video' || mediaType === 'audio') && mediaUrl ? (
+                    <div className="w-full h-full rounded-xl overflow-hidden relative bg-black">
+                        <ReactPlayer
+                            // @ts-ignore - Dynamic import typing issue
+                            url={mediaUrl}
+                            width="100%"
+                            height="100%"
+                            controls={true}
+                            light={true} // Show thumbnail first
+                            playIcon={
+                                <div className="w-16 h-16 bg-garo-neon/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-garo-neon/50 group-hover:scale-110 transition-transform">
+                                    <span className="text-3xl ml-1">▶️</span>
+                                </div>
+                            }
+                        />
+                        {/* Content Overlay (Title/Details) still rendered via children if provided */}
+                        {children && (
+                            <div className="absolute inset-0 pointer-events-none">
+                                {children}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    children
+                )}
             </div>
         </Tilt>
     );

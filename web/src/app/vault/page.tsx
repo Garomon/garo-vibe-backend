@@ -9,6 +9,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useLanguage, LanguageToggle } from "../../context/LanguageProvider";
 import VaultCard from "../components/VaultCard";
 import InfoModal from "../components/ui/InfoModal";
+import RecoveryModal from "../components/ui/RecoveryModal";
 
 const VaultPage: FC = () => {
     const { loggedIn, publicKey, isLoading, userInfo } = useWeb3Auth();
@@ -81,6 +82,7 @@ const VaultPage: FC = () => {
     const [vaultItems, setVaultItems] = useState<any[]>([]);
     // Help Modal State
     const [showHelpModal, setShowHelpModal] = useState(false);
+    const [showRecoveryModal, setShowRecoveryModal] = useState(false);
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -371,7 +373,15 @@ const VaultPage: FC = () => {
                     </h1>
                     <p className="text-garo-silver mb-8">{t.connectToAccess}</p>
                     <WalletButton />
+
+                    <button
+                        onClick={() => setShowRecoveryModal(true)}
+                        className="mt-6 text-xs text-garo-muted hover:text-garo-neon transition-colors underline decoration-garo-neon/30 hover:decoration-garo-neon"
+                    >
+                        {language === 'es' ? '¿Problemas de Acceso? / Trouble Logging In?' : 'Trouble Logging In?'}
+                    </button>
                 </motion.div>
+                <RecoveryModal isOpen={showRecoveryModal} onClose={() => setShowRecoveryModal(false)} />
             </div>
         );
     }
@@ -437,6 +447,14 @@ const VaultPage: FC = () => {
                     </div>
 
                     <WalletButton />
+
+                    <button
+                        onClick={() => setShowRecoveryModal(true)}
+                        className="mt-4 text-xs text-garo-muted hover:text-garo-neon transition-colors underline decoration-garo-neon/30 hover:decoration-garo-neon"
+                    >
+                        {language === 'es' ? '¿Problemas de Acceso? / Trouble Logging In?' : 'Trouble Logging In?'}
+                    </button>
+                    <RecoveryModal isOpen={showRecoveryModal} onClose={() => setShowRecoveryModal(false)} />
 
                     {/* Help Trigger */}
                     <motion.button
