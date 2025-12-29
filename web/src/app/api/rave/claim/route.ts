@@ -8,12 +8,6 @@ export async function POST(req: NextRequest) {
     try {
         const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-        // 1. Verify Auth (Custom header or implicit session if we were using it, 
-        // but here we likely rely on the client sending the user ID or wallet).
-        // For better security, we should verify the wallet signature, but for this MVP:
-        // We will accept the wallet_address in the body (and assume frontend integrity for now).
-        // Ideally, we'd use a legitimate session/auth token.
-
         const body = await req.json();
         const { wallet_address, energy_score } = body;
 
@@ -22,17 +16,14 @@ export async function POST(req: NextRequest) {
         }
 
         // 2. Validate Energy Score (Basic anti-cheat)
-        // If score is too low, reject
         if (energy_score < 80) {
             return NextResponse.json({ error: "Vibe check failed. Energy too low." }, { status: 400 });
         }
 
-        // 3. Rate Limiting / Cooldown
-        // (For MVP, we skip complex Redis rate limiting, but we could check the last 'claim' timestamp if we tracked it)
-        // We will just verify the user exists first.
+        // 3. Get User
         const { data: user, error: userError } = await supabase
             .from("garo_users")
-            .select("id, xp")
+            .select("id, xp, last_rave_at")
             .eq("wallet_address", wallet_address)
             .single();
 
@@ -41,39 +32,56 @@ export async function POST(req: NextRequest) {
         }
 
         // 4. Award $VIBE (XP)
-        // ECONOMY CONTROL: Check for Active Event
-        let REWARD_AMOUNT = 10; // Default: Training Mode
+        // ECONOMY CONTROL: State Capitalist Model
+        // - Live Event: Uncapped (100 XP)
+        // - Training Mode: Capped (10 XP per day)
 
+        let REWARD_AMOUNT = 0;
+
+        // Check for Active Event
         const { data: activeEvents } = await supabase
             .from("garo_events")
             .select("id")
             .eq("status", "ACTIVE")
             .limit(1);
 
-        let isLive = false;
-        if (activeEvents && activeEvents.length > 0) {
-            REWARD_AMOUNT = 100; // Live Event Mode
-            isLive = true;
-        }
+        const isLive = activeEvents && activeEvents.length > 0;
 
-        // Using direct update for simplicity if RPC not deployed
-        const { error: updateError } = await supabase.rpc('increment_xp', {
-            row_id: user.id,
-            amount: REWARD_AMOUNT
-        });
+        if (isLive) {
+            // Live Event: Full Rewards (Uncapped)
+            REWARD_AMOUNT = 100;
+        } else {
+            // Training Mode: Check Daily Limit
+            const lastRave = user.last_rave_at ? new Date(user.last_rave_at) : null;
+            const now = new Date();
 
-        // Fallback if RPC doesn't exist (though migration should create it)
-        if (updateError) {
-            console.log("RPC failed, trying direct update", updateError);
-            const { error: directError } = await supabase
-                .from("garo_users")
-                .update({ xp: (user.xp || 0) + REWARD_AMOUNT })
-                .eq("id", user.id);
+            // Check if last rave was today
+            const isToday = lastRave &&
+                lastRave.getDate() === now.getDate() &&
+                lastRave.getMonth() === now.getMonth() &&
+                lastRave.getFullYear() === now.getFullYear();
 
-            if (directError) {
-                throw directError;
+            if (isToday) {
+                return NextResponse.json({
+                    success: false,
+                    message: "Daily training limit reached (10/10). Rest, or find a Live Event.",
+                    reward: 0
+                });
             }
+
+            REWARD_AMOUNT = 10;
         }
+
+        // Update User (XP + Timestamp)
+        const { error: updateError } = await supabase
+            .from("garo_users")
+            .update({
+                xp: (user.xp || 0) + REWARD_AMOUNT,
+                last_rave_at: new Date().toISOString()
+            })
+            .eq("id", user.id);
+
+        if (updateError) throw updateError;
 
         return NextResponse.json({
             success: true,
