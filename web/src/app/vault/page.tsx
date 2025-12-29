@@ -753,7 +753,7 @@ const VaultPage: FC = () => {
                         </div>
                         <div className="text-center">
                             <div className="text-3xl font-bold text-garo-silver">
-                                {vaultItems.filter(i => isUnlocked(i.requiredTier)).length}/{vaultItems.length}
+                                {vaultItems.filter(i => isUnlocked(i.min_tier)).length}/{vaultItems.length}
                             </div>
                             <div className="text-sm text-garo-muted">{language === "es" ? "Desbloqueados" : "Unlocked"}</div>
                         </div>
