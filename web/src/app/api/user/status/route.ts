@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 // Initialize Supabase Admin Client to bypass RLS for user checks
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function GET(req: NextRequest) {
+    // Initialize Supabase Admin Client inside handler to avoid build-time errors
+    // if environment variables are not available during build
+    const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     const { searchParams } = new URL(req.url);
     const email = searchParams.get("email");
 
