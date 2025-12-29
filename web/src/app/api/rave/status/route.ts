@@ -90,20 +90,18 @@ export async function GET() {
             .limit(1);
 
         if (error) {
-
-            if (activeEvents && activeEvents.length > 0) {
-                return NextResponse.json({
-                    mode: 'LIVE',
-                    event: activeEvents[0]
-                });
-            }
-
-            // Default to TRAINING (Daily Cap enforced in claim API)
-            return NextResponse.json({ mode: 'TRAINING' });
-
-        } catch (error) {
-            return NextResponse.json({ mode: 'OFFLINE', error: "Internal Error" });
+            throw error;
         }
+
+        if (activeEvents && activeEvents.length > 0) {
+            return NextResponse.json({
+                mode: 'LIVE',
+                event: activeEvents[0]
+            });
+        }
+
+        // Default to TRAINING (Daily Cap enforced in claim API)
+        return NextResponse.json({ mode: 'TRAINING' });
     } catch (error) {
         return NextResponse.json({ mode: 'OFFLINE', error: "Internal Error" });
     }
