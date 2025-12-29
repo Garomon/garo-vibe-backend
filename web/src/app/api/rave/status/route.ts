@@ -8,9 +8,6 @@ export async function GET() {
     try {
         const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-        // Check for any event marked as 'ACTIVE'
-        // OR check if current time is within an event window
-        // For now, explicit status is safest/easiest control
         const { data: activeEvents, error } = await supabase
             .from("garo_events")
             .select("id, name, location")
@@ -19,7 +16,8 @@ export async function GET() {
 
         if (error) {
             console.error("Error checking active events:", error);
-            return NextResponse.json({ mode: 'TRAINING' });
+            // Default to OFFLINE if error
+            return NextResponse.json({ mode: 'OFFLINE' });
         }
 
         if (activeEvents && activeEvents.length > 0) {
@@ -29,9 +27,10 @@ export async function GET() {
             });
         }
 
-        return NextResponse.json({ mode: 'TRAINING' });
+        // Default to OFFLINE (Standby)
+        return NextResponse.json({ mode: 'OFFLINE' });
 
     } catch (error) {
-        return NextResponse.json({ mode: 'TRAINING', error: "Internal Error" });
+        return NextResponse.json({ mode: 'OFFLINE', error: "Internal Error" });
     }
 }
