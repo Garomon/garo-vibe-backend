@@ -51,9 +51,9 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "", mediaTy
                 return (
                     <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 bg-black/50">
                         <iframe
-                            src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1`}
+                            src={`https://www.youtube.com/embed/${youtubeId}?rel=0&modestbranding=1&playsinline=1`}
                             title="YouTube video player"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             allowFullScreen
                             className="w-full h-full border-0"
                         />
@@ -120,7 +120,7 @@ const VaultCard: FC<VaultCardProps> = ({ tier, children, className = "", mediaTy
             perspective={1000}
             scale={config.scale}
             transitionSpeed={300}
-            gyroscope={true}
+            gyroscope={false}
             glareEnable={true}
             glareMaxOpacity={config.glareMaxOpacity}
             glareColor={config.glareColor}
