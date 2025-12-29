@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { WalletButton } from "../components/WalletButton";
 import { QRCodeSVG } from "qrcode.react";
 import { useLanguage, LanguageToggle } from "../../context/LanguageProvider";
+import VaultCard from "../components/VaultCard";
 
 const VaultPage: FC = () => {
     const { loggedIn, publicKey, isLoading, userInfo } = useWeb3Auth();
@@ -687,20 +688,22 @@ const VaultPage: FC = () => {
                             </motion.div>
                         )}
 
-                        <div className={`relative group perspective-1000 transition duration-1000 ${riskLevel > 0.8 ? 'grayscale sepia contrast-125' : ''}`}>
-                            <div className="absolute -inset-1 bg-gradient-to-r from-garo-neon to-garo-neon-dim rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-                            <img
-                                src={`/assets/cards/tier-${userTier >= 3 ? 3 : userTier === 2 ? 2 : 1}.png`}
-                                alt={`Tier ${userTier} Membership Card`}
-                                className="relative w-full max-w-sm rounded-xl shadow-2xl transform transition-transform duration-500 hover:scale-105 hover:rotate-y-12"
-                            />
-                            <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                                <span className="font-mono text-xs text-white/50">{publicKey?.toBase58().slice(0, 6)}...</span>
-                                <span className="tier-badge text-xs bg-black/50 backdrop-blur-md border border-white/10">
-                                    {userTier >= 3 ? t.tier3.toUpperCase() : userTier === 2 ? t.tier2.toUpperCase() : t.tier1.toUpperCase()}
-                                </span>
+                        <VaultCard tier={userTier >= 3 ? 3 : userTier >= 2 ? 2 : 1} className={`${riskLevel > 0.8 ? 'grayscale sepia contrast-125' : ''}`}>
+                            <div className="relative group">
+                                <div className="absolute -inset-1 bg-gradient-to-r from-garo-neon to-garo-neon-dim rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
+                                <img
+                                    src={`/assets/cards/tier-${userTier >= 3 ? 3 : userTier === 2 ? 2 : 1}.png`}
+                                    alt={`Tier ${userTier} Membership Card`}
+                                    className="relative w-full max-w-sm rounded-xl shadow-2xl"
+                                />
+                                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                                    <span className="font-mono text-xs text-white/50">{publicKey?.toBase58().slice(0, 6)}...</span>
+                                    <span className="tier-badge text-xs bg-black/50 backdrop-blur-md border border-white/10">
+                                        {userTier >= 3 ? t.tier3.toUpperCase() : userTier === 2 ? t.tier2.toUpperCase() : t.tier1.toUpperCase()}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        </VaultCard>
                     </div>
 
                     <p className="text-xl text-garo-silver max-w-2xl mx-auto">
