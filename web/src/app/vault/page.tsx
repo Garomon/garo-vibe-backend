@@ -424,10 +424,15 @@ const VaultPage: FC = () => {
                         <span className="text-garo-muted">{t.signalLostAction}</span>
                     </p>
 
-                    <div className="glass p-4 rounded-xl mb-8 text-left text-sm">
-                        <p className="text-garo-muted mb-2">Tu wallet:</p>
-                        <p className="font-mono text-xs text-garo-silver break-all">
-                            {publicKey?.toBase58()}
+                    <div className="glass p-4 rounded-xl mb-8 text-left text-sm border-l-4 border-l-garo-neon/50">
+                        <p className="text-garo-muted mb-2 text-xs uppercase tracking-widest">
+                            {language === 'es' ? 'Identidad Detectada' : 'Identity Detected'}
+                        </p>
+                        <p className="font-mono text-garo-silver break-all flex items-center gap-2">
+                            <span className="text-garo-neon">
+                                {userData?.email ? '📧' : '💳'}
+                            </span>
+                            {userData?.email || publicKey?.toBase58()}
                         </p>
                     </div>
 
