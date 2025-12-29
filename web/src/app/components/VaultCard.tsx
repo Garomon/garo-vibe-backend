@@ -68,8 +68,8 @@ const VaultCard: FC<VaultCardProps> = ({
                         slidesPerView={1}
                         pagination={{
                             clickable: true,
-                            bulletClass: 'swiper-pagination-bullet !bg-white/30 !w-3 !h-1 !rounded-sm',
-                            bulletActiveClass: '!bg-garo-neon !shadow-[0_0_8px_rgba(0,255,255,0.8)]'
+                            bulletClass: 'gallery-bullet',
+                            bulletActiveClass: 'gallery-bullet-active'
                         }}
                         className="w-full h-full gallery-swiper"
                     >

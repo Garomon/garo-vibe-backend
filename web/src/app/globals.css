@@ -532,3 +532,28 @@ body {
   pointer-events: none;
   z-index: 5;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Gallery Swiper Pagination - Cyberpunk Style
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.gallery-bullet {
+  display: inline-block;
+  width: 12px;
+  height: 4px;
+  margin: 0 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.gallery-bullet:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.gallery-bullet-active {
+  background: var(--garo-neon) !important;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.8);
+  width: 20px;
+}
