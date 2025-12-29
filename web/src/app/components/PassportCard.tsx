@@ -106,37 +106,37 @@ const PassportCard: FC<PassportCardProps> = ({
 
                 {/* BACK - Passport ID */}
                 <div
-                    className="absolute inset-0 w-full"
+                    className="absolute inset-0 w-full h-full"
                     style={{
                         backfaceVisibility: 'hidden',
                         transform: 'rotateY(180deg)'
                     }}
                 >
-                    <div className={`bg-gradient-to-br ${tierColors[tier] || tierColors[1]} rounded-xl p-5 shadow-2xl border-2 border-white/30 min-h-[320px] flex flex-col`}>
+                    <div className={`bg-gradient-to-br ${tierColors[tier] || tierColors[1]} rounded-xl p-4 shadow-2xl border-2 border-white/30 h-full flex flex-col justify-between`}>
                         {/* Header with LIVE indicator */}
-                        <div className="flex justify-between items-start mb-3">
+                        <div className="flex justify-between items-start">
                             <div>
                                 <div className="text-[10px] uppercase tracking-widest text-white/60">Property of</div>
-                                <div className="text-base font-bold tracking-wide">
+                                <div className="text-sm font-bold tracking-wide">
                                     G<span className="text-garo-neon">Λ</span>RO VIBE
                                 </div>
                             </div>
-                            {/* LIVE Indicator - Moved here */}
-                            <div className="flex items-center gap-1.5 bg-black/30 px-2 py-1 rounded-full" title="Live verification - not a screenshot">
+                            {/* LIVE Indicator */}
+                            <div className="flex items-center gap-1 bg-black/30 px-2 py-0.5 rounded-full" title="Live verification">
                                 <span className="relative flex h-2 w-2">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                                 </span>
-                                <span className="text-[10px] uppercase tracking-widest text-green-400 font-bold">LIVE</span>
+                                <span className="text-[9px] uppercase text-green-400 font-bold">LIVE</span>
                             </div>
                         </div>
 
-                        {/* QR Code - Enlarged for easier scanning */}
-                        <div className="flex justify-center my-3">
-                            <div className="bg-white p-2 rounded-lg shadow-lg">
+                        {/* QR Code - Compact */}
+                        <div className="flex justify-center py-2">
+                            <div className="bg-white p-1.5 rounded-lg shadow-lg">
                                 <QRCodeSVG
                                     value={walletAddress}
-                                    size={140}
+                                    size={100}
                                     bgColor="#FFFFFF"
                                     fgColor="#000000"
                                     level="H"
@@ -145,37 +145,34 @@ const PassportCard: FC<PassportCardProps> = ({
                             </div>
                         </div>
 
-                        {/* Member Data */}
-                        <div className="space-y-1.5 text-sm flex-grow">
-                            <div className="flex justify-between items-center">
-                                <span className="text-white/60 text-xs">TIER</span>
-                                <span className="font-bold text-white">{tierNames[tier] || tier}</span>
+                        {/* Member Data - Compact */}
+                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div>
+                                <div className="text-white/50 text-[10px]">TIER</div>
+                                <div className="font-bold text-white">{tierNames[tier]}</div>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-white/60 text-xs">SINCE</span>
-                                <span className="font-mono text-white text-sm">{formattedDate}</span>
+                            <div>
+                                <div className="text-white/50 text-[10px]">SINCE</div>
+                                <div className="font-mono text-white text-[11px]">{formattedDate}</div>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-white/60 text-xs">EVENTS</span>
-                                <span className="font-bold text-white">{attendanceCount}</span>
+                            <div>
+                                <div className="text-white/50 text-[10px]">EVENTS</div>
+                                <div className="font-bold text-white">{attendanceCount}</div>
                             </div>
                         </div>
 
-                        {/* Wallet Address - Full & Copyable */}
-                        <div className="mt-3 pt-2 border-t border-white/20">
-                            <button
-                                onClick={copyWallet}
-                                className="w-full text-center bg-black/30 hover:bg-black/50 transition py-2 px-3 rounded-lg group"
-                            >
-                                <span className="text-[10px] text-white/50 block mb-1">WALLET ADDRESS</span>
-                                <span className="text-xs text-white font-mono break-all leading-tight block">
-                                    {walletAddress}
-                                </span>
-                                <span className={`text-[10px] mt-1 block transition ${copied ? 'text-green-400' : 'text-white/40 group-hover:text-white/70'}`}>
-                                    {copied ? '✓ Copied!' : '📋 Tap to copy'}
-                                </span>
-                            </button>
-                        </div>
+                        {/* Wallet Address - Compact copyable */}
+                        <button
+                            onClick={copyWallet}
+                            className="w-full bg-black/30 hover:bg-black/50 transition py-1.5 px-2 rounded-lg mt-2"
+                        >
+                            <span className="text-[9px] text-white font-mono block truncate">
+                                {walletAddress}
+                            </span>
+                            <span className={`text-[10px] transition ${copied ? 'text-green-400' : 'text-white/50'}`}>
+                                {copied ? '✓ Copied!' : '📋 Tap to copy'}
+                            </span>
+                        </button>
                     </div>
                 </div>
             </motion.div>
