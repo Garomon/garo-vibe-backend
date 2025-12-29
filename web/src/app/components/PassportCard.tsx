@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -20,6 +20,7 @@ const PassportCard: FC<PassportCardProps> = ({
     attendanceCount = 0
 }) => {
     const [isFlipped, setIsFlipped] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     const tierNames: Record<number, string> = {
         1: "RESIDENTE",
@@ -37,11 +38,37 @@ const PassportCard: FC<PassportCardProps> = ({
         ? new Date(createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
         : 'N/A';
 
+    // Screen brightness control when showing QR
+    useEffect(() => {
+        if (isFlipped) {
+            // Try to maximize brightness and prevent sleep
+            try {
+                // Wake Lock API to prevent screen sleep
+                if ('wakeLock' in navigator) {
+                    (navigator as any).wakeLock.request('screen').catch(() => { });
+                }
+            } catch (e) {
+                console.log('Wake lock not supported');
+            }
+        }
+    }, [isFlipped]);
+
+    const handleFlip = () => {
+        setIsFlipped(!isFlipped);
+    };
+
+    const copyWallet = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent flip
+        navigator.clipboard.writeText(walletAddress);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
     return (
         <div
             className="relative w-full max-w-sm mx-auto cursor-pointer"
             style={{ perspective: '1000px' }}
-            onClick={() => setIsFlipped(!isFlipped)}
+            onClick={handleFlip}
         >
             <motion.div
                 className="relative w-full"
@@ -85,21 +112,31 @@ const PassportCard: FC<PassportCardProps> = ({
                         transform: 'rotateY(180deg)'
                     }}
                 >
-                    <div className={`bg-gradient-to-br ${tierColors[tier] || tierColors[1]} rounded-xl p-6 shadow-2xl border border-white/20 h-full min-h-[300px]`}>
-                        {/* Header */}
-                        <div className="text-center mb-4">
-                            <div className="text-xs uppercase tracking-widest text-white/60 mb-1">Property of</div>
-                            <div className="text-lg font-bold tracking-wide">
-                                G<span className="text-garo-neon">Λ</span>RO VIBE
+                    <div className={`bg-gradient-to-br ${tierColors[tier] || tierColors[1]} rounded-xl p-5 shadow-2xl border-2 border-white/30 min-h-[320px] flex flex-col`}>
+                        {/* Header with LIVE indicator */}
+                        <div className="flex justify-between items-start mb-3">
+                            <div>
+                                <div className="text-[10px] uppercase tracking-widest text-white/60">Property of</div>
+                                <div className="text-base font-bold tracking-wide">
+                                    G<span className="text-garo-neon">Λ</span>RO VIBE
+                                </div>
+                            </div>
+                            {/* LIVE Indicator - Moved here */}
+                            <div className="flex items-center gap-1.5 bg-black/30 px-2 py-1 rounded-full" title="Live verification - not a screenshot">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                </span>
+                                <span className="text-[10px] uppercase tracking-widest text-green-400 font-bold">LIVE</span>
                             </div>
                         </div>
 
-                        {/* QR Code */}
-                        <div className="flex justify-center mb-4">
-                            <div className="bg-white p-2 rounded-lg">
+                        {/* QR Code - Enlarged for easier scanning */}
+                        <div className="flex justify-center my-3">
+                            <div className="bg-white p-2 rounded-lg shadow-lg">
                                 <QRCodeSVG
                                     value={walletAddress}
-                                    size={120}
+                                    size={140}
                                     bgColor="#FFFFFF"
                                     fgColor="#000000"
                                     level="H"
@@ -109,33 +146,35 @@ const PassportCard: FC<PassportCardProps> = ({
                         </div>
 
                         {/* Member Data */}
-                        <div className="space-y-2 text-sm">
+                        <div className="space-y-1.5 text-sm flex-grow">
                             <div className="flex justify-between items-center">
-                                <span className="text-white/60">TIER</span>
+                                <span className="text-white/60 text-xs">TIER</span>
                                 <span className="font-bold text-white">{tierNames[tier] || tier}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-white/60">SINCE</span>
-                                <span className="font-mono text-white">{formattedDate}</span>
+                                <span className="text-white/60 text-xs">SINCE</span>
+                                <span className="font-mono text-white text-sm">{formattedDate}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-white/60">EVENTS</span>
+                                <span className="text-white/60 text-xs">EVENTS</span>
                                 <span className="font-bold text-white">{attendanceCount}</span>
                             </div>
                         </div>
 
-                        {/* LIVE Indicator */}
-                        <div className="mt-4 flex items-center justify-center gap-2">
-                            <span className="relative flex h-3 w-3">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                            </span>
-                            <span className="text-xs uppercase tracking-widest text-green-400 font-bold">LIVE</span>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="mt-4 pt-3 border-t border-white/10 text-center">
-                            <span className="text-xs text-white/40 font-mono">{walletAddress.slice(0, 8)}...{walletAddress.slice(-8)}</span>
+                        {/* Wallet Address - Full & Copyable */}
+                        <div className="mt-3 pt-2 border-t border-white/20">
+                            <button
+                                onClick={copyWallet}
+                                className="w-full text-center bg-black/30 hover:bg-black/50 transition py-2 px-3 rounded-lg group"
+                            >
+                                <span className="text-[10px] text-white/50 block mb-1">WALLET ADDRESS</span>
+                                <span className="text-xs text-white font-mono break-all leading-tight block">
+                                    {walletAddress}
+                                </span>
+                                <span className={`text-[10px] mt-1 block transition ${copied ? 'text-green-400' : 'text-white/40 group-hover:text-white/70'}`}>
+                                    {copied ? '✓ Copied!' : '📋 Tap to copy'}
+                                </span>
+                            </button>
                         </div>
                     </div>
                 </div>
