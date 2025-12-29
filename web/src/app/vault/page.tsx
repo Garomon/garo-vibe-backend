@@ -10,6 +10,7 @@ import { useLanguage, LanguageToggle } from "../../context/LanguageProvider";
 import VaultCard from "../components/VaultCard";
 import InfoModal from "../components/ui/InfoModal";
 import RecoveryModal from "../components/ui/RecoveryModal";
+import PassportCard from "../components/PassportCard";
 
 const VaultPage: FC = () => {
     const { loggedIn, publicKey, isLoading, userInfo } = useWeb3Auth();
@@ -717,22 +718,16 @@ const VaultPage: FC = () => {
                             </motion.div>
                         )}
 
-                        <VaultCard tier={userTier >= 3 ? 3 : userTier >= 2 ? 2 : 1} className={`${riskLevel > 0.8 ? 'grayscale sepia contrast-125' : ''}`}>
-                            <div className="relative group">
-                                <div className="absolute -inset-1 bg-gradient-to-r from-garo-neon to-garo-neon-dim rounded-2xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-                                <img
-                                    src={`/assets/cards/tier-${userTier >= 3 ? 3 : userTier === 2 ? 2 : 1}.png`}
-                                    alt={`Tier ${userTier} Membership Card`}
-                                    className="relative w-full max-w-sm rounded-xl shadow-2xl"
-                                />
-                                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
-                                    <span className="font-mono text-xs text-white/50">{publicKey?.toBase58().slice(0, 6)}...</span>
-                                    <span className="tier-badge text-xs bg-black/50 backdrop-blur-md border border-white/10">
-                                        {userTier >= 3 ? t.tier3.toUpperCase() : userTier === 2 ? t.tier2.toUpperCase() : t.tier1.toUpperCase()}
-                                    </span>
-                                </div>
-                            </div>
-                        </VaultCard>
+                        {/* PASSPORT FLIP CARD */}
+                        <PassportCard
+                            tier={userTier >= 3 ? 3 : userTier >= 2 ? 2 : 1}
+                            walletAddress={publicKey?.toBase58() || ""}
+                            email={userData?.email}
+                            createdAt={userData?.created_at}
+                            attendanceCount={attendanceCount}
+                        />
+
+                        <p className="text-xs text-garo-muted mt-4">{language === "es" ? "Toca la tarjeta para ver tu ID" : "Tap the card to see your ID"}</p>
                     </div>
 
                     <p className="text-xl text-garo-silver max-w-2xl mx-auto">

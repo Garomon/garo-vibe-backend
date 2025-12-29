@@ -115,6 +115,16 @@ const AdminDashboard: FC = () => {
                         </div>
                     </div>
                 </a>
+
+                <a href="/admin/roster" className="block">
+                    <div className="glass p-6 flex items-center gap-4 hover:border-garo-neon/50 transition-all active:scale-[0.98]">
+                        <span className="text-4xl">📋</span>
+                        <div>
+                            <div className="font-bold text-lg">The Roster</div>
+                            <div className="text-sm text-garo-muted">View, ban, and manage members</div>
+                        </div>
+                    </div>
+                </a>
             </motion.div>
         </div>
     );
