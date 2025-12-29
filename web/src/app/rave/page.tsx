@@ -11,17 +11,9 @@ export default function RavePage() {
     const { loggedIn, publicKey } = useWeb3Auth();
     const router = useRouter();
 
-    // Game States: 'idle' | 'active' | 'success' | 'fail'
-    const [gameState, setGameState] = useState<'idle' | 'active' | 'success' | 'fail'>('idle');
-    const [energy, setEnergy] = useState(0); // 0-100
-    const [timeLeft, setTimeLeft] = useState(60);
-    const [hasPermission, setHasPermission] = useState(false);
-
-    const [avgEnergy, setAvgEnergy] = useState(0);
-
-    // Mode State
-    const [raveMode, setRaveMode] = useState<'TRAINING' | 'LIVE'>('TRAINING');
-    const [activeEvent, setActiveEvent] = useState<any>(null);
+    // Claim Result State
+    const [claimResult, setClaimResult] = useState<{ success: boolean; message: string; reward: number } | null>(null);
+    const [isClaiming, setIsClaiming] = useState(false);
 
     useEffect(() => {
         // Check Status
@@ -41,7 +33,6 @@ export default function RavePage() {
     useEffect(() => {
         if (!loggedIn) {
             // Optional: Redirect or show login prompt. 
-            // For now we allow viewing but claiming requires auth.
         }
     }, [loggedIn]);
 
@@ -67,16 +58,19 @@ export default function RavePage() {
 
         setAvgEnergy(avg);
 
-        if (avg >= 70) { // Threshold for success (can tune)
-            setGameState('success');
-            await claimReward();
+        if (avg >= 70) {
+            // Vibe Check Passed
+            // Don't set 'success' yet. Wait for claim.
+            setGameState('claiming'); // Intermediate state
+            await claimReward(avg);
         } else {
             setGameState('fail');
         }
     };
 
-    const claimReward = async () => {
+    const claimReward = async (finalAvg: number) => {
         if (!publicKey) return;
+        setIsClaiming(true);
 
         try {
             const res = await fetch("/api/rave/claim", {
@@ -84,13 +78,25 @@ export default function RavePage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     wallet_address: publicKey.toBase58(),
-                    energy_score: Math.round(avgEnergy) || 80 // Fallback
+                    energy_score: Math.round(finalAvg) || 80
                 })
             });
             const data = await res.json();
-            if (!res.ok) console.error(data.error);
+
+            setClaimResult({
+                success: data.success,
+                message: data.message || (data.success ? "Vibe Captured!" : "Claim Failed"),
+                reward: data.reward || 0
+            });
+
+            setGameState('success'); // Now show success screen with data
+
         } catch (e) {
             console.error("Claim failed", e);
+            setClaimResult({ success: false, message: "Network Error", reward: 0 });
+            setGameState('success'); // Still show screen but with error msg
+        } finally {
+            setIsClaiming(false);
         }
     };
 
@@ -289,6 +295,19 @@ export default function RavePage() {
                             </div>
                         </motion.div>
                     )}
+                    {/* STATE: CLAIMING */}
+                    {gameState === 'claiming' && (
+                        <motion.div
+                            key="claiming"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="flex flex-col items-center justify-center"
+                        >
+                            <div className="w-16 h-16 border-4 border-white/20 border-t-garo-neon rounded-full animate-spin mb-4"></div>
+                            <h2 className="text-2xl font-bold animate-pulse">Syncing Vibe...</h2>
+                        </motion.div>
+                    )}
 
                     {/* STATE: SUCCESS */}
                     {gameState === 'success' && (
@@ -299,11 +318,19 @@ export default function RavePage() {
                             className="text-center"
                         >
                             <div className="text-8xl mb-6">💃</div>
-                            <h2 className="text-4xl font-bold text-garo-neon mb-2">VIBE CHECK PASSED</h2>
+                            <h2 className="text-4xl font-bold text-garo-neon mb-2">
+                                {claimResult?.reward > 0 ? "VIBE CAPTURED" : "TRAINING COMPLETE"}
+                            </h2>
                             <div className="text-xl text-white mb-8">
-                                +{raveMode === 'LIVE' ? 100 : 10} <span className={`font-bold text-transparent bg-clip-text bg-gradient-to-r ${raveMode === 'LIVE' ? 'from-purple-400 to-pink-600' : 'from-yellow-400 to-orange-500'}`}>$VIBE</span>
+                                {claimResult?.reward > 0 ? (
+                                    <>+{claimResult.reward} <span className={`font-bold text-transparent bg-clip-text bg-gradient-to-r ${raveMode === 'LIVE' ? 'from-purple-400 to-pink-600' : 'from-yellow-400 to-orange-500'}`}>$VIBE</span></>
+                                ) : (
+                                    <span className="text-gray-400">Daily Cap Reached (0 $VIBE)</span>
+                                )}
                             </div>
-                            <p className="text-xs text-gray-500 mb-8 uppercase tracking-widest">{raveMode === 'LIVE' ? 'Live Session Verified' : 'Daily Training Complete'}</p>
+                            <p className="text-xs text-gray-500 mb-8 uppercase tracking-widest">
+                                {claimResult?.message}
+                            </p>
 
                             <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/10 mb-8 max-w-xs mx-auto">
                                 <div className="text-sm text-gray-400">Avg Energy</div>
