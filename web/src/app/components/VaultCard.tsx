@@ -42,22 +42,30 @@ const VaultCard: FC<VaultCardProps> = ({
     isViewed = false
 }) => {
     const [mounted, setMounted] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
         setMounted(true);
+        // Detect mobile
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    // Simplified config for mobile - reduce GPU-heavy effects
     const tiltConfig = {
-        1: { tiltMaxAngleX: 10, tiltMaxAngleY: 10, glareMaxOpacity: 0.3, glareColor: "rgba(180, 180, 180, 0.8)", scale: 1.02 },
-        2: { tiltMaxAngleX: 15, tiltMaxAngleY: 15, glareMaxOpacity: 0.5, glareColor: "rgba(255, 165, 0, 0.9)", scale: 1.03 },
-        3: { tiltMaxAngleX: 20, tiltMaxAngleY: 20, glareMaxOpacity: 0.7, glareColor: "rgba(0, 255, 255, 0.9)", scale: 1.05 },
+        1: { tiltMaxAngleX: isMobile ? 5 : 10, tiltMaxAngleY: isMobile ? 5 : 10, glareMaxOpacity: isMobile ? 0.1 : 0.3, glareColor: "rgba(180, 180, 180, 0.8)", scale: 1.02 },
+        2: { tiltMaxAngleX: isMobile ? 5 : 15, tiltMaxAngleY: isMobile ? 5 : 15, glareMaxOpacity: isMobile ? 0.15 : 0.5, glareColor: "rgba(255, 165, 0, 0.9)", scale: isMobile ? 1.01 : 1.03 },
+        3: { tiltMaxAngleX: isMobile ? 5 : 20, tiltMaxAngleY: isMobile ? 5 : 20, glareMaxOpacity: isMobile ? 0.2 : 0.7, glareColor: "rgba(0, 255, 255, 0.9)", scale: isMobile ? 1.01 : 1.05 },
     };
 
     const config = tiltConfig[tier as keyof typeof tiltConfig] || tiltConfig[1];
 
+    // Disable animations on mobile to prevent flickering
     const tierStyles: Record<number, string> = {
         1: "vault-card-tier1",
-        2: "vault-card-tier2 animate-pulse-slow",
+        2: isMobile ? "vault-card-tier2" : "vault-card-tier2 animate-pulse-slow",
         3: "vault-card-tier3",
     };
 
@@ -152,7 +160,7 @@ const VaultCard: FC<VaultCardProps> = ({
             scale={config.scale}
             transitionSpeed={300}
             gyroscope={false}
-            glareEnable={true}
+            glareEnable={!isMobile}
             glareMaxOpacity={config.glareMaxOpacity}
             glareColor={config.glareColor}
             glarePosition="all"
@@ -167,7 +175,7 @@ const VaultCard: FC<VaultCardProps> = ({
                 </div>
             )}
 
-            {tier === 3 && (
+            {tier === 3 && !isMobile && (
                 <div className="absolute inset-0 rounded-3xl pointer-events-none holo-overlay z-10" />
             )}
 
@@ -178,7 +186,7 @@ const VaultCard: FC<VaultCardProps> = ({
         </Tilt>
     );
 
-    if (tier === 3) {
+    if (tier === 3 && !isMobile) {
         return <div className="animate-float">{cardContent}</div>;
     }
 
