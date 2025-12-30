@@ -634,16 +634,17 @@ const VaultPage: FC = () => {
                         <span className="lambda-subtle">Λ</span>
                     </a>
 
-                    <div className="flex items-center gap-2 sm:gap-4">
-                        <div className={`px-3 py-1.5 rounded-full font-bold text-xs sm:text-sm whitespace-nowrap ${userTier >= 3 ? "bg-green-600 text-white" :
+                    <div className="flex items-center gap-1.5 sm:gap-3">
+                        {/* Tier badge - hidden on very small screens */}
+                        <div className={`hidden sm:flex px-2 py-1 rounded-full font-bold text-xs whitespace-nowrap ${userTier >= 3 ? "bg-green-600 text-white" :
                             userTier >= 2 ? "bg-orange-600 text-white" :
                                 userTier >= 1 ? "bg-gray-600 text-gray-200" :
                                     "bg-red-600 text-white"
                             }`}>
-                            {userTier >= 3 ? `👑 ${t.tier3.toUpperCase()}` :
-                                userTier >= 2 ? `🏠 ${t.tier2.toUpperCase()}` :
-                                    userTier >= 1 ? `🌱 ${t.tier1.toUpperCase()}` :
-                                        `👻 ${t.ghost.toUpperCase()}`}
+                            {userTier >= 3 ? `👑` :
+                                userTier >= 2 ? `🏠` :
+                                    userTier >= 1 ? `🌱` :
+                                        `👻`}
                         </div>
                         <VibeBalance />
                         <WalletButton />
