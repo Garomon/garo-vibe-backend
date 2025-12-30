@@ -775,6 +775,9 @@ const VaultPage: FC = () => {
                         <button onClick={() => router.push('/leaderboard')} className="text-xs bg-yellow-600 text-black font-bold px-6 py-2 rounded hover:scale-105 transition flex items-center gap-2">
                             🏆 RANKS
                         </button>
+                        <button onClick={() => router.push('/scan')} className="text-xs bg-cyan-600 text-white font-bold px-6 py-2 rounded hover:scale-105 transition flex items-center gap-2">
+                            📷 CHECK-IN
+                        </button>
                     </div>
                 </motion.section>
 

@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { QRCodeSVG } from "qrcode.react";
 
 export default function EventsAdminPage() {
-    const [events, setEvents] = useState<any[]>([]);
+    const [events, setEvents] = useState<{ id: string; name: string; status: string; date: string; location?: string; capacity?: number }[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showQrEventId, setShowQrEventId] = useState<string | null>(null);
 
     useEffect(() => {
         fetchEvents();
@@ -95,16 +97,16 @@ export default function EventsAdminPage() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             className={`relative p-6 rounded-2xl border ${event.status === 'ACTIVE'
-                                    ? 'bg-red-950/30 border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]'
-                                    : 'bg-white/5 border-white/10 hover:border-white/20'
+                                ? 'bg-red-950/30 border-red-500/50 shadow-[0_0_30px_rgba(239,68,68,0.2)]'
+                                : 'bg-white/5 border-white/10 hover:border-white/20'
                                 } transition-all`}
                         >
                             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                                 {/* Status Indicator */}
                                 <div className="flex-shrink-0">
                                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-2xl ${event.status === 'ACTIVE'
-                                            ? 'bg-red-500 text-black animate-pulse'
-                                            : 'bg-gray-800 text-gray-500'
+                                        ? 'bg-red-500 text-black animate-pulse'
+                                        : 'bg-gray-800 text-gray-500'
                                         }`}>
                                         {event.status === 'ACTIVE' ? 'ON' : 'OFF'}
                                     </div>
@@ -130,11 +132,19 @@ export default function EventsAdminPage() {
                                     <button
                                         onClick={() => toggleStatus(event.id, event.status)}
                                         className={`px-6 py-3 rounded-full font-bold transition-all ${event.status === 'ACTIVE'
-                                                ? 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                                                : 'bg-green-500 text-black hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.4)]'
+                                            ? 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                                            : 'bg-green-500 text-black hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.4)]'
                                             }`}
                                     >
                                         {event.status === 'ACTIVE' ? 'STOP EVENT' : 'Go LIVE 🚀'}
+                                    </button>
+
+                                    <button
+                                        onClick={() => setShowQrEventId(event.id)}
+                                        className="p-3 text-gray-500 hover:text-garo-neon transition"
+                                        title="Show Event QR"
+                                    >
+                                        📱
                                     </button>
 
                                     <button
@@ -150,6 +160,48 @@ export default function EventsAdminPage() {
                     ))}
                 </div>
             )}
+
+            {/* QR Code Modal */}
+            <AnimatePresence>
+                {showQrEventId && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+                        onClick={() => setShowQrEventId(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.9 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-gray-900 border border-garo-neon/30 rounded-3xl p-8 text-center max-w-md"
+                        >
+                            <h3 className="text-2xl font-bold mb-4">Event Check-in QR</h3>
+                            <p className="text-gray-400 text-sm mb-6">
+                                Print or display this QR. Users scan to check in.
+                            </p>
+                            <div className="bg-white p-6 rounded-2xl inline-block mb-6">
+                                <QRCodeSVG
+                                    value={JSON.stringify({ type: "GARO_EVENT", event_id: showQrEventId })}
+                                    size={250}
+                                    level="H"
+                                />
+                            </div>
+                            <p className="text-xs text-gray-500 font-mono break-all mb-6">
+                                {JSON.stringify({ type: "GARO_EVENT", event_id: showQrEventId })}
+                            </p>
+                            <button
+                                onClick={() => setShowQrEventId(null)}
+                                className="bg-garo-neon text-black font-bold px-8 py-3 rounded-full"
+                            >
+                                CLOSE
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
