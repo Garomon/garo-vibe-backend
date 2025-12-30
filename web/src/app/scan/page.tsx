@@ -148,7 +148,7 @@ function ScanContent() {
                             }}
                             onError={(error) => {
                                 console.error('Scanner error:', error);
-                                setScannerError(error?.message || 'Camera access denied');
+                                setScannerError(error instanceof Error ? error.message : 'Camera access denied');
                             }}
                             constraints={{ facingMode: 'environment' }}
                             styles={{
