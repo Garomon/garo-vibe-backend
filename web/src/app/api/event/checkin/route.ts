@@ -19,12 +19,16 @@ export async function POST(request: NextRequest) {
             }, { status: 400 });
         }
 
+        console.log("Check-in attempt:", { wallet_address, event_id });
+
         // 1. Validate event exists and is ACTIVE
         const { data: event, error: eventError } = await supabase
             .from("events")
             .select("id, name, status")
             .eq("id", event_id)
             .single();
+
+        console.log("Event query result:", { event, eventError });
 
         if (eventError || !event) {
             return NextResponse.json({
