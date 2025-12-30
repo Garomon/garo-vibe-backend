@@ -6,7 +6,7 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const CHECK_IN_REWARD = 50; // $VIBE reward for checking in
+const CHECK_IN_REWARD = 100; // $VIBE reward for checking in (EXCLUSIVE MODE)
 
 export async function POST(request: NextRequest) {
     try {
@@ -58,7 +58,27 @@ export async function POST(request: NextRequest) {
             }, { status: 404 });
         }
 
-        // 3. Check if user already checked in to this event
+        // 3. 🔐 EXCLUSIVE MODE: Check if user has a valid ticket for this event
+        const { data: ticket, error: ticketError } = await supabase
+            .from("user_event_tickets")
+            .select("id, status")
+            .eq("user_id", user.id)
+            .eq("event_id", event_id)
+            .eq("status", "VALID")
+            .single();
+
+        console.log("Ticket query result:", { ticket, ticketError });
+
+        if (ticketError || !ticket) {
+            return NextResponse.json({
+                success: false,
+                error: "ACCESS DENIED",
+                message: "No estás en la lista. Pide a un Miembro que te envíe una invitación para activar tu acceso.",
+                access_denied: true
+            }, { status: 403 });
+        }
+
+        // 4. Check if user already checked in to this event
         const { data: existingCheckin } = await supabase
             .from("event_attendance")
             .select("id")
@@ -74,7 +94,7 @@ export async function POST(request: NextRequest) {
             }, { status: 400 });
         }
 
-        // 4. Create attendance record
+        // 5. Create attendance record
         const { error: attendanceError } = await supabase
             .from("event_attendance")
             .insert({
@@ -86,7 +106,17 @@ export async function POST(request: NextRequest) {
             throw attendanceError;
         }
 
-        // 5. Award XP
+        // 6. Mark ticket as USED
+        const { error: ticketUpdateError } = await supabase
+            .from("user_event_tickets")
+            .update({ status: "USED", used_at: new Date().toISOString() })
+            .eq("id", ticket.id);
+
+        if (ticketUpdateError) {
+            console.error("Failed to update ticket status:", ticketUpdateError);
+        }
+
+        // 7. Award XP (100 $VIBE for exclusive events)
         const newXP = (user.xp || 0) + CHECK_IN_REWARD;
         const { error: xpError } = await supabase
             .from("garo_users")

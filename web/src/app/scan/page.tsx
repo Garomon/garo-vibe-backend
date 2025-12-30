@@ -15,7 +15,7 @@ const Scanner = dynamic(
     { ssr: false }
 );
 
-type ScanState = 'scanning' | 'processing' | 'success' | 'error' | 'already_checked';
+type ScanState = 'scanning' | 'processing' | 'success' | 'error' | 'already_checked' | 'access_denied';
 
 interface CheckinResult {
     success: boolean;
@@ -24,6 +24,7 @@ interface CheckinResult {
     event_name?: string;
     error?: string;
     already_checked_in?: boolean;
+    access_denied?: boolean;
 }
 
 function ScanContent() {
@@ -93,6 +94,9 @@ function ScanContent() {
                 refreshBalance();
             } else if (data.already_checked_in) {
                 setScanState('already_checked');
+                setResult(data);
+            } else if (data.access_denied) {
+                setScanState('access_denied');
                 setResult(data);
             } else {
                 setScanState('error');
@@ -253,6 +257,36 @@ function ScanContent() {
                         className="mt-8 bg-white/10 text-white font-bold px-8 py-4 rounded-full"
                     >
                         TRY AGAIN
+                    </button>
+                </div>
+            )}
+
+            {/* ACCESS DENIED - Exclusive Mode */}
+            {scanState === 'access_denied' && (
+                <div className="text-center py-12">
+                    <motion.div
+                        initial={{ scale: 0.5 }}
+                        animate={{ scale: 1 }}
+                        className="text-8xl mb-6"
+                    >
+                        ⛔
+                    </motion.div>
+                    <h2 className="text-4xl font-black text-red-500 mb-4">
+                        ACCESS DENIED
+                    </h2>
+                    <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6 max-w-md mx-auto mb-8">
+                        <p className="text-white text-lg">
+                            {result?.message || 'No estás en la lista.'}
+                        </p>
+                        <p className="text-gray-400 text-sm mt-4">
+                            Pide a un Miembro que te envíe una invitación para activar tu acceso.
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => router.push('/vault')}
+                        className="bg-white/10 text-white font-bold px-8 py-4 rounded-full"
+                    >
+                        BACK TO VAULT
                     </button>
                 </div>
             )}
