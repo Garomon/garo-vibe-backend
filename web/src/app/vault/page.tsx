@@ -355,12 +355,48 @@ const VaultPage: FC = () => {
                 )
                 .subscribe();
 
+            // Channel for user_event_tickets changes (Member receives ticket from Admin)
+            const ticketsChannel = supabase
+                .channel('user-event-tickets-changes')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: 'INSERT',
+                        schema: 'public',
+                        table: 'user_event_tickets'
+                    },
+                    (payload) => {
+                        console.log('📡 Realtime: user_event_tickets INSERT detected', payload);
+                        // Re-check ticket status with full event data
+                        if (userData?.email) {
+                            fetch(`/api/user/ticket-status?email=${encodeURIComponent(userData.email)}`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    const hadTicket = hasPendingTicket;
+                                    setHasPendingTicket(data.hasPendingTicket && !data.isExpired);
+                                    if (data.event) {
+                                        setTicketEvent({
+                                            ...data.event,
+                                            expiresAt: data.ticket?.expiresAt
+                                        });
+                                    }
+                                    // If we just got a ticket, show celebration
+                                    if (!hadTicket && data.hasPendingTicket) {
+                                        console.log('🎟️ TICKET RECEIVED via Realtime! Showing update...');
+                                    }
+                                });
+                        }
+                    }
+                )
+                .subscribe();
+
             // Cleanup function
             return () => {
                 console.log("🔌 Cleaning up Realtime subscriptions");
                 supabase.removeChannel(invitesChannel);
                 supabase.removeChannel(usersChannel);
                 supabase.removeChannel(attendanceChannel);
+                supabase.removeChannel(ticketsChannel);
             };
         };
 
