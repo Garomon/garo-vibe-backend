@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
         // 1. Validate event exists and is ACTIVE
         const { data: event, error: eventError } = await supabase
-            .from("events")
+            .from("garo_events")
             .select("id, name, status")
             .eq("id", event_id)
             .single();
