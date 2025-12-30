@@ -6,8 +6,8 @@ import { LanguageToggle } from "../../context/LanguageProvider";
 export function GlobalLanguageToggle() {
     const pathname = usePathname();
 
-    // Hide on admin routes
-    if (pathname?.startsWith("/admin")) {
+    // Hide on admin routes and leaderboard (has sticky footer)
+    if (pathname?.startsWith("/admin") || pathname === "/leaderboard") {
         return null;
     }
 
