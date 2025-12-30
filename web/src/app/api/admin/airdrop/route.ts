@@ -12,6 +12,56 @@ export async function POST(request: Request) {
 
         const normalizedEmail = email.toLowerCase().trim();
 
+        // Check if user already exists as a member
+        const { data: existingUser } = await supabase
+            .from("garo_users")
+            .select("id, tier, email")
+            .eq("email", normalizedEmail)
+            .single();
+
+        // If user exists and we have an eventId, create ticket directly
+        if (existingUser && eventId) {
+            // Check if ticket already exists
+            const { data: existingTicket } = await supabase
+                .from("user_event_tickets")
+                .select("id")
+                .eq("user_id", existingUser.id)
+                .eq("event_id", eventId)
+                .single();
+
+            if (existingTicket) {
+                return NextResponse.json({
+                    success: true,
+                    message: `🎫 Ticket already exists for this member and event`,
+                    invite: { email: normalizedEmail, status: "TICKET_EXISTS" }
+                });
+            }
+
+            // Create ticket directly for existing member
+            const { error: ticketError } = await supabase
+                .from("user_event_tickets")
+                .insert({
+                    user_id: existingUser.id,
+                    event_id: eventId,
+                    ticket_type: "STANDARD",
+                    status: "VALID"
+                });
+
+            if (ticketError) {
+                console.error("Failed to create ticket:", ticketError);
+                return NextResponse.json({ error: ticketError.message }, { status: 500 });
+            }
+
+            console.log(`🎟️ Ticket created for existing member: ${normalizedEmail} (Event: ${eventId})`);
+
+            return NextResponse.json({
+                success: true,
+                message: `✅ Ticket granted! Tier ${existingUser.tier} member can now check in.`,
+                invite: { email: normalizedEmail, status: "TICKET_GRANTED" }
+            });
+        }
+
+        // For GHOST users (no account) - create pending_invite as before
         // Check if there's already a PENDING invite for THIS event
         const { data: existingInvite } = await supabase
             .from("pending_invites")
@@ -21,7 +71,6 @@ export async function POST(request: Request) {
             .single();
 
         if (existingInvite) {
-            // Already has a pending invite - check if same event
             if (existingInvite.event_id === eventId) {
                 return NextResponse.json({
                     success: true,
@@ -29,7 +78,6 @@ export async function POST(request: Request) {
                     invite: { email: normalizedEmail, status: "PENDING" }
                 });
             }
-            // Different event - allow sending new ticket
         }
 
         // Fetch event date to set expiration
@@ -42,14 +90,13 @@ export async function POST(request: Request) {
                 .single();
 
             if (event?.date) {
-                // Expire 1 day after event date
                 const eventDate = new Date(event.date);
                 eventDate.setDate(eventDate.getDate() + 1);
                 expiresAt = eventDate.toISOString();
             }
         }
 
-        // Create new pending invite (Entry Ticket) for this event
+        // Create new pending invite (Entry Ticket) for ghost user
         const { data: newInvite, error: createError } = await supabase
             .from("pending_invites")
             .insert([{
@@ -69,22 +116,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: createError.message }, { status: 500 });
         }
 
-        // Check if user already exists
-        const { data: existingUser } = await supabase
-            .from("garo_users")
-            .select("tier")
-            .eq("email", normalizedEmail)
-            .single();
-
-        const statusMessage = existingUser
-            ? `🎫 Event ticket sent to existing Tier ${existingUser.tier} member!`
-            : "🎫 Entry Ticket sent! They'll become a member when scanned at the door.";
-
-        console.log(`Airdrop: Entry Ticket created for ${normalizedEmail} (Event: ${eventId || 'General'}, Expires: ${expiresAt || 'Never'})`);
+        console.log(`🎫 Ghost invite created for ${normalizedEmail} (Event: ${eventId || 'General'})`);
 
         return NextResponse.json({
             success: true,
-            message: statusMessage,
+            message: "🎫 Entry Ticket sent! They'll get access when they sign up.",
             invite: { email: normalizedEmail, status: "PENDING", expiresAt }
         });
 
@@ -93,4 +129,3 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
-

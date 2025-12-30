@@ -3,6 +3,7 @@ import { supabase } from "../../../../../lib/supabaseClient";
 
 /**
  * Bulk Airdrop - Send tickets to ALL existing members for an event
+ * Now creates user_event_tickets directly (not pending_invites)
  */
 export async function POST(request: Request) {
     try {
@@ -32,67 +33,53 @@ export async function POST(request: Request) {
             });
         }
 
-        // Fetch event to get expiration date
+        // Fetch event name
         const { data: event } = await supabase
             .from("garo_events")
-            .select("date, name")
+            .select("name")
             .eq("id", eventId)
             .single();
 
-        // Calculate expiration (1 day after event)
-        let expiresAt = null;
-        if (event?.date) {
-            const eventDate = new Date(event.date);
-            eventDate.setDate(eventDate.getDate() + 1);
-            expiresAt = eventDate.toISOString();
-        }
-
-        // Insert invites one by one to handle duplicates gracefully
+        // Create tickets directly in user_event_tickets
         let successCount = 0;
         let skipCount = 0;
 
         for (const member of members) {
-            if (!member.email) continue;
-
-            // Check if already has pending invite for this event
-            const { data: existing } = await supabase
-                .from("pending_invites")
+            // Check if ticket already exists
+            const { data: existingTicket } = await supabase
+                .from("user_event_tickets")
                 .select("id")
-                .eq("email", member.email.toLowerCase())
+                .eq("user_id", member.id)
                 .eq("event_id", eventId)
-                .eq("status", "PENDING")
                 .single();
 
-            if (existing) {
+            if (existingTicket) {
                 skipCount++;
                 continue;
             }
 
-            // Create new invite
+            // Create ticket directly
             const { error: insertError } = await supabase
-                .from("pending_invites")
+                .from("user_event_tickets")
                 .insert({
-                    email: member.email.toLowerCase(),
-                    tier_to_mint: 1,
-                    nft_type: 'ENTRY',
-                    status: 'PENDING',
+                    user_id: member.id,
                     event_id: eventId,
-                    invited_by: 'ADMIN_BULK',
-                    expires_at: expiresAt
+                    ticket_type: "STANDARD",
+                    status: "VALID"
                 });
 
             if (insertError) {
-                console.error(`Failed for ${member.email}:`, insertError.message);
+                console.error(`Failed for member ${member.id}:`, insertError.message);
             } else {
                 successCount++;
             }
         }
 
-        console.log(`📢 Bulk Airdrop: ${successCount} tickets sent, ${skipCount} skipped for event ${event?.name || eventId}`);
+        console.log(`📢 Bulk Tickets: ${successCount} created, ${skipCount} skipped for event ${event?.name || eventId}`);
 
         return NextResponse.json({
             success: true,
-            message: `🎫 ${successCount} tickets sent for "${event?.name || 'Event'}" (${skipCount} already had tickets)`,
+            message: `🎟️ ${successCount} tickets created for "${event?.name || 'Event'}" (${skipCount} already had tickets)`,
             count: successCount,
             skipped: skipCount,
             eventName: event?.name
