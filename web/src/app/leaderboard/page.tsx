@@ -118,7 +118,7 @@ export default function LeaderboardPage() {
 
                                             <span className="text-4xl mb-2">{style.icon}</span>
                                             <div className="text-xs text-gray-400 mb-1">{style.label}</div>
-                                            <div className="font-bold text-lg truncate max-w-full">{user.nickname}</div>
+                                            <div className="font-bold text-base text-center break-all px-2">{user.nickname}</div>
                                             <div className="flex items-center gap-1 mt-2">
                                                 <span>💎</span>
                                                 <span className="text-xl font-mono font-bold text-garo-neon">{user.xp.toLocaleString()}</span>
