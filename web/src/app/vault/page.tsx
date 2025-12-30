@@ -635,16 +635,21 @@ const VaultPage: FC = () => {
                     </a>
 
                     <div className="flex items-center gap-1.5 sm:gap-3">
-                        {/* Tier badge - hidden on very small screens */}
-                        <div className={`hidden sm:flex px-2 py-1 rounded-full font-bold text-xs whitespace-nowrap ${userTier >= 3 ? "bg-green-600 text-white" :
+                        {/* Tier badge - emoji only on mobile, full text on desktop */}
+                        <div className={`px-2 py-1 rounded-full font-bold text-xs whitespace-nowrap ${userTier >= 3 ? "bg-green-600 text-white" :
                             userTier >= 2 ? "bg-orange-600 text-white" :
                                 userTier >= 1 ? "bg-gray-600 text-gray-200" :
                                     "bg-red-600 text-white"
                             }`}>
-                            {userTier >= 3 ? `👑` :
-                                userTier >= 2 ? `🏠` :
-                                    userTier >= 1 ? `🌱` :
-                                        `👻`}
+                            <span className="sm:hidden">
+                                {userTier >= 3 ? `👑` : userTier >= 2 ? `🏠` : userTier >= 1 ? `🌱` : `👻`}
+                            </span>
+                            <span className="hidden sm:inline">
+                                {userTier >= 3 ? `👑 ${t.tier3.toUpperCase()}` :
+                                    userTier >= 2 ? `🏠 ${t.tier2.toUpperCase()}` :
+                                        userTier >= 1 ? `🌱 ${t.tier1.toUpperCase()}` :
+                                            `👻 ${t.ghost.toUpperCase()}`}
+                            </span>
                         </div>
                         <VibeBalance />
                         <WalletButton />
