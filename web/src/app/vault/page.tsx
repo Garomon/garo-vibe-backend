@@ -756,7 +756,7 @@ const VaultPage: FC = () => {
                         </div>
                     </div>
 
-                    <div className="mt-8 flex justify-center gap-4">
+                    <div className="mt-8 flex justify-center gap-4 flex-wrap">
                         <button onClick={handleSimulateCheckin} className="text-xs border border-garo-muted text-garo-muted px-4 py-2 rounded hover:bg-white/10 transition">
                             {t.simulateEvent}
                         </button>
@@ -765,6 +765,9 @@ const VaultPage: FC = () => {
                         </button>
                         <button onClick={() => router.push('/shop')} className="text-xs bg-purple-600 text-white font-bold px-6 py-2 rounded hover:scale-105 transition flex items-center gap-2">
                             🛒 SHOP
+                        </button>
+                        <button onClick={() => router.push('/leaderboard')} className="text-xs bg-yellow-600 text-black font-bold px-6 py-2 rounded hover:scale-105 transition flex items-center gap-2">
+                            🏆 RANKS
                         </button>
                     </div>
                 </motion.section>
