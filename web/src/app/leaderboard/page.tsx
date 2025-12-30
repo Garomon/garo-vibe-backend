@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useWeb3Auth } from "../providers/Web3AuthProvider";
 import { VibeBalance } from "../components/ui/VibeBalance";
+import { SetAliasModal } from "../components/ui/SetAliasModal";
 import Link from "next/link";
 import AmbientBackground from "../components/ui/AmbientBackground";
 
@@ -32,6 +33,7 @@ export default function LeaderboardPage() {
     const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
     const [nextRankUser, setNextRankUser] = useState<NextRankUser | null>(null);
     const [loading, setLoading] = useState(true);
+    const [showAliasModal, setShowAliasModal] = useState(false);
 
     useEffect(() => {
         const walletParam = loggedIn && publicKey ? `?wallet_address=${publicKey.toBase58()}` : '';
@@ -183,7 +185,15 @@ export default function LeaderboardPage() {
                                 #{currentUser.rank}
                             </motion.div>
                             <div>
-                                <div className="font-bold">{currentUser.nickname}</div>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-bold">{currentUser.nickname}</span>
+                                    <button
+                                        onClick={() => setShowAliasModal(true)}
+                                        className="text-xs text-garo-neon hover:text-white transition"
+                                    >
+                                        ✏️
+                                    </button>
+                                </div>
                                 <div className="text-sm text-gray-400">💎 {currentUser.xp.toLocaleString()} $VIBE</div>
                             </div>
                         </div>
@@ -206,6 +216,17 @@ export default function LeaderboardPage() {
                     </div>
                 </motion.div>
             )}
+
+            {/* Set Alias Modal */}
+            <SetAliasModal
+                isOpen={showAliasModal}
+                onClose={() => setShowAliasModal(false)}
+                onSuccess={(newNickname) => {
+                    if (currentUser) {
+                        setCurrentUser({ ...currentUser, nickname: newNickname });
+                    }
+                }}
+            />
         </div>
     );
 }
