@@ -634,8 +634,8 @@ const VaultPage: FC = () => {
                         <span className="lambda-subtle">Λ</span>
                     </a>
 
-                    <div className="flex items-center gap-6">
-                        <div className={`px-4 py-2 rounded-full font-bold text-sm ${userTier >= 3 ? "bg-green-600 text-white" :
+                    <div className="flex items-center gap-2 sm:gap-4">
+                        <div className={`px-3 py-1.5 rounded-full font-bold text-xs sm:text-sm whitespace-nowrap ${userTier >= 3 ? "bg-green-600 text-white" :
                             userTier >= 2 ? "bg-orange-600 text-white" :
                                 userTier >= 1 ? "bg-gray-600 text-gray-200" :
                                     "bg-red-600 text-white"
