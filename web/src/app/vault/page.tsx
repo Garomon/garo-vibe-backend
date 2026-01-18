@@ -10,6 +10,8 @@ import { useLanguage, LanguageToggle } from "../../context/LanguageProvider";
 import VaultCard from "../components/VaultCard";
 import InfoModal from "../components/ui/InfoModal";
 import RecoveryModal from "../components/ui/RecoveryModal";
+import InviteModal from "../components/ui/InviteModal";
+import VibeHistoryModal from "../components/ui/VibeHistoryModal";
 import PassportCard from "../components/PassportCard";
 import { VibeBalance } from "../components/ui/VibeBalance";
 
@@ -85,6 +87,8 @@ const VaultPage: FC = () => {
     // Help Modal State
     const [showHelpModal, setShowHelpModal] = useState(false);
     const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [showVibeHistory, setShowVibeHistory] = useState(false);
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -687,7 +691,7 @@ const VaultPage: FC = () => {
                                             `👻 ${t.ghost.toUpperCase()}`}
                             </span>
                         </div>
-                        <VibeBalance />
+                        <VibeBalance onClick={() => setShowVibeHistory(true)} />
                         <WalletButton />
                     </div>
                 </div>
@@ -814,6 +818,14 @@ const VaultPage: FC = () => {
                         <button onClick={() => router.push('/scan')} className="text-xs bg-cyan-600 text-white font-bold px-6 py-2 rounded hover:scale-105 transition flex items-center gap-2">
                             📷 CHECK-IN
                         </button>
+                        {userTier >= 1 && (
+                            <button
+                                onClick={() => setShowInviteModal(true)}
+                                className="text-xs bg-pink-600 text-white font-bold px-6 py-2 rounded hover:scale-105 transition flex items-center gap-2"
+                            >
+                                💌 {language === "es" ? "INVITAR" : "INVITE"}
+                            </button>
+                        )}
                     </div>
                 </motion.section>
 
@@ -953,6 +965,21 @@ const VaultPage: FC = () => {
                     </motion.section>
                 )}
             </main>
+
+            {/* Invite Modal */}
+            <InviteModal
+                isOpen={showInviteModal}
+                onClose={() => setShowInviteModal(false)}
+                walletAddress={publicKey?.toBase58() || ""}
+                userTier={userTier}
+            />
+
+            {/* VIBE History Modal */}
+            <VibeHistoryModal
+                isOpen={showVibeHistory}
+                onClose={() => setShowVibeHistory(false)}
+                walletAddress={publicKey?.toBase58() || ""}
+            />
         </div>
     );
 };

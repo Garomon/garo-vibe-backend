@@ -4,7 +4,11 @@ import { FC, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVibe } from "../../../context/VibeContext";
 
-export const VibeBalance: FC = () => {
+interface VibeBalanceProps {
+    onClick?: () => void;
+}
+
+export const VibeBalance: FC<VibeBalanceProps> = ({ onClick }) => {
     const { balance } = useVibe();
     const [displayBalance, setDisplayBalance] = useState(0);
     const [isIncreased, setIsIncreased] = useState(false);
@@ -61,8 +65,10 @@ export const VibeBalance: FC = () => {
                     borderColor: isIncreased ? "rgba(34, 197, 94, 0.8)" : "rgba(168, 85, 247, 0.5)"
                 }}
                 transition={{ duration: 0.3 }}
+                onClick={onClick}
                 className={`
                     flex items-center gap-2 px-3 py-1.5 rounded-full border bg-black/40 backdrop-blur-md select-none
+                    ${onClick ? 'cursor-pointer hover:scale-105 active:scale-95 transition-transform' : ''}
                     ${isIncreased ? 'shadow-[0_0_15px_rgba(34,197,94,0.5)] border-green-500/50' : 'shadow-[0_0_10px_rgba(168,85,247,0.3)] border-purple-500/50'}
                 `}
             >

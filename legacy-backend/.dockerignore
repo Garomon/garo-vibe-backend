@@ -1,8 +1,0 @@
-node_modules
-dist
-.env
-wallet-keypair.json
-tree-address.txt
-output.txt
-output_address.txt
-.git

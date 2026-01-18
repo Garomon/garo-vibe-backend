@@ -147,17 +147,27 @@ export async function POST(request: Request) {
                 console.error("Mint failed:", mintError);
             }
 
-            // Update user to Tier 1 member
+            // Update user to Tier 1 member (XP will be handled by log_vibe_transaction)
             await supabase
                 .from("garo_users")
                 .update({
                     tier: 1,
                     attendance_count: 1,
                     last_attendance: new Date().toISOString(),
-                    last_mint_address: mintAddress,
-                    xp: (user.xp || 0) + 100 // Award 100 XP for first check-in
+                    last_mint_address: mintAddress
                 })
                 .eq("id", user.id);
+
+            // Log VIBE transaction for first check-in
+            const ticketEvtId = ticketSource === "user_event_tickets" ? entryTicket.event_id : entryTicket.event_id;
+            await supabase.rpc("log_vibe_transaction", {
+                p_user_id: user.id,
+                p_amount: 100,
+                p_type: "FIRST_EVENT",
+                p_description: "Welcome bonus - First event check-in",
+                p_reference_type: ticketEvtId ? "event" : null,
+                p_reference_id: ticketEvtId || null
+            });
 
             // Log attendance
             await supabase
@@ -206,12 +216,23 @@ export async function POST(request: Request) {
             // REFERRAL REWARD: If someone invited this user, reward them!
             if (user.invited_by) {
                 const REFERRAL_REWARD = 50; // +50 VIBE for successful referral
-                await supabase.rpc("increment_xp", {
-                    row_id: user.invited_by,
-                    amount: REFERRAL_REWARD
+                await supabase.rpc("log_vibe_transaction", {
+                    p_user_id: user.invited_by,
+                    p_amount: REFERRAL_REWARD,
+                    p_type: "REFERRAL",
+                    p_description: `Referral bonus - ${user.email || 'friend'} attended first event`,
+                    p_reference_type: "user",
+                    p_reference_id: user.id
                 });
                 console.log(`🎁 Referral reward: +${REFERRAL_REWARD} VIBE to inviter ${user.invited_by}`);
+
+                // Check if inviter earned any new badges (referral badges)
+                await supabase.rpc("check_and_grant_badges", { p_user_id: user.invited_by });
             }
+
+            // Check for new badges for this user
+            const { data: newBadges } = await supabase.rpc("check_and_grant_badges", { p_user_id: user.id });
+            console.log(`🏅 Badges checked for new member:`, newBadges);
 
             return NextResponse.json({
                 success: true,
@@ -221,7 +242,8 @@ export async function POST(request: Request) {
                 tierName: "INITIATE",
                 isFirstTime: true,
                 mintAddress,
-                reward: 100
+                reward: 100,
+                newBadges: newBadges || []
             });
         }
 
@@ -325,18 +347,27 @@ export async function POST(request: Request) {
                 .eq("id", memberTicket.id);
         }
 
-        // Increment Attendance
+        // Increment Attendance (XP handled by log_vibe_transaction)
         const newCount = (user.attendance_count || 0) + 1;
-        const newXP = (user.xp || 0) + 100; // 100 XP per check-in
 
         await supabase
             .from("garo_users")
             .update({
                 attendance_count: newCount,
-                last_attendance: new Date().toISOString(),
-                xp: newXP
+                last_attendance: new Date().toISOString()
             })
             .eq("id", user.id);
+
+        // Log VIBE transaction for check-in
+        const ticketEvtId = memberTicket.event_id;
+        await supabase.rpc("log_vibe_transaction", {
+            p_user_id: user.id,
+            p_amount: 100,
+            p_type: "CHECKIN",
+            p_description: `Event check-in #${newCount}`,
+            p_reference_type: ticketEvtId ? "event" : null,
+            p_reference_id: ticketEvtId || null
+        });
 
         // Log Attendance
         await supabase
@@ -397,6 +428,12 @@ export async function POST(request: Request) {
         const finalTier = upgradedTier || user.tier;
         const tierNames = { 1: "INITIATE", 2: "RESIDENT", 3: "FAMILY" };
 
+        // Check for new badges for this user
+        const { data: newBadges } = await supabase.rpc("check_and_grant_badges", { p_user_id: user.id });
+        if (newBadges && newBadges.length > 0) {
+            console.log(`🏅 New badges earned:`, newBadges);
+        }
+
         return NextResponse.json({
             success: true,
             status: upgradedTier ? "LEVEL_UP" : "ACCESS_GRANTED",
@@ -405,7 +442,8 @@ export async function POST(request: Request) {
             newTier: finalTier,
             tierName: tierNames[finalTier as keyof typeof tierNames] || "INITIATE",
             upgraded: !!upgradedTier,
-            reward: 100
+            reward: 100,
+            newBadges: newBadges || []
         });
 
     } catch (error) {
