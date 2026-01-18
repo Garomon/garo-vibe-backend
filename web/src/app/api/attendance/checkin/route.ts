@@ -203,6 +203,16 @@ export async function POST(request: Request) {
                 console.log(`🏆 POAP recorded for event ${ticketEventId}`);
             }
 
+            // REFERRAL REWARD: If someone invited this user, reward them!
+            if (user.invited_by) {
+                const REFERRAL_REWARD = 50; // +50 VIBE for successful referral
+                await supabase.rpc("increment_xp", {
+                    row_id: user.invited_by,
+                    amount: REFERRAL_REWARD
+                });
+                console.log(`🎁 Referral reward: +${REFERRAL_REWARD} VIBE to inviter ${user.invited_by}`);
+            }
+
             return NextResponse.json({
                 success: true,
                 status: "TRANSMUTATION",

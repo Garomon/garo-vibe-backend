@@ -32,6 +32,23 @@ export async function POST(request: Request) {
             // Create new GHOST user first
             isNewUser = true;
 
+            // Check if someone invited this email (member_invites system)
+            let inviterId = null;
+            if (userEmail) {
+                const { data: memberInvite } = await supabase
+                    .from("member_invites")
+                    .select("inviter_id")
+                    .eq("invitee_email", userEmail)
+                    .eq("status", "SENT")
+                    .order("created_at", { ascending: false })
+                    .limit(1)
+                    .single();
+
+                if (memberInvite) {
+                    inviterId = memberInvite.inviter_id;
+                }
+            }
+
             const { data: newUser, error: createError } = await supabase
                 .from("garo_users")
                 .insert([
@@ -40,6 +57,7 @@ export async function POST(request: Request) {
                         email: userEmail || null,
                         tier: 0, // GHOST - no tier until validated
                         attendance_count: 0,
+                        invited_by: inviterId, // Link to who invited them
                     }
                 ])
                 .select()
@@ -49,7 +67,21 @@ export async function POST(request: Request) {
                 return NextResponse.json({ error: createError.message }, { status: 500 });
             }
             user = newUser;
-            console.log(`New Ghost user created: ${userEmail || walletAddress}`);
+            console.log(`New Ghost user created: ${userEmail || walletAddress}${inviterId ? ` (invited by ${inviterId})` : ""}`);
+
+            // Mark member_invite as CLAIMED if exists
+            if (userEmail && inviterId) {
+                await supabase
+                    .from("member_invites")
+                    .update({
+                        status: "CLAIMED",
+                        claimed_at: new Date().toISOString(),
+                        claimed_by_user_id: user.id
+                    })
+                    .eq("invitee_email", userEmail)
+                    .eq("status", "SENT");
+                console.log(`Member invite claimed by ${userEmail}`);
+            }
 
             // Now check for pending invites with event_id and auto-create tickets
             if (userEmail) {
